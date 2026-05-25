@@ -38,7 +38,7 @@ export default function TemporaryLanding() {
 
           {/* Glavni naslov */}
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Vrhunska nemačka stolarija <br />
+            Vrhunska stolarija <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400">
               skrojena po vašoj meri.
             </span>
@@ -58,11 +58,11 @@ export default function TemporaryLanding() {
             </div>
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
               <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-wide">Kvalitet</h3>
-              <p className="text-xs text-slate-400 mt-1">Koristimo isključivo sertifikovane nemačke profile i okove.</p>
+              <p className="text-xs text-slate-400 mt-1">Koristimo isključivo sertifikovane profile i okove.</p>
             </div>
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
               <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wide">Inostranstvo</h3>
-              <p className="text-xs text-slate-400 mt-1">Direktna isporuka i profesionalna ugradnja u Srbiji i Austriji (Beč).</p>
+              <p className="text-xs text-slate-400 mt-1">Direktna isporuka i profesionalna ugradnja u Srbiji.</p>
             </div>
           </div>
         </div>
@@ -75,8 +75,8 @@ export default function TemporaryLanding() {
             Jović Group d.o.o. &copy; {new Date().getFullYear()} · Sva prava zadržana.
           </p>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-400">
-            <span>📍 Srbija / Austrija (Wien)</span>
-            <span>✉️ office@jovicgroup.com</span>
+            <span>📍 Srbija / Stari Banovci, Stevana Tišme 112</span>
+            <span>✉️ info@jovicgroup.com</span>
           </div>
         </div>
       </footer>
