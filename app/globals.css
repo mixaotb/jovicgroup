@@ -1,26 +1,204 @@
-@import "tailwindcss";
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* ── Light mode (default) ──────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  --gold:          #C9A84C;
+  --gold-light:    #E8C97A;
+  --gold-muted:    #8A6F32;
+  --navy:          #1A2744;
+  --navy-mid:      #0F1C38;
+
+  --bg:            #F7F6F2;
+  --bg-surface:    #FFFFFF;
+  --bg-raised:     #F1F0EC;
+  --text:          #111827;
+  --text-muted:    #6B7280;
+  --text-faint:    #9CA3AF;
+  --border:        #E5E7EB;
+  --border-strong: #D1D5DB;
+
+  /* Glass card tokens — light mode (solid surfaces for readability) */
+  --glass-bg:          var(--bg-surface);
+  --glass-bg-strong:   var(--bg-raised);
+  --glass-border:      var(--border);
+  --glass-shine:       transparent;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Dark mode — deeper for liquid glass ───────── */
+.dark {
+  --bg:            #06080F;
+  --bg-surface:    #0D1117;
+  --bg-raised:     #111827;
+  --text:          #F1F5F9;
+  --text-muted:    #94A3B8;
+  --text-faint:    #475569;
+  --border:        #1E293B;
+  --border-strong: #334155;
+
+  /* Glass card tokens — dark mode */
+  --glass-bg:          linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+  --glass-bg-strong:   linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  --glass-border:      rgba(255,255,255,0.09);
+  --glass-shine:       rgba(255,255,255,0.10);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid #C9A84C;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: rgba(201, 168, 76, 0.25);
+    color: inherit;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  .font-display { font-family: var(--font-display); }
+  .font-body    { font-family: var(--font-body); }
+
+  /* Semantic colour helpers */
+  .bg-theme       { background-color: var(--bg); }
+  .bg-surface     { background-color: var(--bg-surface); }
+  .bg-raised      { background-color: var(--bg-raised); }
+  .text-theme     { color: var(--text); }
+  .text-muted     { color: var(--text-muted); }
+  .text-faint     { color: var(--text-faint); }
+  .border-theme   { border-color: var(--border); }
+
+  /* Gold rule divider */
+  .gold-rule {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 1px;
+  }
+
+  /* ── Liquid glass web approximation ──────────── */
+  /* Applied on dark backgrounds — web approximation, not official Apple API */
+  .glass {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.04)
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+      0 20px 48px rgba(0, 0, 0, 0.28);
+  }
+
+  .glass-strong {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0.06)
+    );
+    backdrop-filter: blur(32px) saturate(200%) contrast(1.04);
+    -webkit-backdrop-filter: blur(32px) saturate(200%) contrast(1.04);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+      0 32px 64px rgba(0, 0, 0, 0.4);
+  }
+
+  .glass-gold {
+    background: linear-gradient(
+      135deg,
+      rgba(201, 168, 76, 0.14),
+      rgba(201, 168, 76, 0.05)
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(201, 168, 76, 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(201, 168, 76, 0.18),
+      0 20px 48px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Solid fallback for reduced transparency */
+  @media (prefers-reduced-transparency: reduce) {
+    .glass, .glass-strong, .glass-gold {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: rgba(15, 23, 42, 0.95);
+    }
+  }
+
+  /* Gold glow shadow */
+  .shadow-gold { box-shadow: 0 8px 40px rgba(201, 168, 76, 0.3); }
+  .shadow-gold-sm { box-shadow: 0 4px 20px rgba(201, 168, 76, 0.2); }
+
+  /* Status badges */
+  .badge-pending    { @apply bg-amber-500/15 text-amber-500 border border-amber-500/30; }
+  .badge-production { @apply bg-blue-500/15  text-blue-500  border border-blue-500/30; }
+  .badge-delivered  { @apply bg-emerald-500/15 text-emerald-500 border border-emerald-500/30; }
+  .badge-cancelled  { @apply bg-red-500/15   text-red-500   border border-red-500/30; }
+
+  /* Animate utilities (fallback — motion components override these) */
+  .animate-fade-up {
+    animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .delay-100 { animation-delay: 100ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+  .delay-600 { animation-delay: 600ms; }
 }

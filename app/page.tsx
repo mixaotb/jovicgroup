@@ -1,86 +1,605 @@
-import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Metadata } from 'next';
+import {
+  GlobeIcon,
+  CheckCircleIcon,
+  HouseIcon,
+  LightningIcon,
+  SwatchesIcon,
+  ShieldCheckIcon,
+  StarIcon,
+  ArrowRightIcon,
+} from '@phosphor-icons/react/dist/ssr';
+import GlassNav from '@/components/GlassNav';
+import HeroSection from '@/components/HeroSection';
+import RevealUp from '@/components/RevealUp';
 
-export default function TemporaryLanding() {
+export const metadata: Metadata = {
+  title: 'Jović Group | Premium PVC & ALU Stolarija',
+  description:
+    'Nemački profili, precizna izrada, profesionalna ugradnja u Srbiji. Jović Group — vaš partner za PVC i ALU stolariju.',
+  openGraph: {
+    title: 'Jović Group | Premium PVC & ALU Stolarija',
+    description: 'Nemački profili, precizna izrada, profesionalna ugradnja u Srbiji.',
+    type: 'website',
+    locale: 'sr_RS',
+  },
+};
+
+const testimonials = [
+  {
+    text: 'Zamenili smo sve prozore na kući. Tri meseca od ugradnje, a prvi put za 15 godina nemamo propuha ni kondenzaciju.',
+    author: 'Milena Petrović',
+    location: 'Beograd, Zvezdara',
+    rating: 5,
+  },
+  {
+    text: 'Tražio sam kvalitet koji sam video u Nemačkoj. Jović Group je isporučio tačno to, i po daleko razumnijoj ceni.',
+    author: 'Dragan Nikolić',
+    location: 'Novi Sad',
+    rating: 5,
+  },
+  {
+    text: 'Kompletan objekat od 8 stanova. Montaža završena za 5 dana, bez ikakvih iznenađenja.',
+    author: 'Stanković Gradnja d.o.o.',
+    location: 'Niš',
+    rating: 5,
+  },
+];
+
+function Stars({ count }: { count: number }) {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between font-sans">
-      
-      {/* GLAVNI NAV / LOGO DEO */}
-      <header className="border-b border-slate-800 bg-slate-950/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex flex-col">
-            <span className="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">
-              JOVIĆ GROUP
-            </span>
-            <span className="text-xs uppercase tracking-widest text-slate-400 font-semibold -mt-1">
-              PVC & ALU Stolarija
-            </span>
+    <div className="flex gap-1">
+      {Array.from({ length: count }).map((_, i) => (
+        <StarIcon key={i} size={13} weight="fill" className="text-[#C9A84C]" />
+      ))}
+    </div>
+  );
+}
+
+// Reusable glass icon wrapper
+function GlassIcon({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="w-11 h-11 rounded-2xl flex items-center justify-center text-[#C9A84C] flex-shrink-0"
+      style={{
+        background: 'rgba(201,168,76,0.12)',
+        border: '1px solid rgba(201,168,76,0.22)',
+        boxShadow: 'inset 0 1px 0 rgba(201,168,76,0.18)',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <div className="relative bg-theme text-theme">
+      {/* Skip link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#C9A84C] focus:text-[#06080F] focus:font-bold focus:rounded-full"
+      >
+        Preskoči na sadržaj
+      </a>
+
+      <GlassNav />
+
+      <main id="main-content">
+        {/* ─── Hero ─────────────────────────────────────── */}
+        <HeroSection />
+
+        {/* ─── Features ─────────────────────────────────── */}
+        <section id="prednosti" className="relative py-32 overflow-hidden">
+          {/* Background glow orbs so glass cards have something to blur */}
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/6 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#1A2744]/50 blur-[100px] pointer-events-none" />
+
+          <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
+            <RevealUp className="mb-14">
+              <div className="gold-rule mb-5" />
+              <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-tight text-[var(--text)]">
+                Zašto biraju<br />
+                <span className="text-[#C9A84C]">Jović Group</span>
+              </h2>
+            </RevealUp>
+
+            {/* Bento glass grid — 6 cells, no 3-equal-column pattern */}
+            <RevealUp delay={0.05}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                {/* Cell 1: Featured — col-span-2, real photo background */}
+                <div
+                  className="md:col-span-2 relative overflow-hidden rounded-[1.5rem] group cursor-default"
+                  style={{ minHeight: '260px' }}
+                >
+                  {/* Photo background */}
+                  <Image
+                    src="https://picsum.photos/seed/window-installation-workshop-precision/900/600"
+                    alt="Precizna izrada prozora u radionici"
+                    fill
+                    className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.03]"
+                    sizes="(max-width: 768px) 100vw, 66vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#06080F]/80 via-[#06080F]/50 to-transparent" />
+                  {/* Double-bezel glass overlay */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-7"
+                    style={{
+                      background: 'linear-gradient(to top, rgba(6,8,15,0.85) 30%, transparent)',
+                    }}
+                  >
+                    <GlassIcon><GlobeIcon size={22} weight="light" /></GlassIcon>
+                    <h3 className="font-display font-bold text-[1.35rem] text-white mt-4 mb-2">Nemački profili</h3>
+                    <p className="text-white/70 text-[13.5px] leading-relaxed mb-5 max-w-sm">
+                      Isključivo Schüco i Rehau profili — standardi koji važe decenijama širom Evrope.
+                    </p>
+                    <div className="flex gap-2">
+                      {['Schüco', 'Rehau', 'ISO 9001'].map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide text-[#C9A84C]"
+                          style={{
+                            background: 'rgba(201,168,76,0.12)',
+                            border: '1px solid rgba(201,168,76,0.25)',
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cell 2: Garancija — gold glass */}
+                <div
+                  className="relative overflow-hidden rounded-[1.5rem] p-7 flex flex-col justify-between group hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(201,168,76,0.16), rgba(201,168,76,0.06))',
+                    border: '1px solid rgba(201,168,76,0.24)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    boxShadow: 'inset 0 1px 0 rgba(201,168,76,0.22)',
+                    minHeight: '260px',
+                  }}
+                >
+                  <div
+                    className="absolute top-4 right-5 font-display font-black text-[#C9A84C]/10 leading-none select-none pointer-events-none"
+                    style={{ fontSize: '7rem' }}
+                    aria-hidden
+                  >5</div>
+                  <GlassIcon><ShieldCheckIcon size={22} weight="light" /></GlassIcon>
+                  <div>
+                    <h3 className="font-display font-bold text-[1.3rem] text-[var(--text)] mb-2">Garancija 5 godina</h3>
+                    <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed">
+                      Servisni tim dostupan u roku od 48 sati za sve intervencije.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Cells 3, 4, 5 — glass cards */}
+                {[
+                  {
+                    icon: <CheckCircleIcon size={22} weight="light" />,
+                    title: 'Precizna izrada',
+                    body: 'Tačnost do milimetra. Bez kompromisa, samo savršen spoj.',
+                  },
+                  {
+                    icon: <HouseIcon size={22} weight="light" />,
+                    title: 'Profesionalna ugradnja',
+                    body: 'Tim koji briše granicu između fabrike i vašeg doma.',
+                  },
+                  {
+                    icon: <SwatchesIcon size={22} weight="light" />,
+                    title: 'Individualni dizajn',
+                    body: 'Više od 200 boja RAL skale, mat ili sjaj, lučni oblici.',
+                  },
+                ].map((f) => (
+                  <div
+                    key={f.title}
+                    className="rounded-[1.5rem] p-6 flex flex-col gap-5 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                    style={{
+                      background: 'var(--glass-bg)',
+                      border: '1px solid var(--glass-border)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      boxShadow: 'inset 0 1px 0 var(--glass-shine)',
+                    }}
+                  >
+                    <GlassIcon>{f.icon}</GlassIcon>
+                    <div>
+                      <h3 className="font-display font-bold text-[1.05rem] text-[var(--text)] mb-2">{f.title}</h3>
+                      <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed">{f.body}</p>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Cell 6: Energetska efikasnost — full width horizontal glass */}
+                <div
+                  className="md:col-span-3 rounded-[1.5rem] p-7 flex flex-col md:flex-row items-start md:items-center gap-6 hover:scale-[1.005] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  style={{
+                    background: 'var(--glass-bg)',
+                    border: '1px solid var(--glass-border)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    boxShadow: 'inset 0 1px 0 var(--glass-shine)',
+                  }}
+                >
+                  <GlassIcon><LightningIcon size={22} weight="light" /></GlassIcon>
+                  <div className="flex-1">
+                    <h3 className="font-display font-bold text-[1.05rem] text-[var(--text)] mb-1.5">Energetska efikasnost</h3>
+                    <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed max-w-xl">
+                      Trojni staklopaketi smanjuju gubitke toplote za do 40%. Investicija koja se isplati već prve zime.
+                    </p>
+                  </div>
+                  <div
+                    className="flex-shrink-0 text-right md:pl-8 md:border-l"
+                    style={{ borderColor: 'var(--glass-border)' }}
+                  >
+                    <div className="font-display font-black text-[2.8rem] text-[#C9A84C] leading-none tabular-nums">-40%</div>
+                    <div className="text-[var(--text-faint)] text-[10px] mt-1 uppercase tracking-[0.12em] font-semibold">Gubici toplote</div>
+                  </div>
+                </div>
+
+              </div>
+            </RevealUp>
           </div>
-          <div className="hidden sm:flex space-x-6 text-sm text-slate-400">
-            <span className="hover:text-blue-400 transition-colors">O nama</span>
-            <span className="hover:text-blue-400 transition-colors">Uskoro</span>
-            <span className="hover:text-blue-400 transition-colors">Kontakt</span>
-          </div>
-        </div>
-      </header>
+        </section>
 
-      {/* HERO / GLAVNI SADRŽAJ */}
-      <main className="flex-grow flex items-center justify-center px-4 py-20 relative overflow-hidden">
-        {/* Blago svetlo u pozadini da razbije crnilo (bez slika) */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+        {/* ─── About ────────────────────────────────────── */}
+        <section id="o-nama" className="relative py-32 overflow-hidden">
+          <div className="absolute top-1/2 right-0 w-[600px] h-[600px] rounded-full bg-[#1A2744]/40 blur-[120px] pointer-events-none -translate-y-1/2" />
 
-        <div className="max-w-3xl text-center relative z-10 space-y-8">
-          {/* Tag / Status */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-medium uppercase tracking-wider mx-auto">
-            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
-            Novi sajt u izradi
-          </div>
+          <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
+            <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
 
-          {/* Glavni naslov */}
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Vrhunska stolarija <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400">
-              skrojena po vašoj meri.
-            </span>
-          </h1>
+              <RevealUp>
+                <div className="gold-rule mb-6" />
+                <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-tight text-[var(--text)] mb-7">
+                  Domaći majstori,<br />
+                  <span className="text-[#C9A84C]">evropski standardi.</span>
+                </h2>
+                <div className="space-y-4 text-[var(--text-muted)] text-[15px] leading-relaxed">
+                  <p>
+                    Jović Group je porodična kompanija osnovana s jednim ciljem: doneti nivo preciznosti koji
+                    poznajemo iz Nemačke direktno u srpske domove. Naši majstori školovani su prema evropskim
+                    protokolima ugradnje.
+                  </p>
+                  <p>
+                    Realizujemo projekte i za dijasporu — srpske porodice u Nemačkoj, Austriji, Švajcarskoj
+                    i Beneluksu koje žele da opreme stanove u Srbiji, ali sa garancijom kakvu bi dobili u inostranstvu.
+                  </p>
+                </div>
 
-          {/* Opis biznisa */}
-          <p className="text-base sm:text-xl text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Dugogodišnja tradicija u proizvodnji i ugradnji PVC i ALU prozora i vrata. 
-            Naš novi online sistem i CRM za brzu izradu ponuda stižu uskoro.
-          </p>
+                <div className="mt-10 grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Srbija',       desc: 'Dostava i ugradnja' },
+                    { label: 'Inostranstvo', desc: 'Projekti za dijasporu' },
+                    { label: 'PVC',          desc: 'Rehau i Schüco profili' },
+                    { label: 'ALU',          desc: 'Komercijalni objekti' },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="p-4 rounded-2xl hover:scale-[1.02] transition-transform duration-300"
+                      style={{
+                        background: 'var(--glass-bg)',
+                        border: '1px solid var(--glass-border)',
+                        backdropFilter: 'blur(12px)',
+                        WebkitBackdropFilter: 'blur(12px)',
+                      }}
+                    >
+                      <div className="font-display font-bold text-[var(--text)] text-[15px]">{item.label}</div>
+                      <div className="text-[var(--text-faint)] text-xs mt-0.5">{item.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </RevealUp>
 
-          {/* Info kartice sa delatnostima */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left max-w-2xl mx-auto pt-6">
-            <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-              <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wide">Tradicija</h3>
-              <p className="text-xs text-slate-400 mt-1">Porodični biznis zasnovan na poverenju i preporuci od 2005.</p>
+              <RevealUp delay={0.12}>
+                {/* Double-bezel spec card */}
+                <div
+                  className="p-[6px] rounded-[2rem]"
+                  style={{
+                    background: 'var(--glass-bg)',
+                    border: '1px solid var(--glass-border)',
+                  }}
+                >
+                  <div
+                    className="rounded-[calc(2rem-6px)] p-7"
+                    style={{
+                      background: 'var(--glass-bg-strong)',
+                      backdropFilter: 'blur(32px) saturate(200%)',
+                      WebkitBackdropFilter: 'blur(32px) saturate(200%)',
+                      border: '1px solid var(--glass-border)',
+                      boxShadow: 'inset 0 1px 0 var(--glass-shine), 0 32px 64px rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-8">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        style={{
+                          background: 'rgba(201,168,76,0.15)',
+                          border: '1px solid rgba(201,168,76,0.28)',
+                        }}
+                      >
+                        <ShieldCheckIcon size={18} weight="light" className="text-[#C9A84C]" />
+                      </div>
+                      <div>
+                        <div className="font-display font-bold text-[var(--text)] text-[14px]">Kvalitet potvrđen</div>
+                        <div className="text-[var(--text-faint)] text-xs mt-0.5">ISO 9001 standardi</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-5">
+                      {[
+                        { label: 'Termička izolacija', value: 'Uw 0.8 W/m²K', pct: 92 },
+                        { label: 'Zvučna izolacija',   value: 'do 45 dB',     pct: 78 },
+                        { label: 'Klasa zaptivenosti', value: 'Klasa 4 (max)', pct: 95 },
+                      ].map((spec) => (
+                        <div key={spec.label}>
+                          <div className="flex justify-between text-[12px] mb-2">
+                            <span className="text-[var(--text-muted)] font-medium">{spec.label}</span>
+                            <span className="text-[#C9A84C] font-mono font-bold tabular-nums">{spec.value}</span>
+                          </div>
+                          <div
+                            className="h-[3px] rounded-full overflow-hidden"
+                            style={{ background: 'var(--glass-border)' }}
+                          >
+                            <div
+                              className="h-full rounded-full"
+                              style={{
+                                width: `${spec.pct}%`,
+                                background: 'linear-gradient(90deg, #C9A84C, #E8C97A)',
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div
+                      className="mt-7 pt-6 grid grid-cols-3 gap-2 text-center"
+                      style={{ borderTop: '1px solid var(--glass-border)' }}
+                    >
+                      {['DE', 'AT', 'CH'].map((code) => (
+                        <div
+                          key={code}
+                          className="py-2 rounded-xl text-[var(--text-faint)] text-[11px] font-bold tracking-widest"
+                          style={{
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
+                          }}
+                        >
+                          {code}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-center text-[var(--text-faint)] text-[11px] mt-2">Sertifikovano za uvoz/izvoz</p>
+
+                    <div
+                      className="mt-5 flex items-center gap-2.5 px-4 py-3 rounded-2xl"
+                      style={{
+                        background: 'rgba(52,211,153,0.08)',
+                        border: '1px solid rgba(52,211,153,0.2)',
+                      }}
+                    >
+                      <CheckCircleIcon size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
+                      <span className="text-[13px] font-semibold text-emerald-400">Garancija 5 godina na sve ugradnje</span>
+                    </div>
+                  </div>
+                </div>
+              </RevealUp>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-              <h3 className="text-sm font-bold text-indigo-400 uppercase tracking-wide">Kvalitet</h3>
-              <p className="text-xs text-slate-400 mt-1">Koristimo isključivo sertifikovane profile i okove.</p>
+          </div>
+        </section>
+
+        {/* ─── Testimonials ─────────────────────────────── */}
+        <section id="utisci" className="relative py-32 overflow-hidden">
+          <div className="absolute top-1/4 left-1/6 w-[400px] h-[400px] rounded-full bg-[#C9A84C]/5 blur-[100px] pointer-events-none" />
+
+          <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
+            <RevealUp className="mb-14">
+              <div className="gold-rule mb-5" />
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold text-[var(--text)]">
+                  Šta kažu klijenti
+                </h2>
+                <p className="text-[var(--text-muted)] text-[14px] max-w-xs sm:text-right leading-relaxed">
+                  Svaki utisak je rezultat jedne konkretne odluke.
+                </p>
+              </div>
+            </RevealUp>
+
+            {/* Asymmetric: featured large left + two stacked right */}
+            <RevealUp delay={0.05}>
+              <div className="grid md:grid-cols-3 gap-4">
+
+                <div
+                  className="md:col-span-2 relative p-8 rounded-[1.5rem]"
+                  style={{
+                    background: 'var(--glass-bg-strong)',
+                    border: '1px solid var(--glass-border)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    boxShadow: 'inset 0 1px 0 var(--glass-shine)',
+                  }}
+                >
+                  <div
+                    className="absolute top-6 right-7 font-display font-black text-[#C9A84C]/10 leading-none select-none pointer-events-none"
+                    style={{ fontSize: '6rem' }}
+                    aria-hidden
+                  >&ldquo;</div>
+                  <Stars count={testimonials[0].rating} />
+                  <p className="text-[var(--text)] text-[1.08rem] leading-relaxed mt-5 mb-7 max-w-lg relative z-10 font-medium">
+                    &ldquo;{testimonials[0].text}&rdquo;
+                  </p>
+                  <div
+                    className="flex items-center gap-3 pt-6"
+                    style={{ borderTop: '1px solid var(--glass-border)' }}
+                  >
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-bold text-[14px] text-[#C9A84C]"
+                      style={{
+                        background: 'rgba(201,168,76,0.12)',
+                        border: '1px solid rgba(201,168,76,0.2)',
+                      }}
+                    >
+                      {testimonials[0].author[0]}
+                    </div>
+                    <div>
+                      <div className="font-display font-bold text-[var(--text)] text-[13px]">{testimonials[0].author}</div>
+                      <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{testimonials[0].location}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  {testimonials.slice(1).map((t) => (
+                    <div
+                      key={t.author}
+                      className="flex-1 p-6 rounded-[1.5rem]"
+                      style={{
+                        background: 'var(--glass-bg)',
+                        border: '1px solid var(--glass-border)',
+                        backdropFilter: 'blur(20px)',
+                        WebkitBackdropFilter: 'blur(20px)',
+                        boxShadow: 'inset 0 1px 0 var(--glass-shine)',
+                      }}
+                    >
+                      <Stars count={t.rating} />
+                      <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed mt-4 mb-5">
+                        &ldquo;{t.text}&rdquo;
+                      </p>
+                      <div style={{ borderTop: '1px solid var(--glass-border)' }} className="pt-4">
+                        <div className="font-display font-bold text-[var(--text)] text-[12px]">{t.author}</div>
+                        <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{t.location}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </RevealUp>
+          </div>
+        </section>
+
+        {/* ─── CTA Banner ───────────────────────────────── */}
+        <section className="relative py-32 overflow-hidden bg-theme">
+          {/* Central gold glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-[#C9A84C]/8 blur-[100px] pointer-events-none" />
+          <div
+            className="absolute inset-x-0 top-0 h-px"
+            style={{ background: 'linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent)' }}
+          />
+
+          <div className="relative max-w-3xl mx-auto px-5 sm:px-8 text-center">
+            <RevealUp>
+              {/* Double-bezel CTA card */}
+              <div
+                className="p-[6px] rounded-[2rem]"
+                style={{
+                  background: 'rgba(201,168,76,0.06)',
+                  border: '1px solid rgba(201,168,76,0.15)',
+                }}
+              >
+                <div
+                  className="rounded-[calc(2rem-6px)] px-8 py-14"
+                  style={{
+                    background: 'var(--glass-bg-strong)',
+                    backdropFilter: 'blur(32px)',
+                    WebkitBackdropFilter: 'blur(32px)',
+                    border: '1px solid var(--glass-border)',
+                    boxShadow: 'inset 0 1px 0 var(--glass-shine)',
+                  }}
+                >
+                  <div className="flex justify-center mb-7">
+                    <div className="gold-rule" />
+                  </div>
+                  <h2 className="font-display text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight text-[var(--text)] mb-5">
+                    Vaš projekat zaslužuje<br />
+                    <span className="text-[#C9A84C]">tačnu cenu.</span>
+                  </h2>
+                  <p className="text-[var(--text-muted)] text-[15px] max-w-md mx-auto mb-10 leading-relaxed">
+                    Unesite dimenzije, izaberite materijal i lokaciju.
+                    Realan trošak odmah, bez čekanja na poziv.
+                  </p>
+                  <Link
+                    href="/kalkulator"
+                    className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
+                  >
+                    <span>Pokrenite kalkulator</span>
+                    <span
+                      className="ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-[2px] group-hover:-translate-y-[1px] group-hover:scale-105"
+                      style={{ background: 'rgba(6,8,15,0.15)' }}
+                    >
+                      <ArrowRightIcon size={15} weight="bold" />
+                    </span>
+                  </Link>
+                  <p className="text-[var(--text-faint)] text-[11px] mt-5 tracking-wide">
+                    Besplatno · Bez obaveza · Online ili telefonom
+                  </p>
+                </div>
+              </div>
+            </RevealUp>
+          </div>
+        </section>
+
+        {/* ─── Footer ───────────────────────────────────── */}
+        <footer
+          className="py-12"
+          style={{
+            borderTop: '1px solid var(--glass-border)',
+            background: 'var(--glass-bg)',
+          }}
+        >
+          <div className="max-w-7xl mx-auto px-5 sm:px-8">
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+              <div className="sm:col-span-2">
+                <div className="flex items-center gap-2.5 mb-4">
+                  <Image src="/logo.png" alt="Jović Group" width={22} height={22} className="object-contain" />
+                  <span className="font-display text-[14px] font-bold text-[var(--text)]">
+                    Jović <span className="text-[#C9A84C]">Group</span>
+                  </span>
+                </div>
+                <p className="text-[var(--text-faint)] text-[13px] leading-relaxed max-w-[240px]">
+                  PVC i ALU stolarija po nemačkim standardima. Srbija i inostranstvo.
+                </p>
+              </div>
+
+              <div>
+                <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Kontakt</div>
+                <div className="space-y-2 text-[var(--text-faint)] text-[13px]">
+                  <div>info@jovicgroup.rs</div>
+                  <div>+381 11 000 0000</div>
+                  <div>Beograd, Srbija</div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Linkovi</div>
+                <div className="space-y-2 text-[13px]">
+                  <div><Link href="/kalkulator"            className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Kalkulator</Link></div>
+                  <div><a href="#prednosti"                className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Prednosti</a></div>
+                  <div><a href="#utisci"                   className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Utisci</a></div>
+                  <div><Link href="/crm/login"             className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">CRM Login</Link></div>
+                </div>
+              </div>
             </div>
-            <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800">
-              <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wide">Inostranstvo</h3>
-              <p className="text-xs text-slate-400 mt-1">Direktna isporuka i profesionalna ugradnja u Srbiji.</p>
+
+            <div
+              className="pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-[var(--text-faint)] text-[11px]"
+              style={{ borderTop: '1px solid var(--glass-border)' }}
+            >
+              <span>© {new Date().getFullYear()} Jović Group. Sva prava zadržana.</span>
+              <div className="flex flex-wrap items-center justify-center gap-4">
+                <Link href="/politika-privatnosti" className="hover:text-[#C9A84C] transition-colors duration-300">Politika privatnosti</Link>
+                <Link href="/uslovi-koriscenja"    className="hover:text-[#C9A84C] transition-colors duration-300">Uslovi korišćenja</Link>
+                <span>Izrađeno u Srbiji</span>
+              </div>
             </div>
           </div>
-        </div>
+        </footer>
       </main>
-
-      {/* FOOTER / KONTAKT PODACI */}
-      <footer className="border-t border-slate-800 bg-slate-950/80 py-8 text-center text-sm text-slate-500">
-        <div className="max-w-4xl mx-auto px-4 space-y-4">
-          <p className="font-medium text-slate-400">
-            Jović Group d.o.o. &copy; {new Date().getFullYear()} · Sva prava zadržana.
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-slate-400">
-            <span>📍 Srbija / Stari Banovci, Stevana Tišme 112</span>
-            <span>✉️ info@jovicgroup.com</span>
-          </div>
-        </div>
-      </footer>
-
     </div>
   );
 }
