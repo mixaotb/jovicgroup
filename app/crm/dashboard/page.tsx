@@ -347,10 +347,13 @@ function OrderDetailDrawer({
                     {item.dimensions_data?.image_url && (
                       <div className="mt-2 pt-2 border-t border-[var(--border)]">
                         <a href={item.dimensions_data.image_url} target="_blank" rel="noopener noreferrer">
-                          <img
+                          <Image
                             src={item.dimensions_data.image_url}
                             alt="Priložena fotografija"
+                            width={600}
+                            height={400}
                             className="w-full max-h-48 object-cover rounded-lg cursor-zoom-in"
+                            unoptimized
                           />
                         </a>
                       </div>

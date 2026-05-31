@@ -38,7 +38,7 @@ export async function PATCH(request: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-export async function DELETE(_request: NextRequest) {
+export async function DELETE() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Neautorizovan pristup' }, { status: 401 });
