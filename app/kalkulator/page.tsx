@@ -324,6 +324,8 @@ export default function KalkulatorPage() {
   const [customerName, setCustomerName]   = useState('');
   const [phone, setPhone]                 = useState('');
   const [email, setEmail]                 = useState('');
+  const [town, setTown]                   = useState('');
+  const [address, setAddress]             = useState('');
   const [notes, setNotes]                 = useState('');
   const [errors, setErrors]               = useState<FormErrors>({});
 
@@ -455,6 +457,8 @@ export default function KalkulatorPage() {
       phone:          phone.trim(),
       email:          email.trim(),
       location,
+      town:           town.trim() || undefined,
+      address:        address.trim() || undefined,
       payment_method: paymentMethod,
       notes:          notes.trim(),
       total_price:    cartTotals.total,
@@ -479,7 +483,7 @@ export default function KalkulatorPage() {
     } finally {
       setLoading(false);
     }
-  }, [customerName, phone, email, location, paymentMethod, notes, cartTotals.total, cartItems]);
+  }, [customerName, phone, email, location, town, address, paymentMethod, notes, cartTotals.total, cartItems]);
 
   // ─────────────────────────────────────────────────────────────────────────
   // Success screen
@@ -510,7 +514,7 @@ export default function KalkulatorPage() {
               Nazad na početnu
             </Link>
             <button
-              onClick={() => { setStep('config'); setCustomerName(''); setPhone(''); setEmail(''); setNotes(''); setCartItems([]); resetConfigForm(); }}
+              onClick={() => { setStep('config'); setCustomerName(''); setPhone(''); setEmail(''); setTown(''); setAddress(''); setNotes(''); setCartItems([]); resetConfigForm(); }}
               className="px-6 py-3 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] transition-colors text-[14px]"
             >
               Nova narudžbina
@@ -1123,6 +1127,17 @@ export default function KalkulatorPage() {
                           <div className="text-[var(--text-faint)] text-[11px]">{loc.fee}</div>
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <FieldLabel optional>Grad / opština</FieldLabel>
+                      <TextInput type="text" value={town} onChange={(e) => setTown(e.target.value)} placeholder="npr. Beograd, Novi Sad..." />
+                    </div>
+                    <div>
+                      <FieldLabel optional>Adresa</FieldLabel>
+                      <TextInput type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="npr. Ulica br. 12" />
                     </div>
                   </div>
 

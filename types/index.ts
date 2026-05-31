@@ -133,6 +133,8 @@ export interface OrderFormData {
   phone: string;
   email: string;
   location: OrderLocation;
+  town?: string;
+  address?: string;
   payment_method: PaymentMethod;
   notes: string;
   total_price: number;

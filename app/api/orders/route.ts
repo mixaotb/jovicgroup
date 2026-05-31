@@ -109,6 +109,8 @@ export async function POST(request: NextRequest) {
         phone:          body.phone.trim(),
         email:          body.email?.trim() || null,
         location:       body.location,
+        town:           body.town?.trim() || null,
+        address:        body.address?.trim() || null,
         status:         'na_cekanju',
         total_price:    totalPrice,
         payment_method: body.payment_method,
