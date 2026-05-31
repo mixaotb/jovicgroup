@@ -44,10 +44,9 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error('[Auth Login] Error:', msg);
+    console.error('[Auth Login] Error:', err);
     return NextResponse.json(
-      { error: `Interna greška: ${msg}` },
+      { error: 'Interna greška servera' },
       { status: 500 }
     );
   }
