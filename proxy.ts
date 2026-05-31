@@ -33,12 +33,17 @@ export async function handleRequest(request: NextRequest) {
     const isLoginPage = pathname === '/login' || pathname === '/login/';
 
     if (!isLoginPage) {
-      // Auth check before serving any non-login page
-      const res = { current: NextResponse.next({ request }) };
-      const supabase = makeSupabaseClient(request, res);
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        const res = { current: NextResponse.next({ request }) };
+        const supabase = makeSupabaseClient(request, res);
+        const { data: { user } } = await supabase.auth.getUser();
 
-      if (!user) {
+        if (!user) {
+          const url = request.nextUrl.clone();
+          url.pathname = '/login';
+          return NextResponse.redirect(url);
+        }
+      } catch {
         const url = request.nextUrl.clone();
         url.pathname = '/login';
         return NextResponse.redirect(url);
