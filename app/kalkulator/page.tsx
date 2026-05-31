@@ -300,7 +300,7 @@ function InfoTooltip({ text }: { text: string }) {
   );
 }
 
-function ToggleChip({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+function ToggleChip({ checked, onChange, label, icon }: { checked: boolean; onChange: (v: boolean) => void; label: string; icon?: React.ReactNode }) {
   return (
     <button
       type="button"
@@ -316,6 +316,7 @@ function ToggleChip({ checked, onChange, label }: { checked: boolean; onChange: 
           </svg>
         )}
       </span>
+      {icon && <span className="flex-shrink-0 opacity-80">{icon}</span>}
       {label}
     </button>
   );
@@ -638,6 +639,7 @@ export default function KalkulatorPage() {
                 </CardSection>
 
                 {/* 2. Materijal */}
+                {productType !== 'plisirani_komarnik' && (
                 <CardSection>
                   <SectionTitle>2. Materijal</SectionTitle>
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -662,6 +664,7 @@ export default function KalkulatorPage() {
                     ))}
                   </div>
                 </CardSection>
+                )}
 
                 {/* 3. Dimenzije i količina */}
                 <CardSection>
@@ -865,10 +868,41 @@ export default function KalkulatorPage() {
                         <div className="text-[var(--text-muted)] text-[13px] font-medium mb-2">Komarnik</div>
                         <div className="flex flex-wrap gap-2">
                           {([
-                            { value: 'none'      as KomarnikType, label: 'Bez' },
-                            { value: 'fiksni'    as KomarnikType, label: 'Fiksni' },
-                            { value: 'plisirani' as KomarnikType, label: 'Plisirani' },
-                            { value: 'rolo'      as KomarnikType, label: 'Rolo' },
+                            { value: 'none' as KomarnikType, label: 'Bez', icon: (
+                              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                                <rect x="6" y="6" width="20" height="20" rx="1.5" strokeDasharray="3 2.5" />
+                                <line x1="12" y1="12" x2="20" y2="20" strokeLinecap="round" />
+                                <line x1="20" y1="12" x2="12" y2="20" strokeLinecap="round" />
+                              </svg>
+                            )},
+                            { value: 'fiksni' as KomarnikType, label: 'Fiksni', icon: (
+                              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                                <rect x="5" y="5" width="22" height="22" rx="1.5" />
+                                <line x1="5" y1="10.7" x2="27" y2="10.7" strokeWidth="0.8" />
+                                <line x1="5" y1="16"   x2="27" y2="16"   strokeWidth="0.8" />
+                                <line x1="5" y1="21.3" x2="27" y2="21.3" strokeWidth="0.8" />
+                                <line x1="10.7" y1="5" x2="10.7" y2="27" strokeWidth="0.8" />
+                                <line x1="16"   y1="5" x2="16"   y2="27" strokeWidth="0.8" />
+                                <line x1="21.3" y1="5" x2="21.3" y2="27" strokeWidth="0.8" />
+                              </svg>
+                            )},
+                            { value: 'plisirani' as KomarnikType, label: 'Plisirani', icon: (
+                              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                                <rect x="5" y="5" width="22" height="22" rx="1.5" />
+                                <polyline points="10,5 8,16 10,27" strokeLinecap="round" strokeLinejoin="round" />
+                                <polyline points="14.5,5 12.5,16 14.5,27" strokeLinecap="round" strokeLinejoin="round" />
+                                <polyline points="19,5 17,16 19,27" strokeLinecap="round" strokeLinejoin="round" />
+                                <polyline points="23.5,5 21.5,16 23.5,27" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            )},
+                            { value: 'rolo' as KomarnikType, label: 'Rolo', icon: (
+                              <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
+                                <rect x="5" y="10" width="22" height="17" rx="1" />
+                                <rect x="4" y="5" width="24" height="6" rx="2.5" />
+                                <line x1="5" y1="16" x2="27" y2="16" strokeWidth="0.8" />
+                                <line x1="5" y1="21" x2="27" y2="21" strokeWidth="0.8" />
+                              </svg>
+                            )},
                           ].filter(opt => availableKomarnikTypes(productType).includes(opt.value))).map((opt) => (
                             <button
                               key={opt.value}
@@ -880,6 +914,7 @@ export default function KalkulatorPage() {
                                   : 'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-muted)] hover:border-[var(--border-strong)]'
                               }`}
                             >
+                              <span className="opacity-80">{opt.icon}</span>
                               {opt.label}
                             </button>
                           ))}
@@ -891,15 +926,37 @@ export default function KalkulatorPage() {
                     )}
                     <div className="flex flex-wrap gap-3">
                       {productHasRoletna(productType) && (
-                        <ToggleChip checked={hasRoletna} onChange={setHasRoletna} label="Roletne" />
+                        <ToggleChip checked={hasRoletna} onChange={setHasRoletna} label="Roletne" icon={
+                          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                            <rect x="5" y="10" width="22" height="17" rx="1" />
+                            <rect x="4" y="4" width="24" height="7" rx="2.5" />
+                            <line x1="5" y1="16" x2="27" y2="16" strokeWidth="0.8" />
+                            <line x1="5" y1="21" x2="27" y2="21" strokeWidth="0.8" />
+                          </svg>
+                        } />
                       )}
                       {productHasOkapnica(productType) && (
-                        <ToggleChip checked={hasOkapnica} onChange={setHasOkapnica} label="Okapnica" />
+                        <ToggleChip checked={hasOkapnica} onChange={setHasOkapnica} label="Okapnica" icon={
+                          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                            <rect x="5" y="4" width="22" height="18" rx="1" />
+                            <path d="M3 22 L16 28 L29 22" strokeLinejoin="round" strokeLinecap="round" />
+                          </svg>
+                        } />
                       )}
                       {productHasSillInside(productType) && (
-                        <ToggleChip checked={hasSillInside} onChange={setHasSillInside} label="Unutrašnja klupica" />
+                        <ToggleChip checked={hasSillInside} onChange={setHasSillInside} label="Unutrašnja klupica" icon={
+                          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                            <rect x="5" y="4" width="22" height="19" rx="1" />
+                            <rect x="3" y="22" width="26" height="4" rx="1" />
+                          </svg>
+                        } />
                       )}
-                      <ToggleChip checked={hasInstallation} onChange={setHasInstallation} label="Ugradnja" />
+                      <ToggleChip checked={hasInstallation} onChange={setHasInstallation} label="Ugradnja" icon={
+                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+                          <path d="M22 5 C26 9 26 15 22 18 L10 29 C9 30 7 30 6 29 C5 28 5 26 6 25 L18 13 C14 9 14 4 18 2" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="7.5" cy="27.5" r="1.5" fill="currentColor" stroke="none" />
+                        </svg>
+                      } />
                     </div>
                   </div>
                   <p className="mt-3 text-[var(--text-faint)] text-[12px] leading-relaxed">
@@ -1053,7 +1110,9 @@ export default function KalkulatorPage() {
                                   )}
                                 </div>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[12.5px] text-[var(--text-muted)]">
-                                  <div>Materijal: <span className="text-[var(--text)]">{item.material}</span></div>
+                                  {item.type !== 'plisirani_komarnik' && (
+                                    <div>Materijal: <span className="text-[var(--text)]">{item.material}</span></div>
+                                  )}
                                   <div>Dim: <span className="text-[var(--text)]">{item.width}×{item.height}mm</span></div>
                                   <div>Kom: <span className="text-[var(--text)]">{item.quantity}</span></div>
                                   {item.type !== 'plisirani_komarnik' && (
@@ -1289,7 +1348,7 @@ export default function KalkulatorPage() {
                   <div className="px-6 pb-5 space-y-1.5 text-[12px]">
                     {([
                       ['Tip',       PRODUCT_TYPES.find(p => p.value === productType)?.label],
-                      ['Materijal', material],
+                      ...(productType !== 'plisirani_komarnik' ? [['Materijal', material]] : []),
                       ['Dimenzije', `${width} × ${height} mm`],
                       ...(productType !== 'plisirani_komarnik' ? [
                         ['Staklo', GLASS_INFO[glassType]?.label],

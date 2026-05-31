@@ -13,7 +13,7 @@ import {
 } from '@phosphor-icons/react';
 import { formatRSD } from '@/lib/pricing';
 import NotificationBell from '@/components/NotificationBell';
-import type { Order, Task, OrderStatus, TaskStatus, User, UserRole, FinanceData } from '@/types';
+import type { Order, Task, OrderStatus, TaskStatus, User, UserRole, FinanceData, ProductType } from '@/types';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -77,17 +77,19 @@ function LoadingSpinner({ label }: { label: string }) {
 
 // ─── ConfirmModal ─────────────────────────────────────────────────────────────
 
-function ConfirmModal({ title, message, confirmLabel = 'Obriši', onConfirm, onCancel }: {
+function ConfirmModal({ title, message, confirmLabel = 'Obriši', onConfirm, onCancel, variant = 'danger' }: {
   title: string; message?: string; confirmLabel?: string;
   onConfirm: () => void; onCancel: () => void;
+  variant?: 'danger' | 'warning';
 }) {
+  const isWarning = variant === 'warning';
   return (
     <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4 sm:p-6">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
       <div className="relative w-full max-w-sm bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-2xl">
         <div className="px-6 pt-6 pb-4">
-          <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/20 flex items-center justify-center mb-4">
-            <Trash size={18} className="text-red-500" />
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${isWarning ? 'bg-amber-500/15 border border-amber-500/20' : 'bg-red-500/15 border border-red-500/20'}`}>
+            {isWarning ? <SignOut size={18} className="text-amber-500" /> : <Trash size={18} className="text-red-500" />}
           </div>
           <h2 className="text-base font-bold text-[var(--text)] mb-1.5">{title}</h2>
           {message && <p className="text-sm text-[var(--text-muted)] leading-relaxed">{message}</p>}
@@ -97,11 +99,11 @@ function ConfirmModal({ title, message, confirmLabel = 'Obriši', onConfirm, onC
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-medium text-sm hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors"
           >
-            Otkaži
+            Ostani
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 active:scale-[0.97] transition-all"
+            className={`flex-1 py-2.5 rounded-xl font-bold text-sm active:scale-[0.97] transition-all text-white ${isWarning ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600'}`}
           >
             {confirmLabel}
           </button>
@@ -487,6 +489,236 @@ function EditOrderModal({
           <div className="flex gap-2 pt-1">
             <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl bg-[#C9A84C] text-slate-950 font-bold text-sm hover:bg-[#E8C97A] transition-colors disabled:opacity-50">
               {saving ? 'Čuvanje...' : 'Sačuvaj'}
+            </button>
+            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-medium text-sm hover:border-[var(--border-strong)] transition-colors">
+              Otkaži
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── AddOrderModal ────────────────────────────────────────────────────────────
+
+type NewOrderItem = {
+  type: ProductType;
+  material: 'PVC' | 'ALU';
+  width: string;
+  height: string;
+  quantity: string;
+};
+
+const PRODUCT_OPTIONS: { value: ProductType; label: string }[] = [
+  { value: 'window_single',     label: 'Jednokrilni prozor' },
+  { value: 'window_double',     label: 'Dvokrilni prozor' },
+  { value: 'trokrilni_prozor',  label: 'Trokrilni prozor' },
+  { value: 'fiksni_prozor',     label: 'Fiksni prozor' },
+  { value: 'door',              label: 'Vrata' },
+  { value: 'balkonska_vrata',   label: 'Balkonska vrata' },
+  { value: 'klizna_vrata',      label: 'Klizna vrata' },
+  { value: 'plisirani_komarnik', label: 'Plisirani komarnik' },
+];
+
+function AddOrderModal({
+  userRole, onClose, onSave,
+}: {
+  userRole: UserRole | null;
+  onClose: () => void;
+  onSave: (order: Order) => void;
+}) {
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [location, setLocation] = useState<'Srbija' | 'Inostranstvo'>('Srbija');
+  const [town, setTown] = useState('');
+  const [address, setAddress] = useState('');
+  const [price, setPrice] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<Order['payment_method']>('cash_on_delivery');
+  const [status, setStatus] = useState<OrderStatus>('na_cekanju');
+  const [notes, setNotes] = useState('');
+  const [items, setItems] = useState<NewOrderItem[]>([
+    { type: 'window_single', material: 'PVC', width: '', height: '', quantity: '1' },
+  ]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  function addItem() {
+    setItems(prev => [...prev, { type: 'window_single', material: 'PVC', width: '', height: '', quantity: '1' }]);
+  }
+
+  function removeItem(idx: number) {
+    setItems(prev => prev.filter((_, i) => i !== idx));
+  }
+
+  function updateItem(idx: number, field: keyof NewOrderItem, value: string) {
+    setItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) { setError('Ime klijenta je obavezno'); return; }
+    if (!phone.trim()) { setError('Telefon je obavezan'); return; }
+    for (const [i, item] of items.entries()) {
+      if (!item.width || !item.height) { setError(`Stavka ${i + 1}: unesite dimenzije`); return; }
+    }
+    setSaving(true); setError('');
+    try {
+      const res = await fetch('/api/orders/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name:  name.trim(),
+          phone:          phone.trim(),
+          email:          email.trim() || undefined,
+          location,
+          town:           town.trim() || undefined,
+          address:        address.trim() || undefined,
+          total_price:    Number(price) || 0,
+          payment_method: paymentMethod,
+          status,
+          notes:          notes.trim() || undefined,
+          items: items.map(item => ({
+            type:     item.type,
+            material: item.material,
+            width:    Number(item.width),
+            height:   Number(item.height),
+            quantity: Number(item.quantity) || 1,
+          })),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Greška pri kreiranju narudžbine'); return; }
+      onSave(data.order as Order);
+    } catch {
+      setError('Greška pri kreiranju narudžbine');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-lg bg-[var(--bg-surface)] border border-[var(--border)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[85vh]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)] flex-shrink-0">
+          <h2 className="text-base font-bold text-[var(--text)]">Nova narudžbina</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-raised)] transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto overscroll-contain px-6 py-5 space-y-5">
+          {/* Customer info */}
+          <div>
+            <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">Podaci o klijentu</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className={LABEL}>Ime klijenta *</label><input type="text" value={name} onChange={e => setName(e.target.value)} className={INPUT} placeholder="npr. Marko Jović" /></div>
+              <div><label className={LABEL}>Telefon *</label><input type="text" value={phone} onChange={e => setPhone(e.target.value)} className={INPUT} placeholder="+381..." /></div>
+            </div>
+            <div className="mt-3"><label className={LABEL}>Email</label><input type="email" value={email} onChange={e => setEmail(e.target.value)} className={INPUT} placeholder="opciono" /></div>
+            <div className="grid grid-cols-2 gap-3 mt-3">
+              <div>
+                <label className={LABEL}>Lokacija *</label>
+                <select value={location} onChange={e => setLocation(e.target.value as 'Srbija' | 'Inostranstvo')} className={INPUT}>
+                  <option value="Srbija">Srbija</option>
+                  <option value="Inostranstvo">Inostranstvo</option>
+                </select>
+              </div>
+              <div><label className={LABEL}>Grad / Opština</label><input type="text" value={town} onChange={e => setTown(e.target.value)} placeholder="npr. Beograd" className={INPUT} /></div>
+            </div>
+            <div className="mt-3"><label className={LABEL}>Adresa</label><input type="text" value={address} onChange={e => setAddress(e.target.value)} placeholder="Ulica i broj" className={INPUT} /></div>
+          </div>
+
+          {/* Items */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">Stavke</div>
+              <button type="button" onClick={addItem} className="flex items-center gap-1 text-[#C9A84C] text-xs font-semibold hover:text-[#E8C97A] transition-colors">
+                <Plus size={12} weight="bold" />Dodaj stavku
+              </button>
+            </div>
+            <div className="space-y-3">
+              {items.map((item, idx) => (
+                <div key={idx} className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)] space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-[var(--text-muted)]">Stavka {idx + 1}</span>
+                    {items.length > 1 && (
+                      <button type="button" onClick={() => removeItem(idx)} className="text-[var(--text-muted)] hover:text-red-500 transition-colors" title="Ukloni stavku">
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+                  <div>
+                    <label className={LABEL}>Tip proizvoda</label>
+                    <select value={item.type} onChange={e => updateItem(idx, 'type', e.target.value)} className={INPUT}>
+                      {PRODUCT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className={LABEL}>Materijal</label>
+                      <select value={item.material} onChange={e => updateItem(idx, 'material', e.target.value)} className={INPUT}>
+                        <option value="PVC">PVC</option>
+                        <option value="ALU">ALU</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={LABEL}>Količina</label>
+                      <input type="number" min="1" max="100" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} className={`${INPUT} [appearance:textfield]`} />
+                    </div>
+                    <div>
+                      <label className={LABEL}>Širina (mm)</label>
+                      <input type="number" min="100" max="4000" value={item.width} onChange={e => updateItem(idx, 'width', e.target.value)} placeholder="npr. 900" className={`${INPUT} [appearance:textfield]`} />
+                    </div>
+                    <div>
+                      <label className={LABEL}>Visina (mm)</label>
+                      <input type="number" min="100" max="4000" value={item.height} onChange={e => updateItem(idx, 'height', e.target.value)} placeholder="npr. 1200" className={`${INPUT} [appearance:textfield]`} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Order details */}
+          <div>
+            <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-3">Detalji narudžbine</div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={LABEL}>Način plaćanja</label>
+                <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value as Order['payment_method'])} className={INPUT}>
+                  <option value="cash_on_delivery">Pouzećem</option>
+                  <option value="racun">Račun</option>
+                </select>
+              </div>
+              <div>
+                <label className={LABEL}>Status</label>
+                <select value={status} onChange={e => setStatus(e.target.value as OrderStatus)} className={INPUT}>
+                  {ORDER_STATUSES.map(s => <option key={s} value={s}>{ORDER_STATUS_CONFIG[s].label}</option>)}
+                </select>
+              </div>
+            </div>
+            {canAccess(userRole, 'admin') && (
+              <div className="mt-3">
+                <label className={LABEL}>Cena (RSD)</label>
+                <input type="number" min="0" value={price} onChange={e => setPrice(e.target.value)} placeholder="0" className={`${INPUT} [appearance:textfield] mt-0`} />
+              </div>
+            )}
+            <div className="mt-3">
+              <label className={LABEL}>Napomena</label>
+              <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Dodatne napomene..." className={`${INPUT} resize-none`} />
+            </div>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-1.5 text-red-500 text-xs -mt-1"><WarningCircle size={13} />{error}</div>
+          )}
+
+          <div className="flex gap-2 pb-2">
+            <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl bg-[#C9A84C] text-slate-950 font-bold text-sm hover:bg-[#E8C97A] transition-colors disabled:opacity-50">
+              {saving ? 'Kreiranje...' : 'Kreiraj narudžbinu'}
             </button>
             <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-medium text-sm hover:border-[var(--border-strong)] transition-colors">
               Otkaži
@@ -1071,8 +1303,10 @@ export default function CrmDashboardPage() {
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [errorToast, setErrorToast] = useState('');
   const [confirmTaskId, setConfirmTaskId] = useState<string | null>(null);
+  const [addingOrder, setAddingOrder] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true);
@@ -1168,9 +1402,16 @@ export default function CrmDashboardPage() {
 
   async function handleLogout() {
     setLoggingOut(true);
+    setShowLogoutConfirm(false);
     await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/crm/login');
   }
+
+  const handleNewOrder = useCallback((order: Order) => {
+    setOrders(prev => [order, ...prev]);
+    setAddingOrder(false);
+    setSelectedOrder(order);
+  }, []);
 
   const filteredOrders = orders.filter(o => {
     if (!searchQuery.trim()) return true;
@@ -1228,7 +1469,7 @@ export default function CrmDashboardPage() {
             <a href="/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-raised)] transition-colors">
               <ArrowSquareOut size={16} />Sajt
             </a>
-            <button onClick={handleLogout} disabled={loggingOut} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50">
+            <button onClick={() => setShowLogoutConfirm(true)} disabled={loggingOut} className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-50">
               <SignOut size={16} />{loggingOut ? 'Odjava...' : 'Odjava'}
             </button>
           </div>
@@ -1293,6 +1534,13 @@ export default function CrmDashboardPage() {
                   </select>
                   <button onClick={fetchOrders} className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-muted)] text-sm hover:text-[var(--text)] hover:border-[var(--border-strong)] transition-colors flex-shrink-0">
                     <ArrowClockwise size={14} />Osveži
+                  </button>
+                  <button
+                    onClick={() => setAddingOrder(true)}
+                    className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-[#C9A84C] text-slate-950 font-semibold text-sm hover:bg-[#E8C97A] active:scale-[0.97] transition-all flex-shrink-0"
+                  >
+                    <Plus size={15} weight="bold" />
+                    <span className="sm:inline">Nova narudžbina</span>
                   </button>
                 </div>
 
@@ -1444,7 +1692,7 @@ export default function CrmDashboardPage() {
               );
             })}
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutConfirm(true)}
               disabled={loggingOut}
               className="flex-1 flex flex-col items-center justify-center gap-1 h-full transition-colors disabled:opacity-50"
             >
@@ -1491,6 +1739,27 @@ export default function CrmDashboardPage() {
         <AnimatePresence>
           {errorToast && <ErrorToast message={errorToast} onClose={() => setErrorToast('')} />}
         </AnimatePresence>
+
+        {/* ── Logout Confirm ────────────────────────────────────────────── */}
+        {showLogoutConfirm && (
+          <ConfirmModal
+            title="Odjava"
+            message="Da li ste sigurni da se želite odjaviti?"
+            confirmLabel="Odjavi se"
+            variant="warning"
+            onConfirm={handleLogout}
+            onCancel={() => setShowLogoutConfirm(false)}
+          />
+        )}
+
+        {/* ── Add Order Modal ───────────────────────────────────────────── */}
+        {addingOrder && (
+          <AddOrderModal
+            userRole={currentUserRole}
+            onClose={() => setAddingOrder(false)}
+            onSave={handleNewOrder}
+          />
+        )}
     </div>
   );
 }
