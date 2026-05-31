@@ -1,6 +1,6 @@
 // app/api/orders/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase';
 import type { OrderStatus, OrderLocation, PaymentMethod } from '@/types';
 
 const VALID_STATUSES: OrderStatus[] = ['na_cekanju', 'u_proizvodnji', 'isporuceno', 'otkazano'];

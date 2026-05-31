@@ -1,7 +1,7 @@
 // app/api/users/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase';
 import type { UserRole } from '@/types';
 
 async function getCallerRole(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {

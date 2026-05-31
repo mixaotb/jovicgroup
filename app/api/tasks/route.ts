@@ -1,6 +1,6 @@
 // app/api/tasks/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase';
 
 async function getCallerRole(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data } = await supabase.from('users').select('role').eq('id', userId).single();

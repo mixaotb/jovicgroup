@@ -1,7 +1,7 @@
 // app/api/orders/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase';
 import { sendNewOrderEmail, sendOrderConfirmationEmail } from '@/lib/email';
 import { formatRSD, calculatePrice, DIMENSION_LIMITS } from '@/lib/pricing';
 import { rateLimit } from '@/lib/ratelimit';

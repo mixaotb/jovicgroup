@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createBrowserClient } from '@/lib/supabase';
 
 interface Notification {
   id: string;
@@ -51,7 +51,7 @@ export default function NotificationBell({ onOrderClick }: Props) {
   useEffect(() => {
     fetchNotifications();
 
-    const supabase = createClient();
+    const supabase = createBrowserClient();
     const channel = supabase
       .channel('crm-notifications')
       .on(
