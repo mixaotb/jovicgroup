@@ -169,7 +169,7 @@ function OrderDetailDrawer({
       <motion.div
         initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
         transition={{ type: 'tween', duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 bg-[var(--bg-surface)]/90 backdrop-blur-2xl border-l border-[var(--border)] flex flex-col"
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-[-24px_0_64px_rgba(0,0,0,0.18)] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--border)] min-w-0 flex-shrink-0">
