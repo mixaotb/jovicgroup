@@ -1029,7 +1029,7 @@ export default function KalkulatorPage() {
                                   )}
                                   <div>Boja: <span className="text-[var(--text)]">{colorInfo?.label}</span></div>
                                   {addons && <div className="col-span-2">Dodaci: <span className="text-[var(--text)]">{addons}</span></div>}
-                                  {item.itemNotes && <div className="col-span-2 text-[var(--text-faint)] italic truncate">„{item.itemNotes}"</div>}
+                                  {item.itemNotes && <div className="col-span-2 text-[var(--text-faint)] italic truncate">&bdquo;{item.itemNotes}&ldquo;</div>}
                                   <div className="col-span-2 pt-1 font-medium">Cena: <span className="text-[#C9A84C]">{formatRSD(pricing.basePrice)}</span></div>
                                 </div>
                               </div>
