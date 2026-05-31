@@ -1,6 +1,7 @@
 // app/api/orders/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
+import { createAdminClient } from '@/lib/supabase';
 import type { OrderStatus, OrderLocation, PaymentMethod } from '@/types';
 
 const VALID_STATUSES: OrderStatus[] = ['na_cekanju', 'u_proizvodnji', 'isporuceno', 'otkazano'];
@@ -148,8 +149,9 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Delete order (order_items will cascade delete automatically due to foreign key constraint)
-    const { error } = await supabase.from('orders').delete().eq('id', id);
+    // Use admin client to bypass RLS — orders table has no DELETE policy
+    const admin = createAdminClient();
+    const { error } = await admin.from('orders').delete().eq('id', id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

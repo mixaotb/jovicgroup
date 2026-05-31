@@ -75,6 +75,63 @@ function LoadingSpinner({ label }: { label: string }) {
   );
 }
 
+// ─── ConfirmModal ─────────────────────────────────────────────────────────────
+
+function ConfirmModal({ title, message, confirmLabel = 'Obriši', onConfirm, onCancel }: {
+  title: string; message?: string; confirmLabel?: string;
+  onConfirm: () => void; onCancel: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4 sm:p-6">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
+      <div className="relative w-full max-w-sm bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-2xl">
+        <div className="px-6 pt-6 pb-4">
+          <div className="w-10 h-10 rounded-xl bg-red-500/15 border border-red-500/20 flex items-center justify-center mb-4">
+            <Trash size={18} className="text-red-500" />
+          </div>
+          <h2 className="text-base font-bold text-[var(--text)] mb-1.5">{title}</h2>
+          {message && <p className="text-sm text-[var(--text-muted)] leading-relaxed">{message}</p>}
+        </div>
+        <div className="flex gap-2 px-6 pb-6">
+          <button
+            onClick={onCancel}
+            className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-medium text-sm hover:border-[var(--border-strong)] hover:text-[var(--text)] transition-colors"
+          >
+            Otkaži
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 py-2.5 rounded-xl bg-red-500 text-white font-bold text-sm hover:bg-red-600 active:scale-[0.97] transition-all"
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ErrorToast ───────────────────────────────────────────────────────────────
+
+function ErrorToast({ message, onClose }: { message: string; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 4000);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.2 }}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-[80] flex items-center gap-3 px-4 py-3 rounded-2xl bg-[var(--bg-surface)] border border-red-500/30 text-red-500 text-sm backdrop-blur-xl shadow-xl max-w-[calc(100vw-2rem)] sm:max-w-sm w-full"
+    >
+      <WarningCircle size={16} className="flex-shrink-0" />
+      <span className="flex-1 leading-snug">{message}</span>
+      <button onClick={onClose} className="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"><X size={14} /></button>
+    </motion.div>
+  );
+}
+
 // ─── StatsSummary ─────────────────────────────────────────────────────────────
 
 function StatsSummary({ orders, tasks, userRole }: { orders: Order[]; tasks: Task[]; userRole: UserRole | null }) {
@@ -150,9 +207,12 @@ function OrderDetailDrawer({
   onClose: () => void; onEdit: (o: Order) => void; onDelete: (id: string) => Promise<void>;
 }) {
   const [deleting, setDeleting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function handleDelete() {
-    if (!confirm(`Obrisati narudžbinu klijenta "${order.customer_name}"?`)) return;
+  function handleDelete() { setConfirmOpen(true); }
+
+  async function performDelete() {
+    setConfirmOpen(false);
     setDeleting(true);
     await onDelete(order.id);
     setDeleting(false);
@@ -160,6 +220,14 @@ function OrderDetailDrawer({
 
   return (
     <>
+      {confirmOpen && (
+        <ConfirmModal
+          title="Obriši narudžbinu"
+          message={`Da li ste sigurni da želite da obrišete narudžbinu klijenta „${order.customer_name}"?`}
+          onConfirm={performDelete}
+          onCancel={() => setConfirmOpen(false)}
+        />
+      )}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         transition={{ duration: 0.18 }}
@@ -269,6 +337,22 @@ function OrderDetailDrawer({
                         {item.dimensions_data.komarnikType && item.dimensions_data.komarnikType !== 'none' && (
                           <span className="text-[10px] text-[var(--text-muted)]">Komarnik: <span className="text-[var(--text)]">{item.dimensions_data.komarnikType}</span></span>
                         )}
+                      </div>
+                    )}
+                    {item.dimensions_data?.notes && (
+                      <div className="mt-2 pt-2 border-t border-[var(--border)]">
+                        <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">{item.dimensions_data.notes}</p>
+                      </div>
+                    )}
+                    {item.dimensions_data?.image_url && (
+                      <div className="mt-2 pt-2 border-t border-[var(--border)]">
+                        <a href={item.dimensions_data.image_url} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={item.dimensions_data.image_url}
+                            alt="Priložena fotografija"
+                            className="w-full max-h-48 object-cover rounded-lg cursor-zoom-in"
+                          />
+                        </a>
                       </div>
                     )}
                   </div>
@@ -419,7 +503,7 @@ function TaskBoard({
   tasks: Task[]; workers: User[]; canManage: boolean;
   onStatusChange: (id: string, status: TaskStatus) => Promise<void>;
   onAddTask: (title: string, desc: string, assignedTo: string, dueDate: string) => Promise<void>;
-  onDeleteTask: (id: string) => Promise<void>;
+  onDeleteTask: (id: string) => void;
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [title, setTitle] = useState(''); const [desc, setDesc] = useState('');
@@ -543,6 +627,9 @@ function UsersSection({ users, onRefresh }: { users: User[]; onRefresh: () => Pr
   const [editPassword, setEditPassword] = useState(''); const [editing, setEditing] = useState(false);
   const [editErr, setEditErr] = useState('');
 
+  const [confirmUser, setConfirmUser] = useState<User | null>(null);
+  const [deleteErr, setDeleteErr] = useState('');
+
   async function handleAdd() {
     if (!addEmail.trim()) { setAddErr('Email je obavezan'); return; }
     if (addPassword.length < 6) { setAddErr('Lozinka mora imati najmanje 6 karaktera'); return; }
@@ -576,13 +663,17 @@ function UsersSection({ users, onRefresh }: { users: User[]; onRefresh: () => Pr
     finally { setEditing(false); }
   }
 
-  async function handleDelete(u: User) {
-    if (!confirm(`Obrisati korisnika ${u.full_name || u.email}?`)) return;
+  function handleDelete(u: User) { setConfirmUser(u); }
+
+  async function performDelete() {
+    if (!confirmUser) return;
+    const u = confirmUser;
+    setConfirmUser(null);
     try {
       const res = await fetch(`/api/users/${u.id}`, { method: 'DELETE' });
-      if (!res.ok) { const d = await res.json(); alert(d.error || 'Greška pri brisanju'); return; }
+      if (!res.ok) { const d = await res.json(); setDeleteErr(d.error || 'Greška pri brisanju'); return; }
       await onRefresh();
-    } catch { alert('Greška pri brisanju korisnika'); }
+    } catch { setDeleteErr('Greška pri brisanju korisnika'); }
   }
 
   const ROLE_CONFIG: Record<UserRole, { label: string; cls: string }> = {
@@ -593,6 +684,14 @@ function UsersSection({ users, onRefresh }: { users: User[]; onRefresh: () => Pr
 
   return (
     <div>
+      {confirmUser && (
+        <ConfirmModal
+          title="Obriši korisnika"
+          message={`Da li ste sigurni da želite da obrišete korisnika ${confirmUser.full_name || confirmUser.email}?`}
+          onConfirm={performDelete}
+          onCancel={() => setConfirmUser(null)}
+        />
+      )}
       <div className="flex items-center justify-between mb-5">
         <h2 className="text-lg font-bold text-[var(--text)]">Korisnici</h2>
         <button onClick={() => { setShowAdd(!showAdd); setAddErr(''); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C9A84C]/15 border border-[#C9A84C]/30 text-[#C9A84C] text-sm font-semibold hover:bg-[#C9A84C]/20 transition-colors">
@@ -600,6 +699,12 @@ function UsersSection({ users, onRefresh }: { users: User[]; onRefresh: () => Pr
           Novi korisnik
         </button>
       </div>
+      {deleteErr && (
+        <div className="mb-4 px-4 py-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-sm flex items-center gap-2">
+          <WarningCircle size={15} />{deleteErr}
+          <button onClick={() => setDeleteErr('')} className="ml-auto opacity-60 hover:opacity-100 transition-opacity"><X size={14} /></button>
+        </div>
+      )}
 
       {showAdd && (
         <div className="mb-5 p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-raised)]">
@@ -963,6 +1068,8 @@ export default function CrmDashboardPage() {
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [errorToast, setErrorToast] = useState('');
+  const [confirmTaskId, setConfirmTaskId] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true);
@@ -1012,7 +1119,7 @@ export default function CrmDashboardPage() {
       const data = await res.json();
       setOrders(prev => prev.map(o => o.id === id ? { ...o, ...data.order } : o));
       setEditingOrder(null);
-    } catch { alert('Greška pri ažuriranju narudžbine'); }
+    } catch { setErrorToast('Greška pri ažuriranju narudžbine'); }
   }, []);
 
   const handleOrderDelete = useCallback(async (id: string) => {
@@ -1021,7 +1128,7 @@ export default function CrmDashboardPage() {
       if (!res.ok) throw new Error();
       setOrders(prev => prev.filter(o => o.id !== id));
       setSelectedOrder(null);
-    } catch { alert('Greška pri brisanju narudžbine'); }
+    } catch { setErrorToast('Greška pri brisanju narudžbine'); }
   }, []);
 
   const handleTaskStatusChange = useCallback(async (id: string, status: TaskStatus) => {
@@ -1029,7 +1136,7 @@ export default function CrmDashboardPage() {
       const res = await fetch(`/api/tasks/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
       if (!res.ok) throw new Error();
       setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t));
-    } catch { alert('Greška pri ažuriranju zadatka'); }
+    } catch { setErrorToast('Greška pri ažuriranju zadatka'); }
   }, []);
 
   const handleAddTask = useCallback(async (title: string, description: string, assignedTo: string, dueDate: string) => {
@@ -1038,17 +1145,23 @@ export default function CrmDashboardPage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setTasks(prev => [data.task, ...prev]);
-    } catch { alert('Greška pri dodavanju zadatka'); }
+    } catch { setErrorToast('Greška pri dodavanju zadatka'); }
   }, []);
 
-  const handleDeleteTask = useCallback(async (id: string) => {
-    if (!confirm('Obrisati zadatak?')) return;
+  const handleDeleteTask = useCallback((id: string) => {
+    setConfirmTaskId(id);
+  }, []);
+
+  const performDeleteTask = useCallback(async () => {
+    if (!confirmTaskId) return;
+    const id = confirmTaskId;
+    setConfirmTaskId(null);
     try {
       const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error();
       setTasks(prev => prev.filter(t => t.id !== id));
-    } catch { alert('Greška pri brisanju zadatka'); }
-  }, []);
+    } catch { setErrorToast('Greška pri brisanju zadatka'); }
+  }, [confirmTaskId]);
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -1360,6 +1473,21 @@ export default function CrmDashboardPage() {
             onSave={handleOrderEdit}
           />
         )}
+
+        {/* ── Task Delete Confirm ───────────────────────────────────────── */}
+        {confirmTaskId && (
+          <ConfirmModal
+            title="Obriši zadatak"
+            message="Da li ste sigurni da želite da obrišete ovaj zadatak?"
+            onConfirm={performDeleteTask}
+            onCancel={() => setConfirmTaskId(null)}
+          />
+        )}
+
+        {/* ── Error Toast ───────────────────────────────────────────────── */}
+        <AnimatePresence>
+          {errorToast && <ErrorToast message={errorToast} onClose={() => setErrorToast('')} />}
+        </AnimatePresence>
     </div>
   );
 }

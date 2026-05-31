@@ -37,3 +37,15 @@ export async function PATCH(request: NextRequest) {
 
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(_request: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Neautorizovan pristup' }, { status: 401 });
+
+  const admin = createAdminClient();
+  const { error } = await admin.from('notifications').delete().not('id', 'is', null);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ success: true });
+}

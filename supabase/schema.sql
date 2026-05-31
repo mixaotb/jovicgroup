@@ -124,6 +124,11 @@ CREATE POLICY "Authenticated users can update orders"
   TO authenticated
   USING (true);
 
+CREATE POLICY "Admins can delete orders"
+  ON public.orders FOR DELETE
+  TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
+
 -- TASKS: authenticated only
 CREATE POLICY "Authenticated users can manage tasks"
   ON public.tasks FOR ALL
@@ -197,6 +202,14 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
 --     'door', 'balkonska_vrata', 'klizna_vrata', 'plisirani_komarnik'
 --   )
 -- );
+-- ============================================================
+
+-- ============================================================
+-- STORAGE: Order images
+-- Create this bucket manually in Supabase Dashboard → Storage:
+--   Name: order-images
+--   Public: true (images served via public URL, no auth required to view)
+-- No SQL needed — Storage buckets are managed via the Supabase dashboard or API.
 -- ============================================================
 
 -- ============================================================

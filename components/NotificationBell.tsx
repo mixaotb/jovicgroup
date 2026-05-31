@@ -22,6 +22,7 @@ export default function NotificationBell({ onOrderClick }: Props) {
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<{ title: string; body: string | null } | null>(null);
+  const [clearing, setClearing] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -33,6 +34,16 @@ export default function NotificationBell({ onOrderClick }: Props) {
       setNotifications(data.notifications ?? []);
       setUnread(data.unread ?? 0);
     } catch { /* non-critical */ }
+  }, []);
+
+  const handleClearAll = useCallback(async () => {
+    setClearing(true);
+    try {
+      await fetch('/api/notifications', { method: 'DELETE' });
+      setNotifications([]);
+      setUnread(0);
+    } catch { /* non-critical */ }
+    finally { setClearing(false); }
   }, []);
 
   // Mark all read when dropdown opens
@@ -146,7 +157,13 @@ export default function NotificationBell({ onOrderClick }: Props) {
             <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
               <span className="text-white text-sm font-semibold">Notifikacije</span>
               {notifications.length > 0 && (
-                <span className="text-slate-500 text-xs">{notifications.length} ukupno</span>
+                <button
+                  onClick={handleClearAll}
+                  disabled={clearing}
+                  className="text-slate-500 hover:text-red-400 text-xs transition-colors disabled:opacity-40"
+                >
+                  {clearing ? 'Brisanje...' : 'Obriši sve'}
+                </button>
               )}
             </div>
 

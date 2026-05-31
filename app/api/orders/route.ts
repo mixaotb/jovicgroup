@@ -124,10 +124,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Greška pri čuvanju narudžbine. Pokušajte ponovo.' }, { status: 500 });
     }
 
-    // Strip imageDataUrl from dimensions_data before storing (can be large)
-    const orderItems = body.items.map(item => {
+    // Upload images to Supabase Storage, store public URL in dimensions_data
+    const orderItems = await Promise.all(body.items.map(async (item, idx) => {
       const { imageDataUrl, ...dimData } = item.dimensions_data;
-      void imageDataUrl; // acknowledged, not stored in DB
+      let image_url: string | undefined;
+      if (imageDataUrl) {
+        try {
+          const base64 = imageDataUrl.replace(/^data:image\/\w+;base64,/, '');
+          const buffer = Buffer.from(base64, 'base64');
+          const path = `${order.id}/${idx}.jpg`;
+          const { error: uploadError } = await supabase.storage
+            .from('order-images')
+            .upload(path, buffer, { contentType: 'image/jpeg', upsert: false });
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage.from('order-images').getPublicUrl(path);
+            image_url = urlData.publicUrl;
+          } else {
+            console.error('[Storage] Image upload failed:', uploadError);
+          }
+        } catch (err) {
+          console.error('[Storage] Image upload error:', err);
+        }
+      }
       return {
         order_id:        order.id,
         type:            item.dimensions_data.type,
@@ -135,9 +153,9 @@ export async function POST(request: NextRequest) {
         width:           item.dimensions_data.width,
         height:          item.dimensions_data.height,
         quantity:        item.dimensions_data.quantity,
-        dimensions_data: dimData,
+        dimensions_data: image_url ? { ...dimData, image_url } : dimData,
       };
-    });
+    }));
 
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
 

@@ -79,6 +79,7 @@ export interface DimensionsData {
   hasSillInside?: boolean;
   notes?: string;
   imageDataUrl?: string;
+  image_url?: string;
 }
 
 export interface OrderItem {
