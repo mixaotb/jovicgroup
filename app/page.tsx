@@ -569,9 +569,9 @@ export default function HomePage() {
               <div>
                 <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Kontakt</div>
                 <div className="space-y-2 text-[var(--text-faint)] text-[13px]">
-                  <div>info@jovicgroup.rs</div>
-                  <div>+381 11 000 0000</div>
-                  <div>Beograd, Srbija</div>
+                  <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
+                  <div>+381 69 3 999 555</div>
+                  <div>Stevana Tisme 114</div>
                 </div>
               </div>
 
