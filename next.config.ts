@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'picsum.photos' },
       { protocol: 'https', hostname: 'fastly.picsum.photos' },
+      { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: '*.supabase.in' },
     ],
   },
   // Ensures server actions and API routes work correctly
