@@ -1,4 +1,4 @@
-import { createBrowserClient as _createBrowserClient, createServerClient as _createServerClient } from '@supabase/ssr';
+import { createBrowserClient as _createBrowserClient, createServerClient as _createServerClient, type CookieOptions } from '@supabase/ssr';
 import { createClient as _createAdminBase } from '@supabase/supabase-js';
 
 export function createBrowserClient() {
@@ -17,7 +17,7 @@ export async function createClient() {
     {
       cookies: {
         getAll() { return cookieStore.getAll(); },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           } catch {
