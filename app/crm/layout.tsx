@@ -9,9 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function CrmLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-[#080E1A]">
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }

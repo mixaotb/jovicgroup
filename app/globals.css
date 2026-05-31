@@ -90,6 +90,13 @@
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(201,168,76,0.6); }
+
+  /* Theme-aware form controls */
+  .dark select,
+  .dark input[type="date"],
+  .dark input[type="datetime-local"],
+  .dark input[type="time"] { color-scheme: dark; }
+  select, input[type="date"], input[type="datetime-local"], input[type="time"] { color-scheme: light; }
 }
 
 @layer utilities {
