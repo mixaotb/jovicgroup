@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { calculatePrice, formatRSD, getDeliveryFee, DIMENSION_LIMITS, DEFAULT_DIMENSIONS } from '@/lib/pricing';
@@ -258,13 +258,44 @@ function TextInput({ error, ...props }: React.InputHTMLAttributes<HTMLInputEleme
 }
 
 function InfoTooltip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const [tipStyle, setTipStyle] = useState<React.CSSProperties>({});
+  const ref = useRef<HTMLSpanElement>(null);
+
+  const computeStyle = useCallback(() => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    const TW = 220;
+    const left = Math.max(8, Math.min(r.left + r.width / 2 - TW / 2, window.innerWidth - TW - 8));
+    setTipStyle({ position: 'fixed', top: r.top, left, width: TW, transform: 'translateY(-100%) translateY(-8px)' });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: Event) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('touchstart', close, { passive: true, capture: true });
+    return () => document.removeEventListener('touchstart', close, true);
+  }, [open]);
+
   return (
-    <span className="relative group inline-block align-middle ml-1.5 cursor-help">
+    <span
+      ref={ref}
+      className="relative inline-block align-middle ml-1.5 cursor-help select-none"
+      onMouseEnter={() => { computeStyle(); setOpen(true); }}
+      onMouseLeave={() => setOpen(false)}
+      onClick={(e) => { e.stopPropagation(); if (open) { setOpen(false); } else { computeStyle(); setOpen(true); } }}
+    >
       <span className="w-4 h-4 rounded-full bg-[var(--bg-raised)] border border-[var(--border)] text-[var(--text-faint)] text-[10px] font-bold inline-flex items-center justify-center leading-none">i</span>
-      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] text-[12px] leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-xl shadow-black/20">
-        {text}
-        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--border)]" />
-      </span>
+      {open && (
+        <span
+          className="p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] text-[12px] leading-relaxed z-[200] shadow-xl shadow-black/20 pointer-events-none"
+          style={tipStyle}
+        >
+          {text}
+        </span>
+      )}
     </span>
   );
 }
@@ -725,7 +756,7 @@ export default function KalkulatorPage() {
 
                     {/* Dvoslojno sub-options */}
                     {!isTroslojnoTier(glassType) && (
-                      <div className="grid grid-cols-3 gap-3 pt-1">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-1">
                         {(['dvoslojno', 'dvoslojno_niskoemisiono', 'dvoslojno_peskirano'] as GlassType[]).map((g) => {
                           const info = GLASS_INFO[g];
                           return (
@@ -749,7 +780,7 @@ export default function KalkulatorPage() {
 
                     {/* Troslojno sub-options */}
                     {isTroslojnoTier(glassType) && (
-                      <div className="grid grid-cols-3 gap-3 pt-1">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-1">
                         {(['niskoemisiono', '4_godisnja_doba', 'peskirano'] as GlassType[]).map((g) => {
                           const info = GLASS_INFO[g];
                           return (

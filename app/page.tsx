@@ -14,6 +14,7 @@ import {
 import GlassNav from '@/components/GlassNav';
 import HeroSection from '@/components/HeroSection';
 import RevealUp from '@/components/RevealUp';
+import LiquidGlassCard from '@/components/LiquidGlassCard';
 
 export const metadata: Metadata = {
   title: 'Jović Group | Premium PVC & ALU Stolarija',
@@ -76,7 +77,7 @@ function GlassIcon({ children }: { children: React.ReactNode }) {
 
 export default function HomePage() {
   return (
-    <div className="relative bg-theme text-theme">
+    <div className="relative bg-theme text-theme overflow-x-hidden">
       {/* Skip link */}
       <a
         href="#main-content"
@@ -92,10 +93,14 @@ export default function HomePage() {
         <HeroSection />
 
         {/* ─── Features ─────────────────────────────────── */}
-        <section id="prednosti" className="relative py-32 overflow-hidden">
-          {/* Background glow orbs so glass cards have something to blur */}
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/6 blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#1A2744]/50 blur-[100px] pointer-events-none" />
+        <section id="prednosti" className="relative py-32">
+          {/* Background glow orbs — colorful so the liquid glass distortion is visible */}
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/10 dark:bg-[#C9A84C]/8 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#1A2744]/30 dark:bg-[#1A2744]/50 blur-[100px] pointer-events-none" />
+          {/* Colorful accent orbs */}
+          <div className="absolute top-[8%] right-[6%] w-[420px] h-[420px] rounded-full bg-blue-400/20 dark:bg-blue-500/20 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[8%] left-[4%] w-[360px] h-[360px] rounded-full bg-purple-400/18 dark:bg-purple-500/18 blur-[110px] pointer-events-none" />
+          <div className="absolute top-[45%] left-[55%] w-[280px] h-[280px] rounded-full bg-teal-400/18 dark:bg-teal-400/15 blur-[90px] pointer-events-none" />
 
           <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
             <RevealUp className="mb-14">
@@ -178,7 +183,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Cells 3, 4, 5 — glass cards */}
+                {/* Cells 3, 4, 5 — liquid glass cards */}
                 {[
                   {
                     icon: <CheckCircleIcon size={22} weight="light" />,
@@ -196,35 +201,23 @@ export default function HomePage() {
                     body: 'Više od 200 boja RAL skale, mat ili sjaj, lučni oblici.',
                   },
                 ].map((f) => (
-                  <div
+                  <LiquidGlassCard
                     key={f.title}
                     className="rounded-[1.5rem] p-6 flex flex-col gap-5 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                    style={{
-                      background: 'var(--glass-bg)',
-                      border: '1px solid var(--glass-border)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      boxShadow: 'inset 0 1px 0 var(--glass-shine)',
-                    }}
+                    style={{ border: '1px solid var(--glass-border)' }}
                   >
                     <GlassIcon>{f.icon}</GlassIcon>
                     <div>
                       <h3 className="font-display font-bold text-[1.05rem] text-[var(--text)] mb-2">{f.title}</h3>
                       <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed">{f.body}</p>
                     </div>
-                  </div>
+                  </LiquidGlassCard>
                 ))}
 
-                {/* Cell 6: Energetska efikasnost — full width horizontal glass */}
-                <div
+                {/* Cell 6: Energetska efikasnost — full width horizontal liquid glass */}
+                <LiquidGlassCard
                   className="md:col-span-3 rounded-[1.5rem] p-7 flex flex-col md:flex-row items-start md:items-center gap-6 hover:scale-[1.005] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-                  style={{
-                    background: 'var(--glass-bg)',
-                    border: '1px solid var(--glass-border)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    boxShadow: 'inset 0 1px 0 var(--glass-shine)',
-                  }}
+                  style={{ border: '1px solid var(--glass-border)' }}
                 >
                   <GlassIcon><LightningIcon size={22} weight="light" /></GlassIcon>
                   <div className="flex-1">
@@ -240,7 +233,7 @@ export default function HomePage() {
                     <div className="font-display font-black text-[2.8rem] text-[#C9A84C] leading-none tabular-nums">-40%</div>
                     <div className="text-[var(--text-faint)] text-[10px] mt-1 uppercase tracking-[0.12em] font-semibold">Gubici toplote</div>
                   </div>
-                </div>
+                </LiquidGlassCard>
 
               </div>
             </RevealUp>
@@ -248,7 +241,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── About ────────────────────────────────────── */}
-        <section id="o-nama" className="relative py-32 overflow-hidden">
+        <section id="o-nama" className="relative py-32">
           <div className="absolute top-1/2 right-0 w-[600px] h-[600px] rounded-full bg-[#1A2744]/40 blur-[120px] pointer-events-none -translate-y-1/2" />
 
           <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
@@ -395,8 +388,12 @@ export default function HomePage() {
         </section>
 
         {/* ─── Testimonials ─────────────────────────────── */}
-        <section id="utisci" className="relative py-32 overflow-hidden">
-          <div className="absolute top-1/4 left-1/6 w-[400px] h-[400px] rounded-full bg-[#C9A84C]/5 blur-[100px] pointer-events-none" />
+        <section id="utisci" className="relative py-32">
+          <div className="absolute top-1/4 left-1/6 w-[400px] h-[400px] rounded-full bg-[#C9A84C]/8 dark:bg-[#C9A84C]/5 blur-[100px] pointer-events-none" />
+          {/* Colorful accent orbs */}
+          <div className="absolute top-[10%] right-[8%] w-[380px] h-[380px] rounded-full bg-blue-400/20 dark:bg-blue-500/18 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[5%] right-[30%] w-[320px] h-[320px] rounded-full bg-purple-400/18 dark:bg-purple-500/15 blur-[100px] pointer-events-none" />
+          <div className="absolute top-[50%] left-[10%] w-[260px] h-[260px] rounded-full bg-teal-400/15 dark:bg-teal-400/12 blur-[90px] pointer-events-none" />
 
           <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
             <RevealUp className="mb-14">
@@ -415,57 +412,47 @@ export default function HomePage() {
             <RevealUp delay={0.05}>
               <div className="grid md:grid-cols-3 gap-4">
 
-                <div
-                  className="md:col-span-2 relative p-8 rounded-[1.5rem]"
-                  style={{
-                    background: 'var(--glass-bg-strong)',
-                    border: '1px solid var(--glass-border)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    boxShadow: 'inset 0 1px 0 var(--glass-shine)',
-                  }}
+                <LiquidGlassCard
+                  className="md:col-span-2 p-8 rounded-[1.5rem]"
+                  style={{ border: '1px solid var(--glass-border)' }}
                 >
-                  <div
-                    className="absolute top-6 right-7 font-display font-black text-[#C9A84C]/10 leading-none select-none pointer-events-none"
-                    style={{ fontSize: '6rem' }}
-                    aria-hidden
-                  >&ldquo;</div>
-                  <Stars count={testimonials[0].rating} />
-                  <p className="text-[var(--text)] text-[1.08rem] leading-relaxed mt-5 mb-7 max-w-lg relative z-10 font-medium">
-                    &ldquo;{testimonials[0].text}&rdquo;
-                  </p>
-                  <div
-                    className="flex items-center gap-3 pt-6"
-                    style={{ borderTop: '1px solid var(--glass-border)' }}
-                  >
+                  <div className="relative">
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-bold text-[14px] text-[#C9A84C]"
-                      style={{
-                        background: 'rgba(201,168,76,0.12)',
-                        border: '1px solid rgba(201,168,76,0.2)',
-                      }}
+                      className="absolute top-0 right-0 font-display font-black text-[#C9A84C]/10 leading-none select-none pointer-events-none"
+                      style={{ fontSize: '6rem' }}
+                      aria-hidden
+                    >&ldquo;</div>
+                    <Stars count={testimonials[0].rating} />
+                    <p className="text-[var(--text)] text-[1.08rem] leading-relaxed mt-5 mb-7 max-w-lg relative z-10 font-medium">
+                      &ldquo;{testimonials[0].text}&rdquo;
+                    </p>
+                    <div
+                      className="flex items-center gap-3 pt-6"
+                      style={{ borderTop: '1px solid var(--glass-border)' }}
                     >
-                      {testimonials[0].author[0]}
-                    </div>
-                    <div>
-                      <div className="font-display font-bold text-[var(--text)] text-[13px]">{testimonials[0].author}</div>
-                      <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{testimonials[0].location}</div>
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-bold text-[14px] text-[#C9A84C]"
+                        style={{
+                          background: 'rgba(201,168,76,0.12)',
+                          border: '1px solid rgba(201,168,76,0.2)',
+                        }}
+                      >
+                        {testimonials[0].author[0]}
+                      </div>
+                      <div>
+                        <div className="font-display font-bold text-[var(--text)] text-[13px]">{testimonials[0].author}</div>
+                        <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{testimonials[0].location}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </LiquidGlassCard>
 
                 <div className="flex flex-col gap-4">
                   {testimonials.slice(1).map((t) => (
-                    <div
+                    <LiquidGlassCard
                       key={t.author}
                       className="flex-1 p-6 rounded-[1.5rem]"
-                      style={{
-                        background: 'var(--glass-bg)',
-                        border: '1px solid var(--glass-border)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        boxShadow: 'inset 0 1px 0 var(--glass-shine)',
-                      }}
+                      style={{ border: '1px solid var(--glass-border)' }}
                     >
                       <Stars count={t.rating} />
                       <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed mt-4 mb-5">
@@ -475,7 +462,7 @@ export default function HomePage() {
                         <div className="font-display font-bold text-[var(--text)] text-[12px]">{t.author}</div>
                         <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{t.location}</div>
                       </div>
-                    </div>
+                    </LiquidGlassCard>
                   ))}
                 </div>
               </div>
@@ -484,7 +471,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── CTA Banner ───────────────────────────────── */}
-        <section className="relative py-32 overflow-hidden bg-theme">
+        <section className="relative py-32 bg-theme">
           {/* Central gold glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-[#C9A84C]/8 blur-[100px] pointer-events-none" />
           <div
