@@ -64,7 +64,7 @@ export default function HeroSection() {
 
           {/* Subtext */}
           <p className="text-[clamp(1rem,1.8vw,1.15rem)] text-[var(--text-muted)] max-w-[480px] leading-relaxed mb-11 animate-fade-up delay-200">
-            PVC i ALU stolarija sa Schüco i Rehau profilima iz Nemačke.
+            PVC i ALU stolarija sa Schüco, Alphacan i Profilink profilima.
             Bez posrednika, samo vrhunski rezultat.
           </p>
 

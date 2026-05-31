@@ -58,8 +58,8 @@ const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: Re
 ];
 
 const MATERIALS: { value: Material; label: string; desc: string }[] = [
-  { value: 'PVC', label: 'PVC', desc: 'Rehau profili · Odlična toplotna izolacija · Niska cena održavanja' },
-  { value: 'ALU', label: 'ALU', desc: 'Schüco sistemi · Premium estetika · Za komercijalne objekte' },
+  { value: 'PVC', label: 'PVC', desc: 'Alphacan profili · Odlična toplotna izolacija · Niska cena održavanja' },
+  { value: 'ALU', label: 'ALU', desc: 'Profilink i Schüco sistemi · Premium estetika · Za komercijalne objekte' },
 ];
 
 const LOCATIONS: { value: OrderLocation; label: string; desc: string; fee: string }[] = [

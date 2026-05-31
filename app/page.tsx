@@ -133,10 +133,10 @@ export default function HomePage() {
                     <GlassIcon><GlobeIcon size={22} weight="light" /></GlassIcon>
                     <h3 className="font-display font-bold text-[1.35rem] text-white mt-4 mb-2">Nemački profili</h3>
                     <p className="text-white/70 text-[13.5px] leading-relaxed mb-5 max-w-sm">
-                      Isključivo Schüco i Rehau profili — standardi koji važe decenijama širom Evrope.
+                      Isključivo Schüco, Alphacan i Profilink profili — standardi koji važe decenijama širom Evrope.
                     </p>
                     <div className="flex gap-2">
-                      {['Schüco', 'Rehau', 'ISO 9001'].map((tag) => (
+                      {['Schüco', 'Alphacan', 'Profilink'].map((tag) => (
                         <span
                           key={tag}
                           className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide text-[#C9A84C]"
@@ -276,7 +276,7 @@ export default function HomePage() {
                   {[
                     { label: 'Srbija',       desc: 'Dostava i ugradnja' },
                     { label: 'Inostranstvo', desc: 'Projekti za dijasporu' },
-                    { label: 'PVC',          desc: 'Rehau i Schüco profili' },
+                    { label: 'PVC',          desc: 'Alphacan i Schüco profili' },
                     { label: 'ALU',          desc: 'Komercijalni objekti' },
                   ].map((item) => (
                     <div
