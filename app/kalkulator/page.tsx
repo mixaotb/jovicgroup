@@ -346,6 +346,7 @@ export default function KalkulatorPage() {
   const [itemNotes, setItemNotes]           = useState('');
   const [imageDataUrl, setImageDataUrl]     = useState<string | undefined>(undefined);
   const [imageError, setImageError]         = useState('');
+  const [isDragOver, setIsDragOver]         = useState(false);
 
   const [cartItems, setCartItems]           = useState<CartItem[]>([]);
   const [editingItemId, setEditingItemId]   = useState<string | null>(null);
@@ -388,6 +389,23 @@ export default function KalkulatorPage() {
       const url = await processImage(file);
       setImageDataUrl(url);
     } catch { setImageError('Greška pri učitavanju slike'); }
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) await handleImageFile(file);
+  }, [handleImageFile]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
   }, []);
 
   // ── Cart helpers ──────────────────────────────────────────────────────────
@@ -995,7 +1013,13 @@ export default function KalkulatorPage() {
                       />
 
                       {imageDataUrl ? (
-                        <div className="flex items-start gap-4">
+                        <div
+                          className={`flex items-start gap-4 rounded-xl border-2 border-dashed p-3 transition-all ${isDragOver ? 'border-[#C9A84C]/60 bg-[#C9A84C]/5' : 'border-transparent'}`}
+                          onDrop={handleDrop}
+                          onDragOver={handleDragOver}
+                          onDragEnter={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                        >
                           <div className="relative w-24 h-20 rounded-xl overflow-hidden border border-[var(--border)] flex-shrink-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={imageDataUrl} alt="Priložena fotografija" className="w-full h-full object-cover" />
@@ -1017,12 +1041,20 @@ export default function KalkulatorPage() {
                       ) : (
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full py-8 rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[#C9A84C]/40 bg-[var(--bg-raised)] text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-all flex flex-col items-center gap-2"
+                          onDrop={handleDrop}
+                          onDragOver={handleDragOver}
+                          onDragEnter={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          className={`w-full py-8 rounded-xl border-2 border-dashed transition-all flex flex-col items-center gap-2 ${
+                            isDragOver
+                              ? 'border-[#C9A84C]/60 bg-[#C9A84C]/5 text-[var(--text-muted)]'
+                              : 'border-[var(--border)] hover:border-[#C9A84C]/40 bg-[var(--bg-raised)] text-[var(--text-faint)] hover:text-[var(--text-muted)]'
+                          }`}
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                           </svg>
-                          <span className="text-[13px]">Dodajte fotografiju ili skicu</span>
+                          <span className="text-[13px]">{isDragOver ? 'Otpustite da biste dodali' : 'Prevucite sliku ovde ili kliknite'}</span>
                           <span className="text-[11px]">JPG, PNG, WEBP do 8 MB</span>
                         </button>
                       )}
