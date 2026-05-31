@@ -96,7 +96,7 @@ function StatsSummary({ orders, tasks, userRole }: { orders: Order[]; tasks: Tas
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-[var(--border)] rounded-2xl overflow-hidden border border-[var(--border)] mb-6">
       {items.map((s, i) => (
-        <div key={i} className="bg-[var(--bg-surface)] px-4 py-3.5">
+        <div key={i} className="bg-[var(--bg-surface)]/80 backdrop-blur-sm px-4 py-3.5">
           <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-1.5 leading-none">{s.label}</div>
           <div className={`text-xl font-bold leading-none font-mono ${s.gold ? 'text-[#C9A84C]' : 'text-[var(--text)]'}`}>{s.value}</div>
         </div>
@@ -169,7 +169,7 @@ function OrderDetailDrawer({
       <motion.div
         initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
         transition={{ type: 'tween', duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 bg-[var(--bg-surface)] border-l border-[var(--border)] flex flex-col"
+        className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 bg-[var(--bg-surface)]/90 backdrop-blur-2xl border-l border-[var(--border)] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--border)] min-w-0 flex-shrink-0">
@@ -935,14 +935,18 @@ export default function CrmDashboardPage() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   useEffect(() => {
-    const saved = localStorage.getItem('crm-theme');
-    if (saved === 'light' || saved === 'dark') setTheme(saved);
+    const saved = localStorage.getItem('crm-theme') as 'dark' | 'light' | null;
+    const initial = saved ?? 'dark';
+    setTheme(initial);
+    document.documentElement.classList.toggle('dark', initial === 'dark');
+    return () => { document.documentElement.classList.remove('dark'); };
   }, []);
 
   function toggleTheme() {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
     localStorage.setItem('crm-theme', next);
+    document.documentElement.classList.toggle('dark', next === 'dark');
   }
 
   // ── Data ──────────────────────────────────────────────────────────────────────
@@ -1069,11 +1073,16 @@ export default function CrmDashboardPage() {
   const sectionTitle = { orders: 'Narudžbine', tasks: 'Zadaci', users: 'Korisnici', finance: 'Finansije' }[activeSection];
 
   return (
-    <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] relative">
+      {/* Ambient glow backdrop — gives glass something to blur against */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div className="absolute -top-48 -right-48 w-[700px] h-[700px] rounded-full bg-[#C9A84C]/[0.07] blur-[130px]" />
+        <div className="absolute top-1/2 -left-64 w-[600px] h-[600px] rounded-full bg-blue-700/[0.09] blur-[120px]" />
+        <div className="absolute -bottom-48 right-1/3 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/[0.04] blur-[100px]" />
+      </div>
 
         {/* ── Desktop Sidebar ───────────────────────────────────────────── */}
-        <aside className="fixed left-0 top-0 bottom-0 w-56 border-r border-[var(--border)] bg-[var(--bg-surface)] flex flex-col z-30 hidden lg:flex">
+        <aside className="fixed left-0 top-0 bottom-0 w-56 border-r border-[var(--border)] bg-[var(--bg-surface)]/80 backdrop-blur-xl flex flex-col z-30 hidden lg:flex">
           <div className="px-5 h-14 flex items-center gap-2.5 border-b border-[var(--border)] flex-shrink-0">
             <div className="w-7 h-7 relative flex-shrink-0">
               <Image src="/logo.png" alt="Jović Group" width={28} height={28} className="object-contain" />
@@ -1113,7 +1122,7 @@ export default function CrmDashboardPage() {
         <main className="lg:pl-56 pb-20 lg:pb-0">
 
           {/* Top bar */}
-          <div className="sticky top-0 z-20 bg-[var(--bg-surface)]/90 backdrop-blur-md border-b border-[var(--border)] h-14 flex items-center px-4 sm:px-6 gap-3 flex-shrink-0">
+          <div className="sticky top-0 z-20 bg-[var(--bg-surface)]/70 backdrop-blur-2xl border-b border-[var(--border)] h-14 flex items-center px-4 sm:px-6 gap-3 flex-shrink-0 shadow-[0_1px_0_rgba(255,255,255,0.05)]">
             <h1 className="text-base font-semibold text-[var(--text)] flex-1 truncate">{sectionTitle}</h1>
             <div className="flex items-center gap-1.5">
               <button
@@ -1191,7 +1200,7 @@ export default function CrmDashboardPage() {
                         <div
                           key={order.id}
                           onClick={() => setSelectedOrder(order)}
-                          className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[#C9A84C]/30 active:scale-[0.99] transition-all cursor-pointer"
+                          className="p-4 rounded-2xl bg-[var(--bg-surface)]/70 backdrop-blur-md border border-[var(--border)] hover:border-[#C9A84C]/40 hover:bg-[var(--bg-surface)]/90 active:scale-[0.99] transition-all cursor-pointer shadow-sm"
                         >
                           <div className="flex items-start justify-between gap-3 mb-2.5">
                             <div className="min-w-0">
@@ -1216,7 +1225,7 @@ export default function CrmDashboardPage() {
                     </div>
 
                     {/* Desktop: table */}
-                    <div className="hidden md:block rounded-2xl border border-[var(--border)] overflow-hidden">
+                    <div className="hidden md:block rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--bg-surface)]/60 backdrop-blur-md">
                       <div className={`grid gap-4 px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-raised)] text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]' : 'grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]'}`}>
                         <span>Klijent</span><span>Kontakt</span><span>Lokacija</span><span>Proizvodi</span>
                         {canAccess(currentUserRole, 'admin') && <span>Vrednost</span>}
@@ -1303,7 +1312,7 @@ export default function CrmDashboardPage() {
         </main>
 
         {/* ── Mobile Bottom Nav ─────────────────────────────────────────── */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[var(--bg-surface)]/90 backdrop-blur-xl border-t border-[var(--border)]">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden bg-[var(--bg-surface)]/75 backdrop-blur-2xl border-t border-[var(--border)] shadow-[0_-4px_30px_rgba(0,0,0,0.12)]">
           <div className="flex items-center h-16 px-1 max-w-lg mx-auto">
             {navItems.map(({ key, label, Icon }) => {
               const active = activeSection === key;
@@ -1351,7 +1360,6 @@ export default function CrmDashboardPage() {
             onSave={handleOrderEdit}
           />
         )}
-      </div>
     </div>
   );
 }
