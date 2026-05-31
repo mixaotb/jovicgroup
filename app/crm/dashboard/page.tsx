@@ -54,8 +54,17 @@ const ORDER_STATUSES: OrderStatus[] = [
 
 // Product type label helper
 function getProductLabel(type: string): string {
-  return type === 'window_single' ? 'Jednokrilni prozor' :
-    type === 'window_double' ? 'Dvokrilni prozor' : 'Vrata';
+  const labels: Record<string, string> = {
+    window_single:      'Jednokrilni prozor',
+    window_double:      'Dvokrilni prozor',
+    trokrilni_prozor:   'Trokrilni prozor',
+    fiksni_prozor:      'Fiksni prozor',
+    door:               'Vrata',
+    balkonska_vrata:    'Balkonska vrata',
+    klizna_vrata:       'Klizna vrata',
+    plisirani_komarnik: 'Plisirani komarnik',
+  };
+  return labels[type] ?? type;
 }
 
 // ─── Role helper ──────────────────────────────────────────────────────────────

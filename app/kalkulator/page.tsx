@@ -1,21 +1,18 @@
 'use client';
 
-// app/kalkulator/page.tsx
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { calculatePrice, formatRSD } from '@/lib/pricing';
+import { calculatePrice, formatRSD, getDeliveryFee, DIMENSION_LIMITS, DEFAULT_DIMENSIONS } from '@/lib/pricing';
 import ThemeToggle from '@/components/ThemeToggle';
 import type {
-  ProductType,
-  Material,
-  OrderLocation,
-  PaymentMethod,
-  OrderFormData,
-  CartItem,
+  ProductType, Material, GlassType, OkovType, ColorType, KomarnikType,
+  OrderLocation, PaymentMethod, OrderFormData, CartItem,
 } from '@/types';
 
 type WizardStep = 'config' | 'cart' | 'checkout' | 'success';
+
+// ─── Product / material / location data ──────────────────────────────────────
 
 const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: React.ReactNode }[] = [
   {
@@ -44,6 +41,31 @@ const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: Re
     ),
   },
   {
+    value: 'trokrilni_prozor',
+    label: 'Trokrilni prozor',
+    desc: 'Tri krila za široke otvore',
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
+        <rect x="1" y="4" width="9" height="24" rx="1" />
+        <rect x="12" y="4" width="8" height="24" rx="1" />
+        <rect x="22" y="4" width="9" height="24" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    value: 'fiksni_prozor',
+    label: 'Fiksni prozor',
+    desc: 'Nepokretno, maksimalna svetlost',
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
+        <rect x="4" y="4" width="24" height="24" rx="1" />
+        <line x1="4" y1="16" x2="28" y2="16" strokeWidth="0.8" />
+        <line x1="16" y1="4" x2="16" y2="28" strokeWidth="0.8" />
+        <circle cx="16" cy="16" r="3.5" />
+      </svg>
+    ),
+  },
+  {
     value: 'door',
     label: 'Vrata',
     desc: 'PVC ili ALU ulazna vrata',
@@ -55,20 +77,116 @@ const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: Re
       </svg>
     ),
   },
+  {
+    value: 'balkonska_vrata',
+    label: 'Balkonska vrata',
+    desc: 'Velika ostakljena vrata za terasu',
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
+        <rect x="3" y="2" width="11" height="28" rx="1" />
+        <rect x="18" y="2" width="11" height="28" rx="1" />
+        <line x1="3" y1="17" x2="14" y2="17" />
+        <line x1="18" y1="17" x2="29" y2="17" />
+        <circle cx="12" cy="15" r="1.2" fill="currentColor" />
+        <circle cx="20" cy="15" r="1.2" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    value: 'klizna_vrata',
+    label: 'Klizna vrata',
+    desc: 'Klizni sistem za terase i verande',
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
+        <rect x="2" y="2" width="13" height="28" rx="1" />
+        <rect x="17" y="2" width="13" height="28" rx="1" />
+        <line x1="2" y1="30" x2="30" y2="30" strokeWidth="2" />
+        <polyline points="22,11 26,15 22,19" strokeLinecap="round" strokeLinejoin="round" />
+        <line x1="17" y1="15" x2="26" y2="15" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    value: 'plisirani_komarnik',
+    label: 'Plisirani komarnik',
+    desc: 'Harmonikaststy sistem bez okvira',
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
+        <rect x="4" y="4" width="24" height="24" rx="1" />
+        <line x1="4" y1="10.7" x2="28" y2="10.7" strokeWidth="0.8" />
+        <line x1="4" y1="16"   x2="28" y2="16"   strokeWidth="0.8" />
+        <line x1="4" y1="21.3" x2="28" y2="21.3" strokeWidth="0.8" />
+        <line x1="10.7" y1="4" x2="10.7" y2="28" strokeWidth="0.8" />
+        <line x1="16"   y1="4" x2="16"   y2="28" strokeWidth="0.8" />
+        <line x1="21.3" y1="4" x2="21.3" y2="28" strokeWidth="0.8" />
+      </svg>
+    ),
+  },
 ];
 
 const MATERIALS: { value: Material; label: string; desc: string }[] = [
-  { value: 'PVC', label: 'PVC', desc: 'Alphacan profili · Odlična toplotna izolacija · Niska cena održavanja' },
-  { value: 'ALU', label: 'ALU', desc: 'Profilink i Schüco sistemi · Premium estetika · Za komercijalne objekte' },
+  { value: 'PVC', label: 'PVC', desc: 'Schüco & Alphacan profili · Odlična toplotna izolacija · Niski troškovi održavanja' },
+  { value: 'ALU', label: 'ALU', desc: 'Elvial & Profilco sistemi · Premium estetika · Za komercijalne objekte' },
 ];
 
 const LOCATIONS: { value: OrderLocation; label: string; desc: string; fee: string }[] = [
-  { value: 'Srbija',       label: 'Srbija',       desc: 'Ugradnja i dostava na teritoriji Srbije', fee: '+2.500 RSD dostava' },
-  { value: 'Inostranstvo', label: 'Inostranstvo', desc: 'Isporuka za dijasporu u EU i šire',        fee: '+18.000 RSD dostava' },
+  { value: 'Srbija',       label: 'Srbija',       desc: 'Ugradnja i dostava na teritoriji Srbije', fee: '+3.500 RSD dostava' },
+  { value: 'Inostranstvo', label: 'Inostranstvo', desc: 'Isporuka za dijasporu u EU i šire',        fee: '+25.000 RSD dostava' },
 ];
 
-interface FormErrors { customer_name?: string; phone?: string; email?: string; }
+const GLASS_INFO: Record<GlassType, { label: string; sublabel: string; tooltip: string }> = {
+  dvoslojno: {
+    label: 'Standard', sublabel: 'U ≈ 1.1 W/m²K',
+    tooltip: 'Standardno dvoslojno staklo 4/16/4 punjeno argonom. U ≈ 1.1 W/m²K. Dobar balans cene i izolacije — preporučujemo za unutrašnje prostorije ili zaštićene fasade.',
+  },
+  dvoslojno_niskoemisiono: {
+    label: 'Niskoemisiono', sublabel: 'U ≈ 0.9 W/m²K',
+    tooltip: 'Dvoslojno staklo sa Low-E premazom koji odbija infracrveno zračenje. U ≈ 0.9 W/m²K — bolja izolacija od standarda uz isti razmak stakla. Idealno kada ne želite troslojno ali tražite veću efikasnost.',
+  },
+  dvoslojno_peskirano: {
+    label: 'Peskirano', sublabel: 'Dekorativno',
+    tooltip: 'Dvoslojni sistem sa matiranim (peskirano) staklom. Propušta difuznu svetlost uz potpunu privatnost. Idealno za kupatila, stepenišne otvore i pregrade.',
+  },
+  niskoemisiono: {
+    label: 'Niskoemisiono', sublabel: 'U ≈ 0.6 W/m²K',
+    tooltip: 'Troslojno staklo (4/12/4/12/4) sa Low-E premazom i kriptonom. U ≈ 0.6 W/m²K — do 45% manji gubitak toplote u poređenju sa dvoslojnim. Preporučujemo za spavaće sobe i dnevne boravke.',
+  },
+  '4_godisnja_doba': {
+    label: '4 godišnja doba', sublabel: 'U ≈ 0.5 W/m²K',
+    tooltip: 'Napredni troslojni sistem sa dvostrukim Low-E premazom i kriptonom. U ≈ 0.5 W/m²K. Optimalno za pasivne kuće i hladne regione — maksimalna energetska efikasnost kroz sve sezone.',
+  },
+  peskirano: {
+    label: 'Peskirano', sublabel: 'Dekorativno',
+    tooltip: 'Troslojni sistem sa matiranim centralnim staklom. Potpuna privatnost uz tristruku izolaciju. Premium opcija za kupatila i reprezentativne prostore gde su važni i estetika i izolacija.',
+  },
+};
 
+const COLOR_OPTIONS: { value: ColorType; label: string; swatch: string; note: string }[] = [
+  { value: 'white',      label: 'Bela',     swatch: 'bg-gray-100 border-gray-300',   note: 'Klasična bela, RAL 9016' },
+  { value: 'anthracite', label: 'Antracit', swatch: 'bg-slate-700 border-slate-600', note: 'Tamno siva, RAL 7016' },
+  { value: 'wood',       label: 'Drvo',     swatch: 'bg-amber-800 border-amber-700', note: 'Hrast / orah folija' },
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const productHasGlass      = (t: ProductType) => t !== 'plisirani_komarnik';
+const productHasOkov       = (t: ProductType) => t !== 'plisirani_komarnik' && t !== 'fiksni_prozor' && t !== 'klizna_vrata';
+
+// Returns which komarnik types are selectable for a given product.
+// Plisirani is only offered as an add-on on doors (not on windows — order standalone instead).
+const availableKomarnikTypes = (t: ProductType): KomarnikType[] => {
+  if (t === 'door' || t === 'balkonska_vrata') return ['none', 'fiksni', 'plisirani', 'rolo'];
+  if (['window_single', 'window_double', 'trokrilni_prozor', 'klizna_vrata'].includes(t)) return ['none', 'fiksni', 'rolo'];
+  return [];
+};
+const productHasKomarnik = (t: ProductType) => availableKomarnikTypes(t).length > 1;
+const productHasRoletna    = (t: ProductType) => t !== 'plisirani_komarnik';
+const productHasOkapnica   = (t: ProductType) => ['window_single', 'window_double', 'trokrilni_prozor', 'fiksni_prozor'].includes(t);
+const productHasSillInside = (t: ProductType) => ['window_single', 'window_double', 'trokrilni_prozor', 'fiksni_prozor'].includes(t);
+
+const isTroslojnoTier = (g: GlassType) => g === 'niskoemisiono' || g === '4_godisnja_doba' || g === 'peskirano';
+
+interface FormErrors { customer_name?: string; phone?: string; email?: string; }
 function validateForm(data: Partial<OrderFormData>): FormErrors {
   const errors: FormErrors = {};
   if (!data.customer_name?.trim()) errors.customer_name = 'Unesite ime i prezime';
@@ -78,7 +196,32 @@ function validateForm(data: Partial<OrderFormData>): FormErrors {
   return errors;
 }
 
-/* ─── Re-usable styled sub-components ─────────────────── */
+async function processImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (file.size < 300_000) { resolve(dataUrl); return; }
+      const img = new window.Image();
+      img.onload = () => {
+        const maxDim = 900;
+        const ratio = Math.min(maxDim / img.width, maxDim / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.80));
+      };
+      img.onerror = reject;
+      img.src = dataUrl;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─── Reusable sub-components ──────────────────────────────────────────────────
+
 function CardSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={`p-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] ${className}`}>
@@ -88,7 +231,7 @@ function CardSection({ children, className = '' }: { children: React.ReactNode; 
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="font-display text-[1.2rem] font-bold text-[var(--text)] mb-5">{children}</h2>;
+  return <h2 className="font-display text-[1.1rem] font-bold text-[var(--text)] mb-5">{children}</h2>;
 }
 
 function FieldLabel({ children, required, optional }: { children: React.ReactNode; required?: boolean; optional?: boolean }) {
@@ -107,49 +250,125 @@ function TextInput({ error, ...props }: React.InputHTMLAttributes<HTMLInputEleme
       <input
         {...props}
         className={`w-full px-4 py-3 rounded-xl bg-[var(--bg-raised)] border text-[var(--text)] placeholder-[var(--text-faint)] text-[14px] focus:outline-none focus:ring-2 transition-colors
-          ${error
-            ? 'border-red-400/60 focus:ring-red-400/20'
-            : 'border-[var(--border)] focus:border-[#C9A84C]/60 focus:ring-[#C9A84C]/15'
-          }`}
+          ${error ? 'border-red-400/60 focus:ring-red-400/20' : 'border-[var(--border)] focus:border-[#C9A84C]/60 focus:ring-[#C9A84C]/15'}`}
       />
       {error && <p className="mt-1.5 text-red-400 text-[12px]">{error}</p>}
     </div>
   );
 }
 
+function InfoTooltip({ text }: { text: string }) {
+  return (
+    <span className="relative group inline-block align-middle ml-1.5 cursor-help">
+      <span className="w-4 h-4 rounded-full bg-[var(--bg-raised)] border border-[var(--border)] text-[var(--text-faint)] text-[10px] font-bold inline-flex items-center justify-center leading-none">i</span>
+      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-60 p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-muted)] text-[12px] leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-xl shadow-black/20">
+        {text}
+        <span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[var(--border)]" />
+      </span>
+    </span>
+  );
+}
+
+function ToggleChip({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-medium transition-all ${
+        checked ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[var(--text)]' : 'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-muted)] hover:border-[var(--border-strong)]'
+      }`}
+    >
+      <span className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors ${checked ? 'bg-[#C9A84C] border-[#C9A84C]' : 'border-[var(--border)]'}`}>
+        {checked && (
+          <svg viewBox="0 0 12 12" fill="none" className="w-2.5 h-2.5">
+            <path d="M2 6l3 3 5-5" stroke="#0B1120" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+      </span>
+      {label}
+    </button>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function KalkulatorPage() {
   const [step, setStep] = useState<WizardStep>('config');
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
 
-  const [productType, setProductType] = useState<ProductType>('window_single');
-  const [material, setMaterial] = useState<Material>('PVC');
-  const [width, setWidth] = useState(1000);
-  const [height, setHeight] = useState(1200);
-  const [quantity, setQuantity] = useState(1);
+  // Config state
+  const [productType, setProductType]       = useState<ProductType>('window_single');
+  const [material, setMaterial]             = useState<Material>('PVC');
+  const [width,  setWidth]                  = useState(1000);
+  const [height, setHeight]                 = useState(1200);
+  const [quantity, setQuantity]             = useState(1);
+  const [glassType, setGlassType]           = useState<GlassType>('dvoslojno');
+  const [okovType, setOkovType]             = useState<OkovType>('agb');
+  const [color, setColor]                   = useState<ColorType>('white');
+  const [komarnikType, setKomarnikType]     = useState<KomarnikType>('none');
+  const [hasRoletna, setHasRoletna]         = useState(false);
+  const [hasOkapnica, setHasOkapnica]       = useState(false);
+  const [hasInstallation, setHasInstallation] = useState(false);
+  const [hasSillInside, setHasSillInside]   = useState(false);
+  const [itemNotes, setItemNotes]           = useState('');
+  const [imageDataUrl, setImageDataUrl]     = useState<string | undefined>(undefined);
+  const [imageError, setImageError]         = useState('');
 
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const [cartItems, setCartItems]           = useState<CartItem[]>([]);
+  const [editingItemId, setEditingItemId]   = useState<string | null>(null);
 
-  const [location, setLocation] = useState<OrderLocation>('Srbija');
+  // Checkout state
+  const [location, setLocation]           = useState<OrderLocation>('Srbija');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash_on_delivery');
-  const [customerName, setCustomerName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [notes, setNotes] = useState('');
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [customerName, setCustomerName]   = useState('');
+  const [phone, setPhone]                 = useState('');
+  const [email, setEmail]                 = useState('');
+  const [notes, setNotes]                 = useState('');
+  const [errors, setErrors]               = useState<FormErrors>({});
 
-  const cartTotals = useMemo(() => {
-    return cartItems.reduce((totals, item) => {
-      const p = calculatePrice(item.width, item.height, item.material, item.type, location, item.quantity);
-      return { basePrice: totals.basePrice + p.basePrice, deliveryFee: p.deliveryFee, total: totals.total + p.total };
-    }, { basePrice: 0, deliveryFee: 0, total: 0 });
-  }, [cartItems, location]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const limits = DIMENSION_LIMITS[productType];
+
+  // ── Config helpers ────────────────────────────────────────────────────────
+
+  const handleProductTypeChange = useCallback((newType: ProductType) => {
+    setProductType(newType);
+    const lim  = DIMENSION_LIMITS[newType];
+    const defs = DEFAULT_DIMENSIONS[newType];
+    setWidth(w  => (w  < lim.minW || w  > lim.maxW ? defs.w : w));
+    setHeight(h => (h  < lim.minH || h  > lim.maxH ? defs.h : h));
+    setKomarnikType(prev => availableKomarnikTypes(newType).includes(prev) ? prev : 'none');
+    if (!productHasRoletna(newType))    setHasRoletna(false);
+    if (!productHasOkapnica(newType))   setHasOkapnica(false);
+    if (!productHasSillInside(newType)) setHasSillInside(false);
+    // Reset glass to default if switching to plisirani_komarnik (no glass section)
+    if (newType === 'plisirani_komarnik') setGlassType('dvoslojno');
+  }, []);
+
+  const handleImageFile = useCallback(async (file: File) => {
+    setImageError('');
+    if (file.size > 8_000_000) { setImageError('Slika ne sme biti veća od 8 MB'); return; }
+    try {
+      const url = await processImage(file);
+      setImageDataUrl(url);
+    } catch { setImageError('Greška pri učitavanju slike'); }
+  }, []);
+
+  // ── Cart helpers ──────────────────────────────────────────────────────────
+
+  const buildCartItem = useCallback((): Omit<CartItem, 'id'> => ({
+    type: productType, material, width, height, quantity,
+    glassType, okovType, color,
+    komarnikType, hasRoletna, hasOkapnica, hasInstallation, hasSillInside,
+    itemNotes, imageDataUrl,
+  }), [productType, material, width, height, quantity, glassType, okovType, color, komarnikType, hasRoletna, hasOkapnica, hasInstallation, hasSillInside, itemNotes, imageDataUrl]);
 
   const addToCart = useCallback(() => {
-    setCartItems(prev => [...prev, { id: Date.now().toString(), type: productType, material, width, height, quantity }]);
+    setCartItems(prev => [...prev, { id: Date.now().toString(), ...buildCartItem() }]);
     setStep('cart');
-  }, [productType, material, width, height, quantity]);
+  }, [buildCartItem]);
 
   const removeItem = useCallback((id: string) => setCartItems(prev => prev.filter(i => i.id !== id)), []);
 
@@ -160,15 +379,25 @@ export default function KalkulatorPage() {
     setWidth(item.width);
     setHeight(item.height);
     setQuantity(item.quantity);
+    setGlassType(item.glassType);
+    setOkovType(item.okovType);
+    setColor(item.color);
+    setKomarnikType(item.komarnikType);
+    setHasRoletna(item.hasRoletna);
+    setHasOkapnica(item.hasOkapnica);
+    setHasInstallation(item.hasInstallation);
+    setHasSillInside(item.hasSillInside);
+    setItemNotes(item.itemNotes);
+    setImageDataUrl(item.imageDataUrl);
     setStep('config');
   }, []);
 
   const updateItem = useCallback(() => {
     if (!editingItemId) return;
-    setCartItems(prev => prev.map(i => i.id === editingItemId ? { ...i, type: productType, material, width, height, quantity } : i));
+    setCartItems(prev => prev.map(i => i.id === editingItemId ? { id: i.id, ...buildCartItem() } : i));
     setEditingItemId(null);
     setStep('cart');
-  }, [editingItemId, productType, material, width, height, quantity]);
+  }, [editingItemId, buildCartItem]);
 
   const resetConfigForm = useCallback(() => {
     setProductType('window_single');
@@ -176,8 +405,43 @@ export default function KalkulatorPage() {
     setWidth(1000);
     setHeight(1200);
     setQuantity(1);
+    setGlassType('dvoslojno');
+    setOkovType('agb');
+    setColor('white');
+    setKomarnikType('none');
+    setHasRoletna(false);
+    setHasOkapnica(false);
+    setHasInstallation(false);
+    setHasSillInside(false);
+    setItemNotes('');
+    setImageDataUrl(undefined);
     setEditingItemId(null);
+    setImageError('');
   }, []);
+
+  // ── Cart totals: delivery fee counted once ────────────────────────────────
+
+  const cartTotals = useMemo(() => {
+    if (cartItems.length === 0) return { basePrice: 0, deliveryFee: 0, total: 0 };
+    const deliveryFee = getDeliveryFee(location);
+    const basePrice = cartItems.reduce((sum, item) => {
+      const p = calculatePrice(item.width, item.height, item.material, item.type, location, item.quantity, {
+        glassType: item.glassType, okovType: item.okovType, color: item.color,
+        komarnikType: item.komarnikType, hasRoletna: item.hasRoletna, hasOkapnica: item.hasOkapnica,
+        hasInstallation: item.hasInstallation, hasSillInside: item.hasSillInside,
+      });
+      return sum + p.basePrice;
+    }, 0);
+    return { basePrice, deliveryFee, total: basePrice + deliveryFee };
+  }, [cartItems, location]);
+
+  // ── Live preview ──────────────────────────────────────────────────────────
+
+  const livePrice = useMemo(() => calculatePrice(width, height, material, productType, location, quantity, {
+    glassType, okovType, color, komarnikType, hasRoletna, hasOkapnica, hasInstallation, hasSillInside,
+  }), [width, height, material, productType, location, quantity, glassType, okovType, color, komarnikType, hasRoletna, hasOkapnica, hasInstallation, hasSillInside]);
+
+  // ── Submit ────────────────────────────────────────────────────────────────
 
   const handleSubmit = useCallback(async () => {
     const formErrors = validateForm({ customer_name: customerName, phone, email });
@@ -187,14 +451,23 @@ export default function KalkulatorPage() {
     setErrors({}); setLoading(true); setServerError('');
 
     const payload: OrderFormData = {
-      customer_name: customerName.trim(),
-      phone: phone.trim(),
-      email: email.trim(),
+      customer_name:  customerName.trim(),
+      phone:          phone.trim(),
+      email:          email.trim(),
       location,
       payment_method: paymentMethod,
-      notes: notes.trim(),
-      total_price: cartTotals.total,
-      items: cartItems.map(item => ({ dimensions_data: { type: item.type, material: item.material, width: item.width, height: item.height, quantity: item.quantity } })),
+      notes:          notes.trim(),
+      total_price:    cartTotals.total,
+      items: cartItems.map(item => ({
+        dimensions_data: {
+          type: item.type, material: item.material, width: item.width, height: item.height, quantity: item.quantity,
+          glassType: item.glassType, okovType: item.okovType, color: item.color,
+          komarnikType: item.komarnikType, hasRoletna: item.hasRoletna, hasOkapnica: item.hasOkapnica,
+          hasInstallation: item.hasInstallation, hasSillInside: item.hasSillInside,
+          notes: item.itemNotes || undefined,
+          imageDataUrl: item.imageDataUrl || undefined,
+        },
+      })),
     };
 
     try {
@@ -208,7 +481,10 @@ export default function KalkulatorPage() {
     }
   }, [customerName, phone, email, location, paymentMethod, notes, cartTotals.total, cartItems]);
 
-  /* ── Success screen ─────────────────────────────────── */
+  // ─────────────────────────────────────────────────────────────────────────
+  // Success screen
+  // ─────────────────────────────────────────────────────────────────────────
+
   if (step === 'success') {
     return (
       <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-6">
@@ -245,7 +521,6 @@ export default function KalkulatorPage() {
     );
   }
 
-  /* ── Step indicator ─────────────────────────────────── */
   const stepIndex = { config: 0, cart: 1, checkout: 2, success: 3 }[step];
   const steps = ['Konfiguracija', 'Korpa', 'Narudžbina'];
 
@@ -255,7 +530,7 @@ export default function KalkulatorPage() {
       <header className="border-b border-[var(--border)] bg-[var(--bg-surface)] sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="w-6 h-6 relative">
+            <div className="w-6 h-6 flex items-center justify-center">
               <Image src="/logo.png" alt="Jović Group" width={24} height={24} className="object-contain" />
             </div>
             <span className="font-display text-[15px] font-bold text-[var(--text)]">
@@ -263,7 +538,6 @@ export default function KalkulatorPage() {
             </span>
           </Link>
 
-          {/* Steps */}
           <div className="flex items-center gap-2 text-[13px]">
             {steps.map((label, i) => {
               const isActive = i === stepIndex;
@@ -277,11 +551,7 @@ export default function KalkulatorPage() {
                       isDone   ? 'bg-emerald-500/15 border border-emerald-500/40 text-emerald-500' :
                                  'bg-[var(--bg-raised)] border border-[var(--border)]'
                     }`}>
-                      {isDone ? (
-                        <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3">
-                          <path fillRule="evenodd" d="M12.416 3.376a.75.75 0 01.208 1.04l-5 7.5a.75.75 0 01-1.154.114l-3-3a.75.75 0 011.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 011.04-.207z" clipRule="evenodd" />
-                        </svg>
-                      ) : i + 1}
+                      {isDone ? <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M12.416 3.376a.75.75 0 01.208 1.04l-5 7.5a.75.75 0 01-1.154.114l-3-3a.75.75 0 011.06-1.06l2.353 2.353 4.493-6.74a.75.75 0 011.04-.207z" clipRule="evenodd" /></svg> : i + 1}
                     </div>
                     <span className="hidden sm:inline font-medium">{label}</span>
                   </div>
@@ -297,29 +567,25 @@ export default function KalkulatorPage() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10">
         <div className="mb-8">
           <div className="gold-rule mb-4" />
-          <h1 className="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-[var(--text)] mb-2">
-            Kalkulator cene
-          </h1>
-          <p className="text-[var(--text-muted)] text-[15px]">
-            Konfigurišite prozore i vrata i odmah dobijte okvirnu cenu.
-          </p>
+          <h1 className="font-display text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-[var(--text)] mb-2">Kalkulator cene</h1>
+          <p className="text-[var(--text-muted)] text-[15px]">Konfigurišite prozore i vrata i odmah dobijte okvirnu cenu.</p>
         </div>
 
         <div className="grid lg:grid-cols-[1fr_340px] gap-6 items-start">
           {/* ── Left panel ── */}
           <div className="space-y-5">
 
-            {/* ── CONFIG STEP ── */}
+            {/* ══════════ CONFIG STEP ══════════ */}
             {step === 'config' && (
               <>
-                {/* Product type */}
+                {/* 1. Tip proizvoda */}
                 <CardSection>
                   <SectionTitle>1. Tip proizvoda</SectionTitle>
-                  <div className="grid sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {PRODUCT_TYPES.map((pt) => (
                       <button
                         key={pt.value}
-                        onClick={() => setProductType(pt.value)}
+                        onClick={() => handleProductTypeChange(pt.value)}
                         className={`p-4 rounded-xl border text-left transition-all ${
                           productType === pt.value
                             ? 'border-[#C9A84C] bg-[#C9A84C]/8'
@@ -336,7 +602,7 @@ export default function KalkulatorPage() {
                   </div>
                 </CardSection>
 
-                {/* Material */}
+                {/* 2. Materijal */}
                 <CardSection>
                   <SectionTitle>2. Materijal</SectionTitle>
                   <div className="grid sm:grid-cols-2 gap-3">
@@ -362,11 +628,10 @@ export default function KalkulatorPage() {
                   </div>
                 </CardSection>
 
-                {/* Dimensions */}
+                {/* 3. Dimenzije i količina */}
                 <CardSection>
                   <SectionTitle>3. Dimenzije i količina</SectionTitle>
                   <div className="space-y-7">
-                    {/* Width */}
                     <div>
                       <div className="flex justify-between items-baseline mb-3">
                         <label className="text-[var(--text-muted)] text-[13px] font-medium">Širina</label>
@@ -376,17 +641,16 @@ export default function KalkulatorPage() {
                         </div>
                       </div>
                       <input
-                        type="range" min={400} max={2500} step={50} value={width}
+                        type="range" min={limits.minW} max={limits.maxW} step={50} value={width}
                         onChange={(e) => setWidth(Number(e.target.value))}
                         className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-                        style={{ background: `linear-gradient(to right, #C9A84C ${((width - 400) / 2100) * 100}%, var(--border) ${((width - 400) / 2100) * 100}%)` }}
+                        style={{ background: `linear-gradient(to right, #C9A84C ${((width - limits.minW) / (limits.maxW - limits.minW)) * 100}%, var(--border) ${((width - limits.minW) / (limits.maxW - limits.minW)) * 100}%)` }}
                       />
                       <div className="flex justify-between text-[11px] text-[var(--text-faint)] mt-1.5">
-                        <span>400mm</span><span>2500mm</span>
+                        <span>{limits.minW}mm</span><span>{limits.maxW}mm</span>
                       </div>
                     </div>
 
-                    {/* Height */}
                     <div>
                       <div className="flex justify-between items-baseline mb-3">
                         <label className="text-[var(--text-muted)] text-[13px] font-medium">Visina</label>
@@ -396,17 +660,16 @@ export default function KalkulatorPage() {
                         </div>
                       </div>
                       <input
-                        type="range" min={400} max={2800} step={50} value={height}
+                        type="range" min={limits.minH} max={limits.maxH} step={50} value={height}
                         onChange={(e) => setHeight(Number(e.target.value))}
                         className="w-full h-1.5 rounded-full appearance-none cursor-pointer"
-                        style={{ background: `linear-gradient(to right, #C9A84C ${((height - 400) / 2400) * 100}%, var(--border) ${((height - 400) / 2400) * 100}%)` }}
+                        style={{ background: `linear-gradient(to right, #C9A84C ${((height - limits.minH) / (limits.maxH - limits.minH)) * 100}%, var(--border) ${((height - limits.minH) / (limits.maxH - limits.minH)) * 100}%)` }}
                       />
                       <div className="flex justify-between text-[11px] text-[var(--text-faint)] mt-1.5">
-                        <span>400mm</span><span>2800mm</span>
+                        <span>{limits.minH}mm</span><span>{limits.maxH}mm</span>
                       </div>
                     </div>
 
-                    {/* Quantity */}
                     <div>
                       <label className="text-[var(--text-muted)] text-[13px] font-medium block mb-3">Količina</label>
                       <div className="flex items-center gap-3">
@@ -425,6 +688,258 @@ export default function KalkulatorPage() {
                   </div>
                 </CardSection>
 
+                {/* 4. Staklo */}
+                {productHasGlass(productType) && (
+                  <CardSection>
+                    <SectionTitle>4. Staklo</SectionTitle>
+
+                    {/* Tier selector */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      {(['dvoslojno', 'troslojno'] as const).map((tier) => {
+                        const active = tier === 'dvoslojno' ? !isTroslojnoTier(glassType) : isTroslojnoTier(glassType);
+                        return (
+                          <button
+                            key={tier}
+                            onClick={() => {
+                              if (tier === 'dvoslojno' && isTroslojnoTier(glassType)) setGlassType('dvoslojno');
+                              if (tier === 'troslojno' && !isTroslojnoTier(glassType)) setGlassType('niskoemisiono');
+                            }}
+                            className={`p-4 rounded-xl border text-left transition-all ${
+                              active ? 'border-[#C9A84C] bg-[#C9A84C]/8' : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
+                            }`}
+                          >
+                            <div className="font-semibold text-[var(--text)] text-[13px]">
+                              {tier === 'dvoslojno' ? 'Dvoslojno' : 'Troslojno'}
+                            </div>
+                            <div className="text-[var(--text-faint)] text-[12px] mt-0.5">
+                              {tier === 'dvoslojno' ? 'Standard · U ≈ 1.1 W/m²K' : 'Premium · U ≤ 0.6 W/m²K'}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Dvoslojno sub-options */}
+                    {!isTroslojnoTier(glassType) && (
+                      <div className="grid grid-cols-3 gap-3 pt-1">
+                        {(['dvoslojno', 'dvoslojno_niskoemisiono', 'dvoslojno_peskirano'] as GlassType[]).map((g) => {
+                          const info = GLASS_INFO[g];
+                          return (
+                            <button
+                              key={g}
+                              onClick={() => setGlassType(g)}
+                              className={`p-3.5 rounded-xl border text-left transition-all ${
+                                glassType === g ? 'border-[#C9A84C] bg-[#C9A84C]/8' : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1 mb-1">
+                                <span className="font-semibold text-[var(--text)] text-[12.5px]">{info.label}</span>
+                                <InfoTooltip text={info.tooltip} />
+                              </div>
+                              <div className="text-[var(--text-faint)] text-[11.5px]">{info.sublabel}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Troslojno sub-options */}
+                    {isTroslojnoTier(glassType) && (
+                      <div className="grid grid-cols-3 gap-3 pt-1">
+                        {(['niskoemisiono', '4_godisnja_doba', 'peskirano'] as GlassType[]).map((g) => {
+                          const info = GLASS_INFO[g];
+                          return (
+                            <button
+                              key={g}
+                              onClick={() => setGlassType(g)}
+                              className={`p-3.5 rounded-xl border text-left transition-all ${
+                                glassType === g ? 'border-[#C9A84C] bg-[#C9A84C]/8' : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1 mb-1">
+                                <span className="font-semibold text-[var(--text)] text-[12.5px]">{info.label}</span>
+                                <InfoTooltip text={info.tooltip} />
+                              </div>
+                              <div className="text-[var(--text-faint)] text-[11.5px]">{info.sublabel}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </CardSection>
+                )}
+
+                {/* 5. Okov */}
+                {productHasOkov(productType) && (
+                  <CardSection>
+                    <SectionTitle>5. Okov</SectionTitle>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {([
+                        { value: 'agb'    as OkovType, name: 'AGB',    origin: 'Italija',  badge: '5 god. garancija', desc: 'Vrhunski italijanski okov. Klasa otpornosti RC2.' },
+                        { value: 'schuco' as OkovType, name: 'Schüco', origin: 'Nemačka', badge: '10 god. garancija', desc: 'Premium nemački okov. Klasa otpornosti RC3.' },
+                      ]).map((ok) => (
+                        <button
+                          key={ok.value}
+                          onClick={() => setOkovType(ok.value)}
+                          className={`p-5 rounded-xl border text-left transition-all ${
+                            okovType === ok.value ? 'border-[#C9A84C] bg-[#C9A84C]/8' : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <div className="font-bold text-[var(--text)] text-[14px]">{ok.name}</div>
+                              <div className="text-[var(--text-faint)] text-[12px]">{ok.origin}</div>
+                            </div>
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${okovType === ok.value ? 'border-[#C9A84C]/50 text-[#C9A84C] bg-[#C9A84C]/10' : 'border-[var(--border)] text-[var(--text-faint)]'}`}>
+                              {ok.badge}
+                            </span>
+                          </div>
+                          <p className="text-[var(--text-muted)] text-[12.5px]">{ok.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </CardSection>
+                )}
+
+                {/* 6. Boja */}
+                <CardSection>
+                  <SectionTitle>6. Boja profila</SectionTitle>
+                  <div className="grid grid-cols-3 gap-3">
+                    {COLOR_OPTIONS.map((c) => (
+                      <button
+                        key={c.value}
+                        onClick={() => setColor(c.value)}
+                        className={`p-4 rounded-xl border text-left transition-all ${
+                          color === c.value ? 'border-[#C9A84C] bg-[#C9A84C]/8' : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
+                        }`}
+                      >
+                        <div className={`w-7 h-7 rounded-lg border-2 mb-2.5 ${c.swatch}`} />
+                        <div className="font-semibold text-[var(--text)] text-[13px]">{c.label}</div>
+                        <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{c.note}</div>
+                      </button>
+                    ))}
+                  </div>
+                </CardSection>
+
+                {/* 7. Opcije */}
+                <CardSection>
+                  <SectionTitle>7. Opcije</SectionTitle>
+                  <div className="space-y-4">
+                    {productHasKomarnik(productType) && (
+                      <div>
+                        <div className="text-[var(--text-muted)] text-[13px] font-medium mb-2">Komarnik</div>
+                        <div className="flex flex-wrap gap-2">
+                          {([
+                            { value: 'none'      as KomarnikType, label: 'Bez' },
+                            { value: 'fiksni'    as KomarnikType, label: 'Fiksni' },
+                            { value: 'plisirani' as KomarnikType, label: 'Plisirani' },
+                            { value: 'rolo'      as KomarnikType, label: 'Rolo' },
+                          ].filter(opt => availableKomarnikTypes(productType).includes(opt.value))).map((opt) => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() => setKomarnikType(opt.value)}
+                              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[13px] font-medium transition-all ${
+                                komarnikType === opt.value
+                                  ? 'border-[#C9A84C] bg-[#C9A84C]/10 text-[var(--text)]'
+                                  : 'border-[var(--border)] bg-[var(--bg-raised)] text-[var(--text-muted)] hover:border-[var(--border-strong)]'
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[var(--text-faint)] text-[12px] leading-relaxed">
+                          Fiksni — najjednostavniji, nepomičan ram. Plisirani — harmonika sistem, po strani. Rolo — navijač, uvlači se u kasetu iznad.
+                        </p>
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-3">
+                      {productHasRoletna(productType) && (
+                        <ToggleChip checked={hasRoletna} onChange={setHasRoletna} label="Roletne" />
+                      )}
+                      {productHasOkapnica(productType) && (
+                        <ToggleChip checked={hasOkapnica} onChange={setHasOkapnica} label="Okapnica" />
+                      )}
+                      {productHasSillInside(productType) && (
+                        <ToggleChip checked={hasSillInside} onChange={setHasSillInside} label="Unutrašnja klupica" />
+                      )}
+                      <ToggleChip checked={hasInstallation} onChange={setHasInstallation} label="Ugradnja" />
+                    </div>
+                  </div>
+                  <p className="mt-3 text-[var(--text-faint)] text-[12px] leading-relaxed">
+                    {productHasRoletna(productType)  && 'Roletne — PVC ili ALU roleta iznad prozora. '}
+                    {productHasOkapnica(productType) && 'Okapnica — ALU tabla za odvod kiše ispod prozora. '}
+                    {productHasSillInside(productType) && 'Unutrašnja klupica — PVC klupica na unutrašnjoj strani. '}
+                    Ugradnja — montaža i ugradnja uključena u cenu.
+                  </p>
+                </CardSection>
+
+                {/* 8. Napomena i fotografija */}
+                <CardSection>
+                  <SectionTitle>8. Napomena i fotografija</SectionTitle>
+                  <div className="space-y-4">
+                    <div>
+                      <FieldLabel optional>Napomena za ovu stavku</FieldLabel>
+                      <textarea
+                        value={itemNotes} onChange={(e) => setItemNotes(e.target.value)} rows={3}
+                        placeholder="Opišite specifičnosti: poseban dizajn, položaj, boja ručice, natprozornik..."
+                        className="w-full px-4 py-3 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] text-[var(--text)] placeholder-[var(--text-faint)] text-[14px] focus:outline-none focus:border-[#C9A84C]/60 focus:ring-2 focus:ring-[#C9A84C]/15 resize-none transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <FieldLabel optional>Fotografija / skica</FieldLabel>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/heic"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) await handleImageFile(file);
+                          if (fileInputRef.current) fileInputRef.current.value = '';
+                        }}
+                      />
+
+                      {imageDataUrl ? (
+                        <div className="flex items-start gap-4">
+                          <div className="relative w-24 h-20 rounded-xl overflow-hidden border border-[var(--border)] flex-shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={imageDataUrl} alt="Priložena fotografija" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-[var(--text)] text-[13px] mb-2">Fotografija priložena</p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] text-[12px] hover:text-[var(--text)] transition-colors"
+                              >Promeni</button>
+                              <button
+                                onClick={() => setImageDataUrl(undefined)}
+                                className="px-3 py-1.5 rounded-lg border border-red-400/30 text-red-400 text-[12px] hover:bg-red-500/10 transition-colors"
+                              >Ukloni</button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full py-8 rounded-xl border-2 border-dashed border-[var(--border)] hover:border-[#C9A84C]/40 bg-[var(--bg-raised)] text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-all flex flex-col items-center gap-2"
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                          </svg>
+                          <span className="text-[13px]">Dodajte fotografiju ili skicu</span>
+                          <span className="text-[11px]">JPG, PNG, WEBP do 8 MB</span>
+                        </button>
+                      )}
+                      {imageError && <p className="mt-2 text-red-400 text-[12px]">{imageError}</p>}
+                    </div>
+                  </div>
+                </CardSection>
+
+                {/* CTA buttons */}
                 <div className="flex gap-3">
                   {editingItemId ? (
                     <>
@@ -451,7 +966,7 @@ export default function KalkulatorPage() {
               </>
             )}
 
-            {/* ── CART STEP ── */}
+            {/* ══════════ CART STEP ══════════ */}
             {step === 'cart' && (
               <CardSection>
                 <div className="flex justify-between items-center mb-6">
@@ -472,21 +987,50 @@ export default function KalkulatorPage() {
                   <>
                     <div className="space-y-3 mb-6">
                       {cartItems.map((item) => {
-                        const pricing = calculatePrice(item.width, item.height, item.material, item.type, location, item.quantity);
+                        const pricing = calculatePrice(item.width, item.height, item.material, item.type, location, item.quantity, {
+                          glassType: item.glassType, okovType: item.okovType, color: item.color,
+                          komarnikType: item.komarnikType, hasRoletna: item.hasRoletna, hasOkapnica: item.hasOkapnica,
+                          hasInstallation: item.hasInstallation, hasSillInside: item.hasSillInside,
+                        });
                         const pt = PRODUCT_TYPES.find(p => p.value === item.type);
+                        const colorInfo = COLOR_OPTIONS.find(c => c.value === item.color);
+                        const KOMARNIK_LABEL: Record<KomarnikType, string> = { none: '', plisirani: 'Plisirani komarnik', rolo: 'Rolo komarnik', fiksni: 'Fiksni komarnik' };
+                        const addons = [
+                          item.komarnikType !== 'none' && KOMARNIK_LABEL[item.komarnikType],
+                          item.hasRoletna     && 'Roletne',
+                          item.hasOkapnica    && 'Okapnica',
+                          item.hasSillInside  && 'Unutrašnja klupica',
+                          item.hasInstallation && 'Ugradnja',
+                        ].filter(Boolean).join(', ');
+
                         return (
                           <div key={item.id} className="p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)]">
                             <div className="flex justify-between items-start gap-4">
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-2.5">
-                                  <div className="text-[#C9A84C]">{pt?.icon}</div>
+                                  <div className="text-[#C9A84C] flex-shrink-0">{pt?.icon}</div>
                                   <div className="font-semibold text-[var(--text)] text-[14px]">{pt?.label}</div>
+                                  {item.imageDataUrl && (
+                                    <div className="w-6 h-6 rounded overflow-hidden border border-[var(--border)] flex-shrink-0 ml-auto">
+                                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                                      <img src={item.imageDataUrl} alt="" className="w-full h-full object-cover" />
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="grid grid-cols-2 gap-1.5 text-[13px] text-[var(--text-muted)]">
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[12.5px] text-[var(--text-muted)]">
                                   <div>Materijal: <span className="text-[var(--text)]">{item.material}</span></div>
                                   <div>Dim: <span className="text-[var(--text)]">{item.width}×{item.height}mm</span></div>
                                   <div>Kom: <span className="text-[var(--text)]">{item.quantity}</span></div>
-                                  <div>Cena: <span className="text-[#C9A84C] font-medium">{formatRSD(pricing.total)}</span></div>
+                                  {item.type !== 'plisirani_komarnik' && (
+                                    <div>Staklo: <span className="text-[var(--text)]">{GLASS_INFO[item.glassType]?.label}</span></div>
+                                  )}
+                                  {productHasOkov(item.type) && (
+                                    <div>Okov: <span className="text-[var(--text)]">{item.okovType === 'agb' ? 'AGB' : 'Schüco'}</span></div>
+                                  )}
+                                  <div>Boja: <span className="text-[var(--text)]">{colorInfo?.label}</span></div>
+                                  {addons && <div className="col-span-2">Dodaci: <span className="text-[var(--text)]">{addons}</span></div>}
+                                  {item.itemNotes && <div className="col-span-2 text-[var(--text-faint)] italic truncate">„{item.itemNotes}"</div>}
+                                  <div className="col-span-2 pt-1 font-medium">Cena: <span className="text-[#C9A84C]">{formatRSD(pricing.basePrice)}</span></div>
                                 </div>
                               </div>
                               <div className="flex gap-1.5 flex-shrink-0">
@@ -524,7 +1068,7 @@ export default function KalkulatorPage() {
                     </div>
 
                     <div className="flex gap-3">
-                      <button onClick={() => setStep('config')} className="flex-1 py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
+                      <button onClick={() => { resetConfigForm(); setStep('config'); }} className="flex-1 py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
                         + Dodaj stavku
                       </button>
                       <button onClick={() => setStep('checkout')} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] transition-colors text-[14px]">
@@ -536,7 +1080,7 @@ export default function KalkulatorPage() {
               </CardSection>
             )}
 
-            {/* ── CHECKOUT STEP ── */}
+            {/* ══════════ CHECKOUT STEP ══════════ */}
             {step === 'checkout' && (
               <CardSection>
                 <button onClick={() => setStep('cart')} className="flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text)] transition-colors text-[13px] mb-6">
@@ -568,7 +1112,6 @@ export default function KalkulatorPage() {
                     <TextInput type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="marko@gmail.com" error={errors.email} />
                   </div>
 
-                  {/* Location */}
                   <div>
                     <FieldLabel>Lokacija dostave</FieldLabel>
                     <div className="grid grid-cols-2 gap-3">
@@ -583,7 +1126,6 @@ export default function KalkulatorPage() {
                     </div>
                   </div>
 
-                  {/* Payment */}
                   <div>
                     <FieldLabel>Način plaćanja</FieldLabel>
                     <div className="grid grid-cols-2 gap-3">
@@ -603,7 +1145,7 @@ export default function KalkulatorPage() {
                   </div>
 
                   <div>
-                    <FieldLabel optional>Napomena</FieldLabel>
+                    <FieldLabel optional>Napomena za narudžbinu</FieldLabel>
                     <textarea
                       value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
                       placeholder="Posebni zahtevi, pristup objektu, preferirano vreme dostave..."
@@ -642,35 +1184,76 @@ export default function KalkulatorPage() {
                   <div className="px-6 py-5 border-b border-[var(--border)] bg-[#C9A84C]/6">
                     <div className="text-[#C9A84C] font-semibold text-[11px] tracking-[0.1em] uppercase mb-1">Cena za ovu stavku</div>
                     <div className="font-display text-[2.2rem] font-bold text-[var(--text)]">
-                      {formatRSD(calculatePrice(width, height, material, productType, location, quantity).total)}
+                      {formatRSD(livePrice.total)}
                     </div>
                     <div className="text-[var(--text-faint)] text-[13px] mt-0.5">sa PDV-om i dostavom</div>
                   </div>
-                  <div className="px-6 py-5 space-y-3 text-[13px]">
-                    {[
-                      ['Cena po komadu', formatRSD(calculatePrice(width, height, material, productType, location, 1).perUnit)],
-                      ['Količina',       `× ${quantity} kom`],
-                      ['Cena proizvoda', formatRSD(calculatePrice(width, height, material, productType, location, quantity).basePrice)],
-                      [`Dostava (${location})`, `+${formatRSD(calculatePrice(width, height, material, productType, location, 1).deliveryFee)}`],
-                    ].map(([label, val]) => (
-                      <div key={label} className="flex justify-between">
-                        <span className="text-[var(--text-muted)]">{label}</span>
-                        <span className="font-mono text-[var(--text)] font-medium">{val}</span>
+
+                  <div className="px-6 py-5 space-y-2.5 text-[13px]">
+                    <div className="flex justify-between">
+                      <span className="text-[var(--text-muted)]">Profili</span>
+                      <span className="font-mono text-[var(--text)] font-medium">{formatRSD(livePrice.profileCost)}</span>
+                    </div>
+                    {livePrice.glassCost > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-[var(--text-muted)]">Staklo</span>
+                        <span className="font-mono text-[var(--text)] font-medium">{formatRSD(livePrice.glassCost)}</span>
                       </div>
-                    ))}
-                    <div className="border-t border-[var(--border)] pt-3 flex justify-between">
+                    )}
+                    {livePrice.okovCost > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-[var(--text-muted)]">Okov</span>
+                        <span className="font-mono text-[var(--text)] font-medium">{formatRSD(livePrice.okovCost)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-[var(--text-muted)]">Rad</span>
+                      <span className="font-mono text-[var(--text)] font-medium">{formatRSD(livePrice.laborCost)}</span>
+                    </div>
+                    {livePrice.addonsCost > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-[var(--text-muted)]">Dodaci</span>
+                        <span className="font-mono text-[var(--text)] font-medium">{formatRSD(livePrice.addonsCost)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between pt-2 border-t border-[var(--border)]">
+                      <span className="text-[var(--text-muted)]">Cena po komadu</span>
+                      <span className="font-mono text-[var(--text)] font-medium">{formatRSD(livePrice.perUnit)}</span>
+                    </div>
+                    {quantity > 1 && (
+                      <div className="flex justify-between">
+                        <span className="text-[var(--text-muted)]">Količina</span>
+                        <span className="font-mono text-[var(--text)] font-medium">× {quantity} kom</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-[var(--text-muted)]">Cena proizvoda</span>
+                      <span className="font-mono text-[var(--text)] font-medium">{formatRSD(livePrice.basePrice)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[var(--text-muted)]">Dostava</span>
+                      <span className="font-mono text-[var(--text)] font-medium">+{formatRSD(livePrice.deliveryFee)}</span>
+                    </div>
+                    <div className="border-t border-[var(--border)] pt-2.5 flex justify-between">
                       <span className="text-[var(--text)] font-semibold">Ukupno</span>
-                      <span className="font-mono text-[#C9A84C] font-bold">
-                        {formatRSD(calculatePrice(width, height, material, productType, location, quantity).total)}
-                      </span>
+                      <span className="font-mono text-[#C9A84C] font-bold">{formatRSD(livePrice.total)}</span>
                     </div>
                   </div>
-                  <div className="px-6 pb-5 space-y-2 text-[12.5px]">
-                    {[
+
+                  <div className="px-6 pb-5 space-y-1.5 text-[12px]">
+                    {([
                       ['Tip',       PRODUCT_TYPES.find(p => p.value === productType)?.label],
                       ['Materijal', material],
                       ['Dimenzije', `${width} × ${height} mm`],
-                    ].map(([l, v]) => (
+                      ...(productType !== 'plisirani_komarnik' ? [
+                        ['Staklo', GLASS_INFO[glassType]?.label],
+                        ...(productHasOkov(productType) ? [['Okov', okovType === 'agb' ? 'AGB' : 'Schüco']] : []),
+                      ] : []),
+                      ['Boja', COLOR_OPTIONS.find(c => c.value === color)?.label],
+                      ...(komarnikType !== 'none' ? [['Komarnik', komarnikType === 'plisirani' ? 'Plisirani' : komarnikType === 'rolo' ? 'Rolo' : 'Fiksni']] : []),
+                      ...(hasInstallation ? [['Ugradnja', 'Da']] : []),
+                      ...(hasSillInside   ? [['Klupica',  'Da']] : []),
+                    ] as [string, string][]).map(([l, v]) => (
                       <div key={l} className="flex justify-between">
                         <span className="text-[var(--text-faint)]">{l}</span>
                         <span className="text-[var(--text-muted)] font-medium">{v}</span>
@@ -709,6 +1292,11 @@ export default function KalkulatorPage() {
                       <div className="space-y-3 max-h-52 overflow-y-auto pr-1">
                         {cartItems.map((item) => {
                           const pt = PRODUCT_TYPES.find(p => p.value === item.type);
+                          const p = calculatePrice(item.width, item.height, item.material, item.type, location, item.quantity, {
+                            glassType: item.glassType, okovType: item.okovType, color: item.color,
+                            komarnikType: item.komarnikType, hasRoletna: item.hasRoletna, hasOkapnica: item.hasOkapnica,
+                            hasInstallation: item.hasInstallation, hasSillInside: item.hasSillInside,
+                          });
                           return (
                             <div key={item.id} className="flex items-center gap-3 text-[12px]">
                               <div className="text-[#C9A84C] flex-shrink-0">{pt?.icon}</div>
@@ -716,9 +1304,7 @@ export default function KalkulatorPage() {
                                 <div className="text-[var(--text)] truncate">{pt?.label}</div>
                                 <div className="text-[var(--text-faint)]">{item.material} · {item.width}×{item.height}mm · {item.quantity}kom</div>
                               </div>
-                              <div className="text-[#C9A84C] font-medium">
-                                {formatRSD(calculatePrice(item.width, item.height, item.material, item.type, location, item.quantity).total)}
-                              </div>
+                              <div className="text-[#C9A84C] font-medium">{formatRSD(p.basePrice)}</div>
                             </div>
                           );
                         })}
@@ -738,12 +1324,10 @@ export default function KalkulatorPage() {
         </div>
       </div>
 
-      {/* Range thumb styles */}
       <style jsx global>{`
         input[type='range']::-webkit-slider-thumb {
           -webkit-appearance: none;
-          width: 18px;
-          height: 18px;
+          width: 18px; height: 18px;
           border-radius: 50%;
           background: #C9A84C;
           cursor: pointer;
@@ -751,8 +1335,7 @@ export default function KalkulatorPage() {
           box-shadow: 0 0 0 1px rgba(201,168,76,0.4);
         }
         input[type='range']::-moz-range-thumb {
-          width: 18px;
-          height: 18px;
+          width: 18px; height: 18px;
           border-radius: 50%;
           background: #C9A84C;
           cursor: pointer;

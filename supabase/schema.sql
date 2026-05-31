@@ -187,6 +187,19 @@ CREATE POLICY "Authenticated users can manage notifications"
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
 
 -- ============================================================
+-- MIGRATION: Add all product types
+-- Run this in Supabase SQL Editor if the order_items table already exists:
+--
+-- ALTER TABLE public.order_items DROP CONSTRAINT IF EXISTS order_items_type_check;
+-- ALTER TABLE public.order_items ADD CONSTRAINT order_items_type_check CHECK (
+--   type IN (
+--     'window_single', 'window_double', 'trokrilni_prozor', 'fiksni_prozor',
+--     'door', 'balkonska_vrata', 'klizna_vrata', 'plisirani_komarnik'
+--   )
+-- );
+-- ============================================================
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS orders_status_idx    ON public.orders(status);

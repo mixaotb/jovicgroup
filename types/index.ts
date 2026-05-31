@@ -10,9 +10,31 @@ export type PaymentMethod = 'cash_on_delivery' | 'racun';
 
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 
-export type ProductType = 'window_single' | 'window_double' | 'door';
+export type ProductType =
+  | 'window_single'
+  | 'window_double'
+  | 'trokrilni_prozor'
+  | 'fiksni_prozor'
+  | 'door'
+  | 'balkonska_vrata'
+  | 'klizna_vrata'
+  | 'plisirani_komarnik';
 
 export type Material = 'PVC' | 'ALU';
+
+export type GlassType =
+  | 'dvoslojno'
+  | 'dvoslojno_niskoemisiono'
+  | 'dvoslojno_peskirano'
+  | 'niskoemisiono'
+  | '4_godisnja_doba'
+  | 'peskirano';
+
+export type OkovType = 'agb' | 'schuco';
+
+export type KomarnikType = 'none' | 'plisirani' | 'rolo' | 'fiksni';
+
+export type ColorType = 'white' | 'anthracite' | 'wood';
 
 export interface CartItem {
   id: string;
@@ -21,6 +43,16 @@ export interface CartItem {
   width: number;
   height: number;
   quantity: number;
+  glassType: GlassType;
+  okovType: OkovType;
+  color: ColorType;
+  komarnikType: KomarnikType;
+  hasRoletna: boolean;
+  hasOkapnica: boolean;
+  hasInstallation: boolean;
+  hasSillInside: boolean;
+  itemNotes: string;
+  imageDataUrl?: string;
 }
 
 export interface User {
@@ -37,7 +69,16 @@ export interface DimensionsData {
   width: number;
   height: number;
   quantity: number;
+  glassType?: GlassType;
+  okovType?: OkovType;
+  color?: ColorType;
+  komarnikType?: KomarnikType;
+  hasRoletna?: boolean;
+  hasOkapnica?: boolean;
+  hasInstallation?: boolean;
+  hasSillInside?: boolean;
   notes?: string;
+  imageDataUrl?: string;
 }
 
 export interface OrderItem {
@@ -84,14 +125,7 @@ export interface Task {
 }
 
 export interface OrderItemData {
-  dimensions_data: {
-    type: ProductType;
-    material: Material;
-    width: number;
-    height: number;
-    quantity: number;
-    notes?: string;
-  };
+  dimensions_data: DimensionsData;
 }
 
 export interface OrderFormData {
@@ -102,15 +136,7 @@ export interface OrderFormData {
   payment_method: PaymentMethod;
   notes: string;
   total_price: number;
-  items: {
-    dimensions_data: {
-      type: ProductType;
-      material: Material;
-      width: number;
-      height: number;
-      quantity: number;
-    };
-  }[];
+  items: OrderItemData[];
 }
 
 export interface DashboardMetrics {

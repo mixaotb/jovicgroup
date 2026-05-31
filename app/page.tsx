@@ -18,10 +18,10 @@ import RevealUp from '@/components/RevealUp';
 export const metadata: Metadata = {
   title: 'Jović Group | Premium PVC & ALU Stolarija',
   description:
-    'Nemački profili, precizna izrada, profesionalna ugradnja u Srbiji. Jović Group — vaš partner za PVC i ALU stolariju.',
+    'Premium PVC i ALU stolarija, precizna izrada, profesionalna ugradnja u Srbiji. Jović Group — vaš partner za prozore i vrata.',
   openGraph: {
     title: 'Jović Group | Premium PVC & ALU Stolarija',
-    description: 'Nemački profili, precizna izrada, profesionalna ugradnja u Srbiji.',
+    description: 'Premium PVC i ALU stolarija, precizna izrada, profesionalna ugradnja u Srbiji.',
     type: 'website',
     locale: 'sr_RS',
   },
@@ -131,12 +131,12 @@ export default function HomePage() {
                     }}
                   >
                     <GlassIcon><GlobeIcon size={22} weight="light" /></GlassIcon>
-                    <h3 className="font-display font-bold text-[1.35rem] text-white mt-4 mb-2">Nemački profili</h3>
+                    <h3 className="font-display font-bold text-[1.35rem] text-white mt-4 mb-2">Evropski profili</h3>
                     <p className="text-white/70 text-[13.5px] leading-relaxed mb-5 max-w-sm">
-                      Isključivo Schüco, Alphacan i Profilink profili — standardi koji važe decenijama širom Evrope.
+                      Alphacan & Schüco (PVC) · Elvial & Profilco (ALU) — sistemi koji važe decenijama širom Evrope.
                     </p>
                     <div className="flex gap-2">
-                      {['Schüco', 'Alphacan', 'Profilink'].map((tag) => (
+                      {['Alphacan', 'Schüco', 'Elvial', 'Profilco'].map((tag) => (
                         <span
                           key={tag}
                           className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide text-[#C9A84C]"
@@ -276,8 +276,8 @@ export default function HomePage() {
                   {[
                     { label: 'Srbija',       desc: 'Dostava i ugradnja' },
                     { label: 'Inostranstvo', desc: 'Projekti za dijasporu' },
-                    { label: 'PVC',          desc: 'Alphacan i Schüco profili' },
-                    { label: 'ALU',          desc: 'Komercijalni objekti' },
+                    { label: 'PVC',          desc: 'Alphacan & Schüco profili' },
+                    { label: 'ALU',          desc: 'Elvial & Profilco sistemi' },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -562,7 +562,7 @@ export default function HomePage() {
                   </span>
                 </div>
                 <p className="text-[var(--text-faint)] text-[13px] leading-relaxed max-w-[240px]">
-                  PVC i ALU stolarija po nemačkim standardima. Srbija i inostranstvo.
+                  PVC i ALU stolarija po evropskim standardima. Srbija i inostranstvo.
                 </p>
               </div>
 
