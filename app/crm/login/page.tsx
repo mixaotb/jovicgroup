@@ -38,7 +38,7 @@ export default function CrmLoginPage() {
         return;
       }
 
-      router.push('/crm/dashboard');
+      router.push('/dashboard');
       router.refresh();
     } catch {
       setError('Greška. Proverite internet konekciju.');
