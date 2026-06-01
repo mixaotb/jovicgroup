@@ -561,7 +561,7 @@ export default function HomePage() {
                   <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
                   <div><a href="tel:+381693999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 69 3 999 555</a></div>
                   <div>Stevana Tisme 114</div>
-                  <div>Stari Banovci, 11253</div>
+                  <div>Stari Banovci, 22305</div>
                   <div>Srbija</div>
                 </address>
               </div>

@@ -75,7 +75,7 @@ const localBusinessSchema = {
     '@type': 'PostalAddress',
     streetAddress: 'Stevana Tisme 114',
     addressLocality: 'Stari Banovci',
-    postalCode: '11253',
+    postalCode: '22305',
     addressRegion: 'Beograd',
     addressCountry: 'RS',
   },
