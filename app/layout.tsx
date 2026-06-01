@@ -16,23 +16,96 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://jovicgroup.com'),
   title: {
-    default: 'Jović Group | Premium PVC & ALU Stolarija',
+    default: 'Jović Group | PVC i ALU Stolarija',
     template: '%s | Jović Group',
   },
   description:
-    'Jović Group — Nemački profili, vrhunska izrada, profesionalna ugradnja. PVC i ALU stolarija za zahtevne klijente u Srbiji i inostranstvu.',
+    'PVC i ALU prozori i vrata po evropskim standardima. Jović Group — precizna izrada i profesionalna ugradnja širom Srbije. Besplatna kalkulacija online.',
   keywords: [
-    'PVC stolarija', 'ALU stolarija', 'prozori', 'vrata', 'Srbija',
-    'nemački profili', 'ugradnja prozora', 'Jović Group',
+    'PVC stolarija Stari Banovci', 'ALU stolarija Beograd', 'prozori Zemun',
+    'vrata Stari Banovci', 'PVC prozori Srbija', 'ALU prozori Srbija',
+    'ugradnja prozora Beograd', 'stolarija Stari Banovci', 'Schuco prozori',
+    'Alphacan PVC', 'Elvial ALU', 'Profilco stolarija', 'nemački profili Srbija',
+    'komarnici Beograd', 'balkonska vrata Srbija', 'klizna vrata',
+    'Jović Group', 'PVC stolarija', 'ALU stolarija',
   ],
+  authors: [{ name: 'Jović Group', url: 'https://jovicgroup.com' }],
+  creator: 'Jović Group',
+  publisher: 'Jović Group',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large' },
+  },
+  alternates: { canonical: 'https://jovicgroup.com' },
   openGraph: {
     type: 'website',
     locale: 'sr_RS',
-    url: 'https://jovicgroup.rs',
+    url: 'https://jovicgroup.com',
     siteName: 'Jović Group',
-    title: 'Jović Group | Premium PVC & ALU Stolarija',
-    description: 'Nemački profili. Precizna izrada. Profesionalna ugradnja.',
+    title: 'Jović Group | PVC i ALU Stolarija',
+    description: 'Prozori i vrata po evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Jović Group — PVC i ALU stolarija' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Jović Group | PVC i ALU Stolarija',
+    description: 'Prozori i vrata po evropskim standardima. Ugradnja u Srbiji.',
+    images: ['/og-image.png'],
+  },
+};
+
+const localBusinessSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  '@id': 'https://jovicgroup.com/#business',
+  name: 'Jović Group',
+  description:
+    'Premium PVC i ALU stolarija — prozori, vrata i komarnici po evropskim standardima. Profesionalna izrada i ugradnja u Srbiji.',
+  url: 'https://jovicgroup.com',
+  telephone: '+381693999555',
+  email: 'info@jovicgroup.com',
+  image: 'https://jovicgroup.com/logo.png',
+  priceRange: '$$',
+  currenciesAccepted: 'RSD',
+  paymentAccepted: 'Cash, Invoice',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Stevana Tisme 114',
+    addressLocality: 'Stari Banovci',
+    postalCode: '11253',
+    addressRegion: 'Beograd',
+    addressCountry: 'RS',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 44.9258,
+    longitude: 20.3312,
+  },
+  areaServed: [
+    { '@type': 'Country', name: 'Srbija' },
+    { '@type': 'City', name: 'Beograd' },
+    { '@type': 'City', name: 'Zemun' },
+    { '@type': 'City', name: 'Novi Sad' },
+    { '@type': 'Country', name: 'Germany' },
+    { '@type': 'Country', name: 'Austria' },
+    { '@type': 'Country', name: 'Switzerland' },
+  ],
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'PVC i ALU stolarija',
+    itemListElement: [
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'PVC prozori' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'ALU prozori' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'PVC vrata' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'ALU vrata' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Balkonska vrata' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Klizna vrata' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Plisirani komarnici' } },
+      { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Ugradnja stolarije' } },
+    ],
   },
 };
 
@@ -52,6 +125,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="sr" className={`${playfair.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+        />
       </head>
       <body className="bg-theme text-theme font-body antialiased">
         {/* Fixed grain — pointer-events-none, sits above content at z-60 */}

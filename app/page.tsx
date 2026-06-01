@@ -17,14 +17,16 @@ import RevealUp from '@/components/RevealUp';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 
 export const metadata: Metadata = {
-  title: 'Jović Group | Premium PVC & ALU Stolarija',
+  title: 'Jović Group | PVC i ALU Stolarija iz Starih Banovaca',
   description:
-    'Premium PVC i ALU stolarija, precizna izrada, profesionalna ugradnja u Srbiji. Jović Group — vaš partner za prozore i vrata.',
+    'Jović Group — PVC i ALU prozori i vrata iz Starih Banovaca. Evropski profili Schüco, Alphacan, Elvial. Ugradnja širom Srbije i za dijasporu. Besplatna kalkulacija online.',
+  alternates: { canonical: 'https://jovicgroup.com' },
   openGraph: {
-    title: 'Jović Group | Premium PVC & ALU Stolarija',
-    description: 'Premium PVC i ALU stolarija, precizna izrada, profesionalna ugradnja u Srbiji.',
+    title: 'Jović Group | PVC i ALU Stolarija iz Starih Banovaca',
+    description: 'PVC i ALU prozori i vrata iz Starih Banovaca. Evropski profili, garancija 5 godina, ugradnja širom Srbije.',
     type: 'website',
     locale: 'sr_RS',
+    url: 'https://jovicgroup.com',
   },
 };
 
@@ -555,11 +557,13 @@ export default function HomePage() {
 
               <div>
                 <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Kontakt</div>
-                <div className="space-y-2 text-[var(--text-faint)] text-[13px]">
+                <address className="not-italic space-y-2 text-[var(--text-faint)] text-[13px]">
                   <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
-                  <div>+381 69 3 999 555</div>
+                  <div><a href="tel:+381693999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 69 3 999 555</a></div>
                   <div>Stevana Tisme 114</div>
-                </div>
+                  <div>Stari Banovci, 11253</div>
+                  <div>Srbija</div>
+                </address>
               </div>
 
               <div>
