@@ -124,8 +124,8 @@ export default function HomePage() {
                 >
                   {/* Photo background */}
                   <Image
-                    src="https://picsum.photos/seed/window-installation-workshop-precision/900/600"
-                    alt="Precizna izrada prozora u radionici"
+                    src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=900&h=600&fit=crop&auto=format"
+                    alt="Moderna zgrada sa evropskim prozorima"
                     fill
                     className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.03]"
                     sizes="(max-width: 768px) 100vw, 66vw"
@@ -514,7 +514,7 @@ export default function HomePage() {
                   </p>
                   <Link
                     href="/kalkulator"
-                    className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
+                    className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_14px_44px_rgba(201,168,76,0.5)] active:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
                   >
                     <span>Pokrenite kalkulator</span>
                     <span
@@ -560,7 +560,7 @@ export default function HomePage() {
                 <address className="not-italic space-y-2 text-[var(--text-faint)] text-[13px]">
                   <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
                   <div><a href="tel:+381693999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 69 3 999 555</a></div>
-                  <div>Stevana Tisme 114</div>
+                  <div>Stari Banovci 112</div>
                   <div>Stari Banovci, 22305</div>
                   <div>Srbija</div>
                 </address>

@@ -73,7 +73,7 @@ const localBusinessSchema = {
   paymentAccepted: 'Cash, Invoice',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Stevana Tisme 114',
+    streetAddress: 'Stari Banovci 112',
     addressLocality: 'Stari Banovci',
     postalCode: '22305',
     addressRegion: 'Beograd',

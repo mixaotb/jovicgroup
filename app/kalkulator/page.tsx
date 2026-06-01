@@ -525,7 +525,10 @@ export default function KalkulatorPage() {
     };
 
     try {
-      const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const [res] = await Promise.all([
+        fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
+        new Promise<void>(resolve => setTimeout(resolve, 1000)),
+      ]);
       if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Greška pri slanju narudžbine'); }
       setStep('success');
     } catch (err: unknown) {
@@ -565,7 +568,7 @@ export default function KalkulatorPage() {
             </Link>
             <button
               onClick={() => { setStep('config'); setCustomerName(''); setPhone(''); setEmail(''); setTown(''); setAddress(''); setNotes(''); setCartItems([]); resetConfigForm(); }}
-              className="px-6 py-3 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] transition-colors text-[14px]"
+              className="px-6 py-3 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300 text-[14px]"
             >
               Nova narudžbina
             </button>
@@ -1067,7 +1070,7 @@ export default function KalkulatorPage() {
                 <div className="flex gap-3">
                   {editingItemId ? (
                     <>
-                      <button onClick={updateItem} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[14px] hover:bg-[#E8C97A] transition-all">
+                      <button onClick={updateItem} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[14px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300">
                         Ažuriraj stavku
                       </button>
                       <button onClick={() => { resetConfigForm(); setStep('cart'); }} className="px-6 py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
@@ -1076,7 +1079,7 @@ export default function KalkulatorPage() {
                     </>
                   ) : (
                     <>
-                      <button onClick={addToCart} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[14px] hover:bg-[#E8C97A] transition-all">
+                      <button onClick={addToCart} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[14px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300">
                         Dodaj u korpu
                       </button>
                       {cartItems.length > 0 && (
@@ -1197,7 +1200,7 @@ export default function KalkulatorPage() {
                       <button onClick={() => { resetConfigForm(); setStep('config'); }} className="flex-1 py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
                         + Dodaj stavku
                       </button>
-                      <button onClick={() => setStep('checkout')} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] transition-colors text-[14px]">
+                      <button onClick={() => setStep('checkout')} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300 text-[14px]">
                         Nastavi →
                       </button>
                     </div>
@@ -1293,14 +1296,15 @@ export default function KalkulatorPage() {
 
                 <button
                   onClick={handleSubmit} disabled={loading}
-                  className="mt-6 w-full py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[15px] hover:bg-[#E8C97A] transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 shadow-[0_4px_24px_rgba(201,168,76,0.2)]"
+                  className="mt-6 w-full py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_10px_36px_rgba(201,168,76,0.45)] active:translate-y-0 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none shadow-[0_4px_24px_rgba(201,168,76,0.2)]"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
+                    <span className="flex items-center justify-center gap-2.5">
+                      <span
+                        className="inline-block w-[18px] h-[18px] rounded-full border-[2.5px] border-[#0B1120]/20 border-t-[#0B1120] animate-spin flex-shrink-0"
+                        style={{ boxShadow: '0 0 8px 2px rgba(11,17,32,0.25)' }}
+                        aria-hidden
+                      />
                       Slanje...
                     </span>
                   ) : `Pošalji narudžbinu · ${formatRSD(cartTotals.total)}`}
@@ -1478,6 +1482,7 @@ export default function KalkulatorPage() {
           cursor: pointer;
           border: 2px solid var(--bg-surface);
         }
+
       `}</style>
     </div>
   );

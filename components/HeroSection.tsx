@@ -72,7 +72,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-3 animate-fade-up delay-300">
             <Link
               href="/kalkulator"
-              className="group inline-flex items-center self-start pl-6 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[14px] hover:bg-[#E8C97A] transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
+              className="group inline-flex items-center self-start pl-6 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[14px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_14px_44px_rgba(201,168,76,0.5)] active:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
             >
               <span>Izračunajte cenu</span>
               <span className="ml-4 w-9 h-9 rounded-full bg-[#06080F]/14 flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-[2px] group-hover:-translate-y-[1px] group-hover:scale-105">
