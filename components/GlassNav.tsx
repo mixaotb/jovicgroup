@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRightIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, CalculatorIcon } from '@phosphor-icons/react';
 import ThemeToggle from '@/components/ThemeToggle';
 
 const NAV_LINKS = [
@@ -146,7 +146,7 @@ export default function GlassNav() {
                 aria-label="Kalkulator"
                 className="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-[#C9A84C] text-[#06080F] hover:bg-[#E8C97A] transition-all duration-300 active:scale-[0.95]"
               >
-                <ArrowRightIcon size={15} weight="bold" />
+                <CalculatorIcon size={17} weight="bold" />
               </Link>
             </div>
           </div>

@@ -6,7 +6,7 @@ import { ArrowRightIcon } from '@phosphor-icons/react';
 
 const STATS = [
   { value: '1.200+', label: 'Projekata' },
-  { value: '14',     label: 'Godina iskustva' },
+  { value: '20+',    label: 'Godina iskustva' },
   { value: '98.3%',  label: 'Zadovoljnih klijenata' },
   { value: '6',      label: 'Zemalja isporuke' },
 ];

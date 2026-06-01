@@ -558,11 +558,10 @@ export default function HomePage() {
               <div>
                 <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Kontakt</div>
                 <address className="not-italic space-y-2 text-[var(--text-faint)] text-[13px]">
-                  <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
+                  <div><a href="mailto:jovic.group@gmail.com" className="hover:text-[#C9A84C] transition-colors duration-300">jovic.group@gmail.com</a></div>
                   <div><a href="tel:+381693999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 69 3 999 555</a></div>
-                  <div>Stari Banovci 112</div>
-                  <div>Stari Banovci, 22305</div>
-                  <div>Srbija</div>
+                  <div>Stevana Tišme 112, Stari Banovci</div>
+                  <div>22303, Srbija</div>
                 </address>
               </div>
 
