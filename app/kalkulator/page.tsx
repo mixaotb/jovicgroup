@@ -55,7 +55,7 @@ const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: Re
   {
     value: 'fiksni_prozor',
     label: 'Fiksni prozor',
-    desc: 'Nepokretno, maksimalna svetlost',
+    desc: 'Fiksno staklo, maksimalna svetlost',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
         <rect x="4" y="4" width="24" height="24" rx="1" />
@@ -68,7 +68,7 @@ const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: Re
   {
     value: 'door',
     label: 'Vrata',
-    desc: 'PVC ili ALU ulazna vrata',
+    desc: 'Jednokrilna ulazna vrata',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
         <rect x="6" y="2" width="20" height="28" rx="1" />
@@ -80,7 +80,7 @@ const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: Re
   {
     value: 'balkonska_vrata',
     label: 'Balkonska vrata',
-    desc: 'Velika ostakljena vrata za terasu',
+    desc: 'Vrata za izlaz na terasu ili balkon',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
         <rect x="3" y="2" width="11" height="28" rx="1" />
@@ -109,7 +109,7 @@ const PRODUCT_TYPES: { value: ProductType; label: string; desc: string; icon: Re
   {
     value: 'plisirani_komarnik',
     label: 'Plisirani komarnik',
-    desc: 'Harmonikaststy sistem bez okvira',
+    desc: 'Harmonikasti sistem, lagan i kompaktan',
     icon: (
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
         <rect x="4" y="4" width="24" height="24" rx="1" />
