@@ -32,21 +32,21 @@ export const metadata: Metadata = {
 
 const testimonials = [
   {
-    text: 'Zamenili smo sve prozore na kući. Tri meseca od ugradnje, a prvi put za 15 godina nemamo propuha ni kondenzaciju.',
-    author: 'Milena Petrović',
-    location: 'Beograd, Zvezdara',
+    text: 'Zamenili smo sve prozore u kući za jedan dan. Ekipa tačna i uredna, bez nereda. Kuća je od tada potpuno drugačija.',
+    author: 'Dajana Nikolić',
+    location: 'Stara Pazova',
     rating: 5,
   },
   {
-    text: 'Tražio sam kvalitet koji sam video u Nemačkoj. Jović Group je isporučio tačno to, i po daleko razumnijoj ceni.',
-    author: 'Dragan Nikolić',
-    location: 'Novi Sad',
+    text: 'Koristio sam kalkulator i finalna cena bila skoro ista. Bez skrivenih troškova, sve ugrađeno besprekorno. Preporučujem svima.',
+    author: 'Aleksa Batoćanin',
+    location: 'Bele Vode, Beograd',
     rating: 5,
   },
   {
-    text: 'Kompletan objekat od 8 stanova. Montaža završena za 5 dana, bez ikakvih iznenađenja.',
-    author: 'Stanković Gradnja d.o.o.',
-    location: 'Niš',
+    text: 'Balkonska vrata i prozori ugrađeni za jedan dan, sve čisto i uredno. Odavno ih poznajem kao komšije, ali posao su odradili potpuno profesionalno.',
+    author: 'Dragana Preradović',
+    location: 'Stari Banovci',
     rating: 5,
   },
 ];
@@ -108,8 +108,8 @@ export default function HomePage() {
             <RevealUp className="mb-14">
               <div className="gold-rule mb-5" />
               <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-tight text-[var(--text)]">
-                Zašto biraju<br />
-                <span className="text-[#C9A84C]">Jović Group</span>
+                Šta nas<br />
+                <span className="text-[#C9A84C]">izdvaja</span>
               </h2>
             </RevealUp>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
                 >
                   {/* Photo background */}
                   <Image
-                    src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=900&h=600&fit=crop&auto=format"
+                    src="/features.jpg"
                     alt="Moderna zgrada sa evropskim prozorima"
                     fill
                     className="object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-[1.03]"
@@ -140,10 +140,10 @@ export default function HomePage() {
                     <GlassIcon><GlobeIcon size={22} weight="light" /></GlassIcon>
                     <h3 className="font-display font-bold text-[1.35rem] text-white mt-4 mb-2">Evropski profili</h3>
                     <p className="text-white/70 text-[13.5px] leading-relaxed mb-5 max-w-sm">
-                      Alphacan & Schüco (PVC) · Elvial & Profilco (ALU) — sistemi koji važe decenijama širom Evrope.
+                      Alphacan & Schüco (PVC) · Elvial & Profilco (ALU), profili koji važe decenijama širom Evrope. Okov: AGB (Italija) i Schüco.
                     </p>
-                    <div className="flex gap-2">
-                      {['Alphacan', 'Schüco', 'Elvial', 'Profilco'].map((tag) => (
+                    <div className="flex flex-wrap gap-2">
+                      {['Alphacan', 'Schüco', 'Elvial', 'Profilco', 'AGB'].map((tag) => (
                         <span
                           key={tag}
                           className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide text-[#C9A84C]"
@@ -195,7 +195,7 @@ export default function HomePage() {
                   {
                     icon: <HouseIcon size={22} weight="light" />,
                     title: 'Profesionalna ugradnja',
-                    body: 'Tim koji briše granicu između fabrike i vašeg doma.',
+                    body: 'Iskusni tim koji svaki ugradnju završava precizno i uredno.',
                   },
                   {
                     icon: <SwatchesIcon size={22} weight="light" />,
@@ -257,22 +257,53 @@ export default function HomePage() {
                 </h2>
                 <div className="space-y-4 text-[var(--text-muted)] text-[15px] leading-relaxed">
                   <p>
-                    Jović Group je porodična kompanija osnovana s jednim ciljem: doneti nivo preciznosti koji
+                    Jović Group je porodična kompanija osnovana 2005. godine s jednim ciljem: doneti nivo preciznosti koji
                     poznajemo iz Nemačke direktno u srpske domove. Naši majstori školovani su prema evropskim
                     protokolima ugradnje.
                   </p>
                   <p>
-                    Realizujemo projekte i za dijasporu — srpske porodice u Nemačkoj, Austriji, Švajcarskoj
-                    i Beneluksu koje žele da opreme stanove u Srbiji, ali sa garancijom kakvu bi dobili u inostranstvu.
+                    Skoro dve decenije kasnije, naš najveći marketing i dalje su preporuke, od komšije do komšije,
+                    od porodice do porodice. Na tome smo gradili reputaciju i na tome ostajemo.
+                  </p>
+                  <p>
+                    Radimo i sa dijasporom, uglavnom srpskim porodicama iz Austrije koje žele da opreme
+                    stanove u Srbiji uz istu garanciju kvaliteta.
                   </p>
                 </div>
 
-                <div className="mt-10 grid grid-cols-2 gap-3">
+                <div className="mt-10 grid grid-cols-3 gap-3">
+                  {/* Combined location card */}
+                  <div
+                    className="col-span-3 p-4 rounded-2xl hover:scale-[1.005] transition-transform duration-300 flex items-center justify-between gap-4"
+                    style={{
+                      background: 'var(--glass-bg)',
+                      border: '1px solid var(--glass-border)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
+                    }}
+                  >
+                    <div>
+                      <div className="font-display font-bold text-[var(--text)] text-[15px]">Gde radimo</div>
+                      <div className="text-[var(--text-faint)] text-xs mt-0.5">Srbija i dijaspora</div>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      {['RS', 'AT'].map((code) => (
+                        <span
+                          key={code}
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-widest text-[var(--text-faint)]"
+                          style={{ background: 'var(--glass-bg-strong)', border: '1px solid var(--glass-border)' }}
+                        >
+                          {code}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Material & hardware cards */}
                   {[
-                    { label: 'Srbija',       desc: 'Dostava i ugradnja' },
-                    { label: 'Inostranstvo', desc: 'Projekti za dijasporu' },
-                    { label: 'PVC',          desc: 'Alphacan & Schüco profili' },
-                    { label: 'ALU',          desc: 'Elvial & Profilco sistemi' },
+                    { label: 'PVC',  desc: 'Alphacan & Schüco profili' },
+                    { label: 'ALU',  desc: 'Elvial & Profilco profili' },
+                    { label: 'Okov', desc: 'AGB (Italija) i Schüco' },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -321,14 +352,13 @@ export default function HomePage() {
                         <ShieldCheckIcon size={18} weight="light" className="text-[#C9A84C]" />
                       </div>
                       <div>
-                        <div className="font-display font-bold text-[var(--text)] text-[14px]">Kvalitet potvrđen</div>
-                        <div className="text-[var(--text-faint)] text-xs mt-0.5">ISO 9001 standardi</div>
+                        <div className="font-display font-bold text-[var(--text)] text-[14px]">Evropski standardi</div>
+                        <div className="text-[var(--text-faint)] text-xs mt-0.5">Schüco · Alphacan · Elvial profili</div>
                       </div>
                     </div>
 
                     <div className="space-y-5">
                       {[
-                        { label: 'Termička izolacija', value: 'Uw 0.8 W/m²K', pct: 92 },
                         { label: 'Zvučna izolacija',   value: 'do 45 dB',     pct: 78 },
                         { label: 'Klasa zaptivenosti', value: 'Klasa 4 (max)', pct: 95 },
                       ].map((spec) => (
@@ -354,10 +384,10 @@ export default function HomePage() {
                     </div>
 
                     <div
-                      className="mt-7 pt-6 grid grid-cols-3 gap-2 text-center"
+                      className="mt-7 pt-6 grid grid-cols-2 gap-2 text-center"
                       style={{ borderTop: '1px solid var(--glass-border)' }}
                     >
-                      {['DE', 'AT', 'CH'].map((code) => (
+                      {['RS', 'AT'].map((code) => (
                         <div
                           key={code}
                           className="py-2 rounded-xl text-[var(--text-faint)] text-[11px] font-bold tracking-widest"
@@ -370,7 +400,7 @@ export default function HomePage() {
                         </div>
                       ))}
                     </div>
-                    <p className="text-center text-[var(--text-faint)] text-[11px] mt-2">Sertifikovano za uvoz/izvoz</p>
+                    <p className="text-center text-[var(--text-faint)] text-[11px] mt-2">Srbija i dijaspora</p>
 
                     <div
                       className="mt-5 flex items-center gap-2.5 px-4 py-3 rounded-2xl"
@@ -405,7 +435,7 @@ export default function HomePage() {
                   Šta kažu klijenti
                 </h2>
                 <p className="text-[var(--text-muted)] text-[14px] max-w-xs sm:text-right leading-relaxed">
-                  Svaki utisak je rezultat jedne konkretne odluke.
+                  Reči naših klijenata govore same za sebe.
                 </p>
               </div>
             </RevealUp>
@@ -426,7 +456,7 @@ export default function HomePage() {
                     >&ldquo;</div>
                     <Stars count={testimonials[0].rating} />
                     <p className="text-[var(--text)] text-[1.08rem] leading-relaxed mt-5 mb-7 max-w-lg relative z-10 font-medium">
-                      &ldquo;{testimonials[0].text}&rdquo;
+                      {testimonials[0].text}
                     </p>
                     <div
                       className="flex items-center gap-3 pt-6"
@@ -458,7 +488,7 @@ export default function HomePage() {
                     >
                       <Stars count={t.rating} />
                       <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed mt-4 mb-5">
-                        &ldquo;{t.text}&rdquo;
+                        {t.text}
                       </p>
                       <div style={{ borderTop: '1px solid var(--glass-border)' }} className="pt-4">
                         <div className="font-display font-bold text-[var(--text)] text-[12px]">{t.author}</div>
@@ -558,10 +588,10 @@ export default function HomePage() {
               <div>
                 <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Kontakt</div>
                 <address className="not-italic space-y-2 text-[var(--text-faint)] text-[13px]">
-                  <div><a href="mailto:jovic.group@gmail.com" className="hover:text-[#C9A84C] transition-colors duration-300">jovic.group@gmail.com</a></div>
+                  <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
                   <div><a href="tel:+381693999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 69 3 999 555</a></div>
                   <div>Stevana Tišme 112, Stari Banovci</div>
-                  <div>22303, Srbija</div>
+                  <div>22305, Srbija</div>
                 </address>
               </div>
 

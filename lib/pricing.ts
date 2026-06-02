@@ -20,7 +20,7 @@ const PROFILE_LENGTH_FACTOR: Record<Exclude<ProductType, 'plisirani_komarnik'>, 
 // Cost per 6 m bar — PVC: Schüco & Alphacan; ALU: Elvial & Profilco
 const BAR_COST: Record<Material, number> = {
   PVC: 3_800,
-  ALU: 9_500,
+  ALU: 5_700,  // 1.5× PVC
 };
 
 // ─── Glass ───────────────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@ const COLOR_MULTIPLIER: Record<ColorType, number> = {
 // ─── Labor ───────────────────────────────────────────────────────────────────
 const LABOR_BASE: Record<Material, number> = {
   PVC: 4_200,
-  ALU: 8_800,
+  ALU: 6_300,  // 1.5× PVC
 };
 
 const TYPE_COMPLEXITY: Record<Exclude<ProductType, 'plisirani_komarnik'>, number> = {
@@ -226,6 +226,58 @@ export function calculatePrice(
 
 export function getDeliveryFee(location: OrderLocation): number {
   return DELIVERY_FEES[location];
+}
+
+export interface AddonCosts {
+  roletna:           number;
+  okapnica:          number;
+  sillInside:        number;
+  installation:      number;
+  komarnikFiksni:    number;
+  komarnikPlisirani: number;
+  komarnikRolo:      number;
+}
+
+export function getGlassPriceDelta(width: number, height: number, type: ProductType, fromGlass: GlassType, toGlass: GlassType): number {
+  if (type === 'plisirani_komarnik') return 0;
+  const ratio = GLASS_AREA_RATIO[type];
+  return Math.round(width * height * ratio * (GLASS_PER_MM2[toGlass] - GLASS_PER_MM2[fromGlass]));
+}
+
+export function getOkovPriceDelta(type: ProductType, fromOkov: OkovType, toOkov: OkovType): number {
+  if (type === 'fiksni_prozor' || type === 'klizna_vrata' || type === 'plisirani_komarnik') return 0;
+  const complexity = TYPE_COMPLEXITY[type];
+  return Math.round(OKOV_COST[toOkov] * complexity) - Math.round(OKOV_COST[fromOkov] * complexity);
+}
+
+export function getColorPriceDelta(width: number, height: number, type: ProductType, material: Material, fromColor: ColorType, toColor: ColorType): number {
+  if (type === 'plisirani_komarnik') return 0;
+  const totalProfileMM = PROFILE_LENGTH_FACTOR[type] * (width + height);
+  const barsNeeded = Math.ceil(totalProfileMM / BAR_LENGTH_MM);
+  return Math.round(barsNeeded * BAR_COST[material] * COLOR_MULTIPLIER[toColor]) - Math.round(barsNeeded * BAR_COST[material] * COLOR_MULTIPLIER[fromColor]);
+}
+
+export function getMaterialPriceDelta(width: number, height: number, type: ProductType, color: ColorType, fromMaterial: Material, toMaterial: Material): number {
+  if (type === 'plisirani_komarnik') return 0;
+  const totalProfileMM = PROFILE_LENGTH_FACTOR[type] * (width + height);
+  const barsNeeded = Math.ceil(totalProfileMM / BAR_LENGTH_MM);
+  const colorMult = COLOR_MULTIPLIER[color];
+  const complexity = TYPE_COMPLEXITY[type];
+  const fromCost = Math.round(barsNeeded * BAR_COST[fromMaterial] * colorMult) + Math.round(LABOR_BASE[fromMaterial] * complexity);
+  const toCost   = Math.round(barsNeeded * BAR_COST[toMaterial]   * colorMult) + Math.round(LABOR_BASE[toMaterial]   * complexity);
+  return toCost - fromCost;
+}
+
+export function getAddonCosts(width: number, height: number, type: ProductType): AddonCosts {
+  return {
+    roletna:           Math.round(ROLETNA_BASE + width * ROLETNA_PER_MM_W),
+    okapnica:          OKAPNICA_FLAT,
+    sillInside:        Math.round(SILL_INSIDE_BASE + width * SILL_INSIDE_PER_MM_W),
+    installation:      INSTALLATION_COST[type],
+    komarnikFiksni:    Math.round(FIKSNI_KOMARNIK_BASE + width * height * FIKSNI_KOMARNIK_PER_MM2),
+    komarnikPlisirani: Math.round(KOMARNIK_BASE + width * height * KOMARNIK_PER_MM2),
+    komarnikRolo:      Math.round(ROLO_KOMARNIK_BASE + width * height * ROLO_KOMARNIK_PER_MM2),
+  };
 }
 
 export function formatRSD(amount: number): string {

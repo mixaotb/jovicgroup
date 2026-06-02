@@ -165,6 +165,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Greška pri čuvanju stavki narudžbine. Pokušajte ponovo.' }, { status: 500 });
     }
 
+    const emailItems = body.items!.map(i => ({
+      type:            i.dimensions_data.type,
+      material:        i.dimensions_data.material,
+      width:           i.dimensions_data.width,
+      height:          i.dimensions_data.height,
+      quantity:        i.dimensions_data.quantity,
+      glassType:       i.dimensions_data.glassType,
+      color:           i.dimensions_data.color,
+      okovType:        i.dimensions_data.okovType,
+      komarnikType:    i.dimensions_data.komarnikType,
+      hasRoletna:      i.dimensions_data.hasRoletna,
+      hasOkapnica:     i.dimensions_data.hasOkapnica,
+      hasInstallation: i.dimensions_data.hasInstallation,
+      hasSillInside:   i.dimensions_data.hasSillInside,
+    }));
+
     void Promise.allSettled([
       sendNewOrderEmail({
         orderId:       order.id,
@@ -172,14 +188,12 @@ export async function POST(request: NextRequest) {
         phone:         body.phone!.trim(),
         email:         body.email?.trim() || null,
         location:      body.location!,
+        town:          body.town?.trim() || null,
+        address:       body.address?.trim() || null,
         paymentMethod: body.payment_method!,
         totalPrice,
         notes:         body.notes?.trim() || null,
-        items:         body.items!.map(i => ({
-          type: i.dimensions_data.type, material: i.dimensions_data.material,
-          width: i.dimensions_data.width, height: i.dimensions_data.height,
-          quantity: i.dimensions_data.quantity,
-        })),
+        items:         emailItems,
       }).catch(err => console.error('[Email] Admin send failed:', err)),
       sendOrderConfirmationEmail({
         orderId:       order.id,
@@ -187,14 +201,12 @@ export async function POST(request: NextRequest) {
         phone:         body.phone!.trim(),
         email:         body.email?.trim() || null,
         location:      body.location!,
+        town:          body.town?.trim() || null,
+        address:       body.address?.trim() || null,
         paymentMethod: body.payment_method!,
         totalPrice,
         notes:         body.notes?.trim() || null,
-        items:         body.items!.map(i => ({
-          type: i.dimensions_data.type, material: i.dimensions_data.material,
-          width: i.dimensions_data.width, height: i.dimensions_data.height,
-          quantity: i.dimensions_data.quantity,
-        })),
+        items:         emailItems,
       }).catch(err => console.error('[Email] Client send failed:', err)),
       supabase.from('notifications').insert({
         type:     'new_order',

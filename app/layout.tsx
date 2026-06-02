@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import { Playfair_Display, DM_Sans } from 'next/font/google';
 import './globals.css';
+import SmoothScroll from '@/components/SmoothScroll';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -18,11 +19,11 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL('https://jovicgroup.com'),
   title: {
-    default: 'Jović Group | PVC i ALU Stolarija',
+    default: 'Jović Group | PVC & ALU Stolarija',
     template: '%s | Jović Group',
   },
   description:
-    'PVC i ALU prozori i vrata po evropskim standardima. Jović Group — precizna izrada i profesionalna ugradnja širom Srbije. Besplatna kalkulacija online.',
+    'PVC i ALU prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije. Besplatna kalkulacija online.',
   keywords: [
     'PVC stolarija Stari Banovci', 'ALU stolarija Beograd', 'prozori Zemun',
     'vrata Stari Banovci', 'PVC prozori Srbija', 'ALU prozori Srbija',
@@ -45,14 +46,14 @@ export const metadata: Metadata = {
     locale: 'sr_RS',
     url: 'https://jovicgroup.com',
     siteName: 'Jović Group',
-    title: 'Jović Group | PVC i ALU Stolarija',
-    description: 'Prozori i vrata po evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije.',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Jović Group — PVC i ALU stolarija' }],
+    title: 'Jović Group | PVC & ALU Stolarija',
+    description: 'Prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Jović Group - PVC & ALU stolarija' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jović Group | PVC i ALU Stolarija',
-    description: 'Prozori i vrata po evropskim standardima. Ugradnja u Srbiji.',
+    title: 'Jović Group | PVC & ALU Stolarija',
+    description: 'Prozori i vrata po meri i evropskim standardima. Ugradnja u Srbiji.',
     images: ['/og-image.png'],
   },
 };
@@ -73,7 +74,7 @@ const localBusinessSchema = {
   paymentAccepted: 'Cash, Invoice',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Stari Banovci 112',
+    streetAddress: 'Stevana Tišme 112',
     addressLocality: 'Stari Banovci',
     postalCode: '22305',
     addressRegion: 'Beograd',
@@ -140,7 +141,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
           aria-hidden
         />
-        {children}
+        <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
   );

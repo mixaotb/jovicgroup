@@ -36,10 +36,10 @@ export default function GlassNav() {
     return () => mo.disconnect();
   }, []);
 
-  // Theme + scroll aware overlay opacity
-  const overlayBg = dark
-    ? (scrolled ? 'rgba(0,0,0,0.32)' : 'rgba(0,0,0,0.18)')
-    : (scrolled ? 'rgba(255,255,255,0.42)' : 'rgba(255,255,255,0.28)');
+  // Composited opacity replaces non-composited background color transition
+  const overlayOpacity = dark
+    ? (scrolled ? 0.32 : 0.18)
+    : (scrolled ? 0.42 : 0.28);
 
   // Specular — brighter in light mode
   const specular = dark
@@ -60,13 +60,20 @@ export default function GlassNav() {
 
       <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-3 sm:pt-4 pointer-events-none">
         <nav
-          className="relative pointer-events-auto rounded-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
-          style={{
-            boxShadow: scrolled
-              ? (dark ? '0 16px 48px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.13)')
-              : 'none',
-          }}
+          className="relative pointer-events-auto rounded-full overflow-hidden"
         >
+          {/* Shadow — opacity transition is composited (no box-shadow transition on parent) */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            borderRadius: 'inherit',
+            boxShadow: dark ? '0 16px 48px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.13)',
+            opacity: scrolled ? 1 : 0,
+            transition: 'opacity 0.5s cubic-bezier(0.32,0.72,0,1)',
+            pointerEvents: 'none',
+          }} />
+
           {/* Layer 1 — blur + liquid distortion (matches .glass-filter) */}
           <div style={{
             position: 'absolute',
@@ -78,24 +85,24 @@ export default function GlassNav() {
             filter: 'url(#glass-distortion) saturate(120%) brightness(1.15)',
           }} />
 
-          {/* Layer 2 — color tint (matches .glass-overlay) */}
+          {/* Layer 2 — color tint; opacity transition is composited */}
           <div style={{
             position: 'absolute',
             inset: 0,
             zIndex: 2,
             borderRadius: 'inherit',
-            background: overlayBg,
-            transition: 'background 0.5s ease',
+            background: dark ? '#000' : '#fff',
+            opacity: overlayOpacity,
+            transition: 'opacity 0.5s ease',
           }} />
 
-          {/* Layer 3 — specular highlight edge (matches .glass-specular) */}
+          {/* Layer 3 — specular highlight edge; no transition needed (theme-switch only) */}
           <div style={{
             position: 'absolute',
             inset: 0,
             zIndex: 3,
             borderRadius: 'inherit',
             boxShadow: specular,
-            transition: 'box-shadow 0.5s ease',
           }} />
 
           {/* Layer 4 — actual nav content (matches .glass-content) */}

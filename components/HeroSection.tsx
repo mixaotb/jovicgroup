@@ -7,8 +7,7 @@ import { ArrowRightIcon } from '@phosphor-icons/react';
 const STATS = [
   { value: '1.200+', label: 'Projekata' },
   { value: '20+',    label: 'Godina iskustva' },
-  { value: '98.3%',  label: 'Zadovoljnih klijenata' },
-  { value: '6',      label: 'Zemalja isporuke' },
+  { value: '5 god.', label: 'Garancija na ugradnju' },
 ];
 
 export default function HeroSection() {
@@ -18,7 +17,7 @@ export default function HeroSection() {
       {/* Background architectural photo */}
       <div className="absolute inset-0">
         <Image
-          src="https://picsum.photos/seed/glass-facade-architecture-modern/1920/1080"
+          src="/hero.jpg"
           alt="Moderna staklena fasada"
           fill
           priority
@@ -64,8 +63,8 @@ export default function HeroSection() {
 
           {/* Subtext */}
           <p className="text-[clamp(1rem,1.8vw,1.15rem)] text-[var(--text-muted)] max-w-[480px] leading-relaxed mb-11 animate-fade-up delay-200">
-            PVC i ALU stolarija sa Schüco, Alphacan i Profilink profilima.
-            Bez posrednika, samo vrhunski rezultat.
+            PVC i ALU stolarija sa Schüco, Alphacan, Elvial i Profilco profilima.
+            Od izrade do ugradnje, sve na jednom mestu.
           </p>
 
           {/* CTAs — button-in-button pattern */}

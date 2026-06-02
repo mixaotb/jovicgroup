@@ -102,6 +102,8 @@ export async function POST(request: NextRequest) {
         phone:         body.phone.trim(),
         email:         body.email?.trim() || null,
         location:      body.location,
+        town:          body.town?.trim() || null,
+        address:       body.address?.trim() || null,
         paymentMethod: body.payment_method,
         totalPrice,
         notes:         body.notes?.trim() || null,

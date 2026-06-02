@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useId } from 'react';
+import { useRef, useCallback, useId, useEffect } from 'react';
 
 export default function LiquidGlassCard({
   children,
@@ -15,18 +15,30 @@ export default function LiquidGlassCard({
   const filterId = `lgc${uid.replace(/:/g, '')}`;
   const cardRef = useRef<HTMLDivElement>(null);
   const specularRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+  const mapRef = useRef<SVGFEDisplacementMapElement | null>(null);
 
-  const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  useEffect(() => {
     const el = cardRef.current;
     if (!el) return;
-    const rect = el.getBoundingClientRect();
+    rectRef.current = el.getBoundingClientRect();
+    mapRef.current = el.querySelector('feDisplacementMap');
+    const ro = new ResizeObserver(() => {
+      rectRef.current = el.getBoundingClientRect();
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = rectRef.current;
+    if (!rect) return;
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const map = el.querySelector('feDisplacementMap');
-    if (map) {
+    if (mapRef.current) {
       const s = Math.max(15, Math.min((x / rect.width) * 100, (y / rect.height) * 100));
-      map.setAttribute('scale', String(s));
+      mapRef.current.setAttribute('scale', String(s));
     }
 
     if (specularRef.current) {
@@ -35,8 +47,7 @@ export default function LiquidGlassCard({
   }, []);
 
   const onLeave = useCallback(() => {
-    const map = cardRef.current?.querySelector('feDisplacementMap');
-    if (map) map.setAttribute('scale', '77');
+    if (mapRef.current) mapRef.current.setAttribute('scale', '77');
     if (specularRef.current) specularRef.current.style.backgroundImage = '';
   }, []);
 

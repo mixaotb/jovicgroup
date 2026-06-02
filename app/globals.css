@@ -19,7 +19,7 @@
   --bg-raised:     #F1F0EC;
   --text:          #111827;
   --text-muted:    #6B7280;
-  --text-faint:    #9CA3AF;
+  --text-faint:    #6B7280;
   --border:        #E5E7EB;
   --border-strong: #D1D5DB;
 
@@ -37,7 +37,7 @@
   --bg-raised:     #111827;
   --text:          #F1F5F9;
   --text-muted:    #94A3B8;
-  --text-faint:    #475569;
+  --text-faint:    #7B8B9E;
   --border:        #1E293B;
   --border-strong: #334155;
 
@@ -187,9 +187,11 @@
 
   /* Animate utilities (fallback — motion components override these) */
   .animate-fade-up {
+    will-change: transform, opacity;
     animation: fadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .animate-fade-in {
+    will-change: opacity;
     animation: fadeIn 0.5s ease-out both;
   }
 

@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect, useId } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { calculatePrice, formatRSD, getDeliveryFee, DIMENSION_LIMITS, DEFAULT_DIMENSIONS } from '@/lib/pricing';
+import { calculatePrice, formatRSD, getDeliveryFee, getAddonCosts, getGlassPriceDelta, getOkovPriceDelta, getColorPriceDelta, getMaterialPriceDelta, DIMENSION_LIMITS, DEFAULT_DIMENSIONS } from '@/lib/pricing';
 import ThemeToggle from '@/components/ThemeToggle';
 import type {
   ProductType, Material, GlassType, OkovType, ColorType, KomarnikType,
@@ -136,24 +136,24 @@ const LOCATIONS: { value: OrderLocation; label: string; desc: string; fee: strin
 
 const GLASS_INFO: Record<GlassType, { label: string; sublabel: string; tooltip: string }> = {
   dvoslojno: {
-    label: 'Standard', sublabel: 'U ≈ 1.1 W/m²K',
-    tooltip: 'Standardno dvoslojno staklo 4/16/4 punjeno argonom. U ≈ 1.1 W/m²K. Dobar balans cene i izolacije — preporučujemo za unutrašnje prostorije ili zaštićene fasade.',
+    label: 'Standard', sublabel: 'Standardna izolacija',
+    tooltip: 'Standardno dvoslojno staklo punjeno argonom. Dobar balans cene i izolacije, preporučujemo za unutrašnje prostorije ili zaštićene fasade.',
   },
   dvoslojno_niskoemisiono: {
-    label: 'Niskoemisiono', sublabel: 'U ≈ 0.9 W/m²K',
-    tooltip: 'Dvoslojno staklo sa Low-E premazom koji odbija infracrveno zračenje. U ≈ 0.9 W/m²K — bolja izolacija od standarda uz isti razmak stakla. Idealno kada ne želite troslojno ali tražite veću efikasnost.',
+    label: 'Niskoemisiono', sublabel: 'Poboljšana izolacija',
+    tooltip: 'Dvoslojno staklo sa Low-E premazom koji odbija infracrveno zračenje. Bolja izolacija od standarda uz isti razmak stakla. Idealno kada ne želite troslojno ali tražite veću efikasnost.',
   },
   dvoslojno_peskirano: {
     label: 'Peskirano', sublabel: 'Dekorativno',
     tooltip: 'Dvoslojni sistem sa matiranim (peskirano) staklom. Propušta difuznu svetlost uz potpunu privatnost. Idealno za kupatila, stepenišne otvore i pregrade.',
   },
   niskoemisiono: {
-    label: 'Niskoemisiono', sublabel: 'U ≈ 0.6 W/m²K',
-    tooltip: 'Troslojno staklo (4/12/4/12/4) sa Low-E premazom i kriptonom. U ≈ 0.6 W/m²K — do 45% manji gubitak toplote u poređenju sa dvoslojnim. Preporučujemo za spavaće sobe i dnevne boravke.',
+    label: 'Niskoemisiono', sublabel: 'Visoka izolacija',
+    tooltip: 'Troslojno staklo sa Low-E premazom. Do 45% manji gubitak toplote u poređenju sa dvoslojnim. Preporučujemo za spavaće sobe i dnevne boravke.',
   },
   '4_godisnja_doba': {
-    label: '4 godišnja doba', sublabel: 'U ≈ 0.5 W/m²K',
-    tooltip: 'Napredni troslojni sistem sa dvostrukim Low-E premazom i kriptonom. U ≈ 0.5 W/m²K. Optimalno za pasivne kuće i hladne regione — maksimalna energetska efikasnost kroz sve sezone.',
+    label: '4 godišnja doba', sublabel: 'Maksimalna izolacija',
+    tooltip: 'Napredni troslojni sistem sa dvostrukim Low-E premazom. Optimalno za pasivne kuće i hladne regione, maksimalna energetska efikasnost kroz sve sezone.',
   },
   peskirano: {
     label: 'Peskirano', sublabel: 'Dekorativno',
@@ -161,10 +161,23 @@ const GLASS_INFO: Record<GlassType, { label: string; sublabel: string; tooltip: 
   },
 };
 
-const COLOR_OPTIONS: { value: ColorType; label: string; swatch: string; note: string }[] = [
+const COLOR_OPTIONS: { value: ColorType; label: string; swatch: string; note: string; icon?: React.ReactNode }[] = [
   { value: 'white',      label: 'Bela',     swatch: 'bg-gray-100 border-gray-300',   note: 'Klasična bela, RAL 9016' },
   { value: 'anthracite', label: 'Antracit', swatch: 'bg-slate-700 border-slate-600', note: 'Tamno siva, RAL 7016' },
-  { value: 'wood',       label: 'Drvo',     swatch: 'bg-amber-800 border-amber-700', note: 'Hrast / orah folija' },
+  {
+    value: 'wood', label: 'Drvo', swatch: '', note: 'Sve vrste drvnih folija',
+    icon: (
+      <svg viewBox="0 0 28 28" fill="none" className="w-7 h-7 rounded-lg mb-2.5" xmlns="http://www.w3.org/2000/svg">
+        <rect width="28" height="28" rx="5" fill="#92400e"/>
+        <path d="M0 4 Q7 2.5 14 4.5 Q21 6.5 28 4" stroke="#5c2200" strokeWidth="1.4" opacity="0.55"/>
+        <path d="M0 9 Q6 7 14 9.5 Q22 12 28 9" stroke="#5c2200" strokeWidth="1.8" opacity="0.65"/>
+        <path d="M0 15 Q7 13 14 15.5 Q21 18 28 15" stroke="#5c2200" strokeWidth="1.4" opacity="0.55"/>
+        <path d="M0 20.5 Q6 19 14 21 Q22 23 28 20.5" stroke="#5c2200" strokeWidth="1.8" opacity="0.65"/>
+        <path d="M0 26 Q7 24 14 26 Q21 28 28 26" stroke="#5c2200" strokeWidth="1.2" opacity="0.45"/>
+        <rect width="28" height="28" rx="5" fill="rgba(255,220,150,0.06)"/>
+      </svg>
+    ),
+  },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -300,7 +313,7 @@ function InfoTooltip({ text }: { text: string }) {
   );
 }
 
-function ToggleChip({ checked, onChange, label, icon }: { checked: boolean; onChange: (v: boolean) => void; label: string; icon?: React.ReactNode }) {
+function ToggleChip({ checked, onChange, label, icon, tooltip, price }: { checked: boolean; onChange: (v: boolean) => void; label: string; icon?: React.ReactNode; tooltip?: string; price?: string }) {
   return (
     <button
       type="button"
@@ -318,7 +331,178 @@ function ToggleChip({ checked, onChange, label, icon }: { checked: boolean; onCh
       </span>
       {icon && <span className="flex-shrink-0 opacity-80">{icon}</span>}
       {label}
+      {price && <span className="text-[#C9A84C] text-[11px] font-semibold ml-0.5">+{price}</span>}
+      {tooltip && <InfoTooltip text={tooltip} />}
     </button>
+  );
+}
+
+function GlassButton({
+  children, onClick, disabled = false, className = '',
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+}) {
+  const uid = useId();
+  const filterId = `gbt${uid.replace(/:/g, '')}`;
+  const elRef = useRef<HTMLButtonElement>(null);
+  const specRef = useRef<HTMLDivElement>(null);
+
+  const onEnter = useCallback(() => {
+    if (!elRef.current || disabled) return;
+    elRef.current.style.transform = 'translateY(-3px)';
+    elRef.current.style.boxShadow = '0 4px 10px rgba(201,168,76,0.25)';
+  }, [disabled]);
+
+  const onMove = useCallback((e: React.MouseEvent) => {
+    const el = elRef.current;
+    if (!el || disabled) return;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    const map = el.querySelector('feDisplacementMap');
+    if (map) map.setAttribute('scale', '22');
+    if (specRef.current) {
+      specRef.current.style.backgroundImage = `radial-gradient(circle at ${x}px ${y}px, rgba(255,255,255,0.52) 0%, rgba(255,255,255,0.2) 26%, transparent 58%)`;
+    }
+  }, [disabled]);
+
+  const onLeave = useCallback(() => {
+    if (elRef.current) {
+      elRef.current.style.transform = '';
+      elRef.current.style.boxShadow = '';
+    }
+    const map = elRef.current?.querySelector('feDisplacementMap');
+    if (map) map.setAttribute('scale', '0');
+    if (specRef.current) specRef.current.style.backgroundImage = '';
+  }, []);
+
+  return (
+    <button
+      ref={elRef}
+      onClick={onClick}
+      disabled={disabled}
+      className={`relative overflow-hidden rounded-xl font-bold text-[#0B1120] flex items-center justify-center transition-all duration-300
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+        ${className}`}
+      onMouseEnter={onEnter}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      onMouseDown={() => { if (elRef.current) elRef.current.style.transform = 'translateY(0px)'; }}
+      onMouseUp={() => { if (elRef.current && !disabled) elRef.current.style.transform = 'translateY(-3px)'; }}
+    >
+      <svg aria-hidden style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        <defs>
+          <filter id={filterId} x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="turbulence" baseFrequency="0.014 0.011" numOctaves="2" result="noise" seed="5" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* Backdrop distortion */}
+      <div className="absolute inset-0 rounded-[inherit] pointer-events-none" style={{
+        backdropFilter: 'blur(6px) saturate(160%)',
+        WebkitBackdropFilter: 'blur(6px) saturate(160%)',
+        filter: `url(#${filterId}) brightness(1.05)`,
+        zIndex: 1,
+      }} />
+
+      {/* Rich gradient */}
+      <div className="absolute inset-0 rounded-[inherit] pointer-events-none" style={{
+        background: 'linear-gradient(135deg, #BF8F28 0%, #C9A84C 30%, #E8931A 65%, #F0BC35 100%)',
+        zIndex: 2,
+      }} />
+
+      {/* Mouse-tracking specular */}
+      <div ref={specRef} className="absolute inset-0 rounded-[inherit] pointer-events-none" style={{
+        boxShadow: 'inset 1px 1px 1px rgba(255,255,255,0.55), inset 0 -1px 0 rgba(0,0,0,0.1)',
+        zIndex: 3,
+      }} />
+
+      {/* Content */}
+      <div className="relative" style={{ zIndex: 4 }}>
+        {children}
+      </div>
+    </button>
+  );
+}
+
+function GlassPricePanel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const uid = useId();
+  const filterId = `gpp${uid.replace(/:/g, '')}`;
+  const panelRef = useRef<HTMLDivElement>(null);
+  const specRef  = useRef<HTMLDivElement>(null);
+
+  const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = panelRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    const map = el.querySelector('feDisplacementMap');
+    if (map) map.setAttribute('scale', String(Math.min(15 + (x / r.width) * 55, 55)));
+    if (specRef.current) {
+      specRef.current.style.backgroundImage = `radial-gradient(ellipse at ${x}px ${y}px, rgba(201,168,76,0.26) 0%, rgba(255,255,255,0.08) 38%, transparent 68%)`;
+    }
+  }, []);
+
+  const onLeave = useCallback(() => {
+    const map = panelRef.current?.querySelector('feDisplacementMap');
+    if (map) map.setAttribute('scale', '35');
+    if (specRef.current) specRef.current.style.backgroundImage = '';
+  }, []);
+
+  return (
+    <div ref={panelRef} className={`relative overflow-hidden ${className}`} onMouseMove={onMove} onMouseLeave={onLeave}>
+      <svg aria-hidden style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
+        <defs>
+          <filter id={filterId} x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="turbulence" baseFrequency="0.008 0.009" numOctaves="2" result="noise" seed="4" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="35" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* Backdrop blur + liquid distortion */}
+      <div className="absolute inset-0 rounded-[inherit] pointer-events-none" style={{
+        backdropFilter: 'blur(22px) saturate(160%)',
+        WebkitBackdropFilter: 'blur(22px) saturate(160%)',
+        filter: `url(#${filterId}) brightness(1.07)`,
+        zIndex: 1,
+      }} />
+
+      {/* Semi-transparent base (light/dark adaptive) */}
+      <div className="absolute inset-0 rounded-[inherit] pointer-events-none bg-white/78 dark:bg-[#0B1120]/82" style={{ zIndex: 2 }} />
+
+      {/* Gold gradient tint — top-left bloom */}
+      <div className="absolute inset-0 rounded-[inherit] pointer-events-none" style={{
+        background: 'linear-gradient(140deg, rgba(201,168,76,0.22) 0%, rgba(201,168,76,0.07) 32%, transparent 58%)',
+        zIndex: 3,
+      }} />
+
+      {/* Mouse-tracking gold specular + edge inset */}
+      <div ref={specRef} className="absolute inset-0 rounded-[inherit] pointer-events-none" style={{
+        boxShadow: 'inset 1px 1px 1px rgba(255,255,255,0.24), inset 0 -1px 0 rgba(0,0,0,0.08)',
+        zIndex: 4,
+      }} />
+
+      {/* Content */}
+      <div className="relative" style={{ zIndex: 5 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function DeltaBadge({ delta }: { delta: number }) {
+  if (delta === 0) return null;
+  return (
+    <span className={`text-[11px] font-semibold ${delta > 0 ? 'text-[#C9A84C]' : 'text-emerald-400'}`}>
+      {delta > 0 ? '+' : ''}{formatRSD(delta)}
+    </span>
   );
 }
 
@@ -487,6 +671,10 @@ export default function KalkulatorPage() {
     return { basePrice, deliveryFee, total: basePrice + deliveryFee };
   }, [cartItems, location]);
 
+  // ── Addon costs (live, per unit) ─────────────────────────────────────────
+
+  const addonCosts = useMemo(() => getAddonCosts(width, height, productType), [width, height, productType]);
+
   // ── Live preview ──────────────────────────────────────────────────────────
 
   const livePrice = useMemo(() => calculatePrice(width, height, material, productType, location, quantity, {
@@ -566,12 +754,12 @@ export default function KalkulatorPage() {
             <Link href="/" className="px-6 py-3 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
               Nazad na početnu
             </Link>
-            <button
+            <GlassButton
               onClick={() => { setStep('config'); setCustomerName(''); setPhone(''); setEmail(''); setTown(''); setAddress(''); setNotes(''); setCartItems([]); resetConfigForm(); }}
-              className="px-6 py-3 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300 text-[14px]"
+              className="px-6 py-3 text-[14px]"
             >
               Nova narudžbina
-            </button>
+            </GlassButton>
           </div>
         </div>
       </div>
@@ -582,10 +770,15 @@ export default function KalkulatorPage() {
   const steps = ['Konfiguracija', 'Korpa', 'Narudžbina'];
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen" style={{ background: 'radial-gradient(ellipse at 78% 28%, rgba(201,168,76,0.09) 0%, transparent 48%), var(--bg)' }}>
       {/* Header */}
-      <header className="border-b border-[var(--border)] bg-[var(--bg-surface)] sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between gap-6">
+      <header className="sticky top-0 z-40 overflow-hidden">
+        {/* Glass layers */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backdropFilter: 'blur(14px) saturate(150%)', WebkitBackdropFilter: 'blur(14px) saturate(150%)', zIndex: 1 }} />
+        <div className="absolute inset-0 pointer-events-none bg-[var(--bg-surface)]/75 dark:bg-[var(--bg-surface)]/82" style={{ zIndex: 2 }} />
+        <div className="absolute inset-0 pointer-events-none border-b border-white/10 dark:border-white/6" style={{ zIndex: 3 }} />
+        <div className="absolute bottom-0 left-0 right-0 h-px pointer-events-none bg-gradient-to-r from-transparent via-[#C9A84C]/35 to-transparent" style={{ zIndex: 4 }} />
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 h-[60px] flex items-center justify-between gap-6 relative" style={{ zIndex: 5 }}>
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
             <div className="w-6 h-6 flex items-center justify-center">
               <Image src="/logo.png" alt="Jović Group" width={24} height={24} className="object-contain" />
@@ -664,7 +857,9 @@ export default function KalkulatorPage() {
                 <CardSection>
                   <SectionTitle>2. Materijal</SectionTitle>
                   <div className="grid sm:grid-cols-2 gap-3">
-                    {MATERIALS.map((m) => (
+                    {MATERIALS.map((m) => {
+                      const delta = getMaterialPriceDelta(width, height, productType, color, material, m.value);
+                      return (
                       <button
                         key={m.value}
                         onClick={() => setMaterial(m.value)}
@@ -674,15 +869,19 @@ export default function KalkulatorPage() {
                             : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
                         }`}
                       >
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-[13px] ${material === m.value ? 'bg-[#C9A84C] text-[#0B1120]' : 'bg-[var(--border)] text-[var(--text-muted)]'}`}>
-                            {m.value}
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-[13px] ${material === m.value ? 'bg-[#C9A84C] text-[#0B1120]' : 'bg-[var(--border)] text-[var(--text-muted)]'}`}>
+                              {m.value}
+                            </div>
+                            <span className="font-bold text-[var(--text)] text-[14px]">{m.label}</span>
                           </div>
-                          <span className="font-bold text-[var(--text)] text-[14px]">{m.label}</span>
+                          {m.value !== material && <DeltaBadge delta={delta} />}
                         </div>
                         <p className="text-[var(--text-muted)] text-[12.5px] leading-relaxed">{m.desc}</p>
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardSection>
                 )}
@@ -756,6 +955,8 @@ export default function KalkulatorPage() {
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       {(['dvoslojno', 'troslojno'] as const).map((tier) => {
                         const active = tier === 'dvoslojno' ? !isTroslojnoTier(glassType) : isTroslojnoTier(glassType);
+                        const targetGlass = tier === 'dvoslojno' ? 'dvoslojno' : 'niskoemisiono';
+                        const delta = active ? 0 : getGlassPriceDelta(width, height, productType, glassType, targetGlass);
                         return (
                           <button
                             key={tier}
@@ -767,11 +968,14 @@ export default function KalkulatorPage() {
                               active ? 'border-[#C9A84C] bg-[#C9A84C]/8' : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
                             }`}
                           >
-                            <div className="font-semibold text-[var(--text)] text-[13px]">
-                              {tier === 'dvoslojno' ? 'Dvoslojno' : 'Troslojno'}
+                            <div className="flex items-baseline justify-between gap-2">
+                              <div className="font-semibold text-[var(--text)] text-[13px]">
+                                {tier === 'dvoslojno' ? 'Dvoslojno' : 'Troslojno'}
+                              </div>
+                              {!active && <DeltaBadge delta={delta} />}
                             </div>
                             <div className="text-[var(--text-faint)] text-[12px] mt-0.5">
-                              {tier === 'dvoslojno' ? 'Standard · U ≈ 1.1 W/m²K' : 'Premium · U ≤ 0.6 W/m²K'}
+                              {tier === 'dvoslojno' ? 'Dobar balans cene i izolacije' : 'Maksimalna toplotna izolacija'}
                             </div>
                           </button>
                         );
@@ -783,6 +987,7 @@ export default function KalkulatorPage() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-1">
                         {(['dvoslojno', 'dvoslojno_niskoemisiono', 'dvoslojno_peskirano'] as GlassType[]).map((g) => {
                           const info = GLASS_INFO[g];
+                          const delta = g !== glassType ? getGlassPriceDelta(width, height, productType, glassType, g) : 0;
                           return (
                             <button
                               key={g}
@@ -796,6 +1001,7 @@ export default function KalkulatorPage() {
                                 <InfoTooltip text={info.tooltip} />
                               </div>
                               <div className="text-[var(--text-faint)] text-[11.5px]">{info.sublabel}</div>
+                              {g !== glassType && <DeltaBadge delta={delta} />}
                             </button>
                           );
                         })}
@@ -807,6 +1013,7 @@ export default function KalkulatorPage() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 pt-1">
                         {(['niskoemisiono', '4_godisnja_doba', 'peskirano'] as GlassType[]).map((g) => {
                           const info = GLASS_INFO[g];
+                          const delta = g !== glassType ? getGlassPriceDelta(width, height, productType, glassType, g) : 0;
                           return (
                             <button
                               key={g}
@@ -820,6 +1027,7 @@ export default function KalkulatorPage() {
                                 <InfoTooltip text={info.tooltip} />
                               </div>
                               <div className="text-[var(--text-faint)] text-[11.5px]">{info.sublabel}</div>
+                              {g !== glassType && <DeltaBadge delta={delta} />}
                             </button>
                           );
                         })}
@@ -836,7 +1044,9 @@ export default function KalkulatorPage() {
                       {([
                         { value: 'agb'    as OkovType, name: 'AGB',    origin: 'Italija',  badge: '5 god. garancija', desc: 'Vrhunski italijanski okov. Klasa otpornosti RC2.' },
                         { value: 'schuco' as OkovType, name: 'Schüco', origin: 'Nemačka', badge: '10 god. garancija', desc: 'Premium nemački okov. Klasa otpornosti RC3.' },
-                      ]).map((ok) => (
+                      ]).map((ok) => {
+                        const delta = ok.value !== okovType ? getOkovPriceDelta(productType, okovType, ok.value) : 0;
+                        return (
                         <button
                           key={ok.value}
                           onClick={() => setOkovType(ok.value)}
@@ -849,13 +1059,17 @@ export default function KalkulatorPage() {
                               <div className="font-bold text-[var(--text)] text-[14px]">{ok.name}</div>
                               <div className="text-[var(--text-faint)] text-[12px]">{ok.origin}</div>
                             </div>
-                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${okovType === ok.value ? 'border-[#C9A84C]/50 text-[#C9A84C] bg-[#C9A84C]/10' : 'border-[var(--border)] text-[var(--text-faint)]'}`}>
-                              {ok.badge}
-                            </span>
+                            <div className="flex flex-col items-end gap-1">
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${okovType === ok.value ? 'border-[#C9A84C]/50 text-[#C9A84C] bg-[#C9A84C]/10' : 'border-[var(--border)] text-[var(--text-faint)]'}`}>
+                                {ok.badge}
+                              </span>
+                              {ok.value !== okovType && <DeltaBadge delta={delta} />}
+                            </div>
                           </div>
                           <p className="text-[var(--text-muted)] text-[12.5px]">{ok.desc}</p>
                         </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   </CardSection>
                 )}
@@ -864,7 +1078,9 @@ export default function KalkulatorPage() {
                 <CardSection>
                   <SectionTitle>6. Boja profila</SectionTitle>
                   <div className="grid grid-cols-3 gap-3">
-                    {COLOR_OPTIONS.map((c) => (
+                    {COLOR_OPTIONS.map((c) => {
+                      const delta = c.value !== color ? getColorPriceDelta(width, height, productType, material, color, c.value) : 0;
+                      return (
                       <button
                         key={c.value}
                         onClick={() => setColor(c.value)}
@@ -872,11 +1088,13 @@ export default function KalkulatorPage() {
                           color === c.value ? 'border-[#C9A84C] bg-[#C9A84C]/8' : 'border-[var(--border)] hover:border-[var(--border-strong)] bg-[var(--bg-raised)]'
                         }`}
                       >
-                        <div className={`w-7 h-7 rounded-lg border-2 mb-2.5 ${c.swatch}`} />
+                        {c.icon ?? <div className={`w-7 h-7 rounded-lg border-2 mb-2.5 ${c.swatch}`} />}
                         <div className="font-semibold text-[var(--text)] text-[13px]">{c.label}</div>
                         <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{c.note}</div>
+                        {c.value !== color && <DeltaBadge delta={delta} />}
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardSection>
 
@@ -937,17 +1155,17 @@ export default function KalkulatorPage() {
                             >
                               <span className="opacity-80">{opt.icon}</span>
                               {opt.label}
+                              {opt.value === 'fiksni'    && <span className="text-[#C9A84C] text-[11px] font-semibold ml-0.5">+{formatRSD(addonCosts.komarnikFiksni)}</span>}
+                              {opt.value === 'plisirani' && <span className="text-[#C9A84C] text-[11px] font-semibold ml-0.5">+{formatRSD(addonCosts.komarnikPlisirani)}</span>}
+                              {opt.value === 'rolo'      && <span className="text-[#C9A84C] text-[11px] font-semibold ml-0.5">+{formatRSD(addonCosts.komarnikRolo)}</span>}
                             </button>
                           ))}
                         </div>
-                        <p className="mt-2 text-[var(--text-faint)] text-[12px] leading-relaxed">
-                          Fiksni — najjednostavniji, nepomičan ram. Plisirani — harmonika sistem, po strani. Rolo — navijač, uvlači se u kasetu iznad.
-                        </p>
                       </div>
                     )}
                     <div className="flex flex-wrap gap-3">
                       {productHasRoletna(productType) && (
-                        <ToggleChip checked={hasRoletna} onChange={setHasRoletna} label="Roletne" icon={
+                        <ToggleChip checked={hasRoletna} onChange={setHasRoletna} label="Roletne" price={formatRSD(addonCosts.roletna)} tooltip="PVC ili ALU roleta montirana iznad prozora. Pruža zaštitu od sunca, toplote i buke." icon={
                           <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
                             <rect x="5" y="10" width="22" height="17" rx="1" />
                             <rect x="4" y="4" width="24" height="7" rx="2.5" />
@@ -957,7 +1175,7 @@ export default function KalkulatorPage() {
                         } />
                       )}
                       {productHasOkapnica(productType) && (
-                        <ToggleChip checked={hasOkapnica} onChange={setHasOkapnica} label="Okapnica" icon={
+                        <ToggleChip checked={hasOkapnica} onChange={setHasOkapnica} label="Okapnica" price={formatRSD(addonCosts.okapnica)} tooltip="ALU tabla ispod prozora koja odvodi kišnicu od fasade. Sprečava vlagu i prljavštinu." icon={
                           <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
                             <rect x="5" y="4" width="22" height="18" rx="1" />
                             <path d="M3 22 L16 28 L29 22" strokeLinejoin="round" strokeLinecap="round" />
@@ -965,14 +1183,14 @@ export default function KalkulatorPage() {
                         } />
                       )}
                       {productHasSillInside(productType) && (
-                        <ToggleChip checked={hasSillInside} onChange={setHasSillInside} label="Unutrašnja klupica" icon={
+                        <ToggleChip checked={hasSillInside} onChange={setHasSillInside} label="Unutrašnja klupica" price={formatRSD(addonCosts.sillInside)} tooltip="PVC klupica koja se postavlja na unutrašnju stranu prozorskog otvora. Dostupna u beloj boji." icon={
                           <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
                             <rect x="5" y="4" width="22" height="19" rx="1" />
                             <rect x="3" y="22" width="26" height="4" rx="1" />
                           </svg>
                         } />
                       )}
-                      <ToggleChip checked={hasInstallation} onChange={setHasInstallation} label="Ugradnja" icon={
+                      <ToggleChip checked={hasInstallation} onChange={setHasInstallation} label="Ugradnja" price={formatRSD(addonCosts.installation)} tooltip="Montaža i ugradnja od strane našeg tima na vašoj lokaciji." icon={
                         <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
                           <path d="M22 5 C26 9 26 15 22 18 L10 29 C9 30 7 30 6 29 C5 28 5 26 6 25 L18 13 C14 9 14 4 18 2" strokeLinecap="round" strokeLinejoin="round" />
                           <circle cx="7.5" cy="27.5" r="1.5" fill="currentColor" stroke="none" />
@@ -980,12 +1198,6 @@ export default function KalkulatorPage() {
                       } />
                     </div>
                   </div>
-                  <p className="mt-3 text-[var(--text-faint)] text-[12px] leading-relaxed">
-                    {productHasRoletna(productType)  && 'Roletne — PVC ili ALU roleta iznad prozora. '}
-                    {productHasOkapnica(productType) && 'Okapnica — ALU tabla za odvod kiše ispod prozora. '}
-                    {productHasSillInside(productType) && 'Unutrašnja klupica — PVC klupica na unutrašnjoj strani. '}
-                    Ugradnja — montaža i ugradnja uključena u cenu.
-                  </p>
                 </CardSection>
 
                 {/* 8. Napomena i fotografija */}
@@ -1070,18 +1282,18 @@ export default function KalkulatorPage() {
                 <div className="flex gap-3">
                   {editingItemId ? (
                     <>
-                      <button onClick={updateItem} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[14px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300">
+                      <GlassButton onClick={updateItem} className="flex-1 py-4 text-[14px]">
                         Ažuriraj stavku
-                      </button>
+                      </GlassButton>
                       <button onClick={() => { resetConfigForm(); setStep('cart'); }} className="px-6 py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
                         Otkaži
                       </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={addToCart} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[14px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300">
+                      <GlassButton onClick={addToCart} className="flex-1 py-4 text-[14px]">
                         Dodaj u korpu
-                      </button>
+                      </GlassButton>
                       {cartItems.length > 0 && (
                         <button onClick={() => setStep('cart')} className="px-6 py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
                           Korpa ({cartItems.length})
@@ -1106,9 +1318,9 @@ export default function KalkulatorPage() {
                 {cartItems.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-[var(--text-faint)] mb-4 text-[14px]">Korpa je prazna</div>
-                    <button onClick={() => setStep('config')} className="px-4 py-2 rounded-lg bg-[#C9A84C] text-[#0B1120] font-semibold text-[14px]">
+                    <GlassButton onClick={() => setStep('config')} className="px-4 py-2 text-[14px]">
                       Dodaj prvu stavku
-                    </button>
+                    </GlassButton>
                   </div>
                 ) : (
                   <>
@@ -1200,9 +1412,9 @@ export default function KalkulatorPage() {
                       <button onClick={() => { resetConfigForm(); setStep('config'); }} className="flex-1 py-4 rounded-xl border border-[var(--border)] text-[var(--text-muted)] font-semibold hover:text-[var(--text)] transition-colors text-[14px]">
                         + Dodaj stavku
                       </button>
-                      <button onClick={() => setStep('checkout')} className="flex-1 py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_8px_28px_rgba(201,168,76,0.4)] active:translate-y-0 transition-all duration-300 text-[14px]">
+                      <GlassButton onClick={() => setStep('checkout')} className="flex-1 py-4 text-[14px]">
                         Nastavi →
-                      </button>
+                      </GlassButton>
                     </div>
                   </>
                 )}
@@ -1294,12 +1506,13 @@ export default function KalkulatorPage() {
                   </div>
                 </div>
 
-                <button
-                  onClick={handleSubmit} disabled={loading}
-                  className="mt-6 w-full py-4 rounded-xl bg-[#C9A84C] text-[#0B1120] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_10px_36px_rgba(201,168,76,0.45)] active:translate-y-0 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none shadow-[0_4px_24px_rgba(201,168,76,0.2)]"
+                <GlassButton
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="mt-6 w-full py-4 text-[15px]"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center gap-2.5">
+                    <span className="flex items-center gap-2.5">
                       <span
                         className="inline-block w-[18px] h-[18px] rounded-full border-[2.5px] border-[#0B1120]/20 border-t-[#0B1120] animate-spin flex-shrink-0"
                         style={{ boxShadow: '0 0 8px 2px rgba(11,17,32,0.25)' }}
@@ -1308,7 +1521,7 @@ export default function KalkulatorPage() {
                       Slanje...
                     </span>
                   ) : `Pošalji narudžbinu · ${formatRSD(cartTotals.total)}`}
-                </button>
+                </GlassButton>
                 <p className="text-center text-[var(--text-faint)] text-[11px] mt-3">
                   Kontaktiraćemo vas u roku od 24h.
                 </p>
@@ -1318,11 +1531,11 @@ export default function KalkulatorPage() {
 
           {/* ── Right: Live price card ── */}
           <div className="lg:sticky lg:top-[76px]">
-            <div className="rounded-2xl border border-[#C9A84C]/25 bg-[var(--bg-surface)] overflow-hidden shadow-lg shadow-black/5 dark:shadow-black/30">
+            <GlassPricePanel className="rounded-2xl border border-[#C9A84C]/30 shadow-xl shadow-black/10 dark:shadow-black/50">
 
               {step === 'config' && (
                 <>
-                  <div className="px-6 py-5 border-b border-[var(--border)] bg-[#C9A84C]/6">
+                  <div className="px-6 py-5 border-b border-[#C9A84C]/20">
                     <div className="text-[#C9A84C] font-semibold text-[11px] tracking-[0.1em] uppercase mb-1">Cena za ovu stavku</div>
                     <div className="font-display text-[2.2rem] font-bold text-[var(--text)]">
                       {formatRSD(livePrice.total)}
@@ -1406,7 +1619,7 @@ export default function KalkulatorPage() {
 
               {(step === 'cart' || step === 'checkout') && (
                 <>
-                  <div className="px-6 py-5 border-b border-[var(--border)] bg-[#C9A84C]/6">
+                  <div className="px-6 py-5 border-b border-[#C9A84C]/20">
                     <div className="text-[#C9A84C] font-semibold text-[11px] tracking-[0.1em] uppercase mb-1">Ukupna korpa</div>
                     <div className="font-display text-[2.2rem] font-bold text-[var(--text)]">{formatRSD(cartTotals.total)}</div>
                     <div className="text-[var(--text-faint)] text-[13px] mt-0.5">
@@ -1460,7 +1673,7 @@ export default function KalkulatorPage() {
                   Ovo je okvirna cena. Konačna cena potvrđuje se nakon detaljnog merenja.
                 </div>
               </div>
-            </div>
+            </GlassPricePanel>
           </div>
         </div>
       </div>
