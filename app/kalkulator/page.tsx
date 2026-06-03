@@ -506,6 +506,96 @@ function DeltaBadge({ delta }: { delta: number }) {
   );
 }
 
+// ─── Success animation components ────────────────────────────────────────────
+
+function SuccessConfetti() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.scale(dpr, dpr);
+    const colors = ['#C9A84C', '#E8931A', '#F0BC35', '#BF8F28', '#F5D37A', '#ffffff', '#6ee7b7'];
+    type P = { x: number; y: number; vx: number; vy: number; life: number; decay: number; size: number; color: string; rot: number; rv: number; rect: boolean };
+    const cx = W / 2;
+    const cy = H / 2 - 80;
+    const ps: P[] = [];
+    for (let i = 0; i < 110; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 2 + Math.random() * 14;
+      ps.push({ x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 3, life: 1, decay: 0.009 + Math.random() * 0.014, size: 5 + Math.random() * 11, color: colors[Math.floor(Math.random() * colors.length)], rot: Math.random() * Math.PI * 2, rv: (Math.random() - 0.5) * 0.22, rect: Math.random() > 0.4 });
+    }
+    let id: number;
+    const tick = () => {
+      ctx.clearRect(0, 0, W, H);
+      let alive = false;
+      for (const p of ps) {
+        if (p.life <= 0) continue;
+        alive = true;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.22; p.vx *= 0.985; p.life -= p.decay; p.rot += p.rv;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life * p.life);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        if (p.rect) ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        else { ctx.beginPath(); ctx.arc(0, 0, p.size / 2.5, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore();
+      }
+      if (alive) id = requestAnimationFrame(tick);
+    };
+    const t = setTimeout(() => { id = requestAnimationFrame(tick); }, 150);
+    return () => { clearTimeout(t); cancelAnimationFrame(id); };
+  }, []);
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 5 }} />;
+}
+
+function AnimatedCheckIcon() {
+  return (
+    <>
+      <style>{`
+        @keyframes suc-draw-circle { to { stroke-dashoffset: 0; } }
+        @keyframes suc-draw-check  { to { stroke-dashoffset: 0; } }
+        @keyframes suc-ring        { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(2.5); opacity: 0; } }
+        @keyframes suc-pop         { 0% { transform: scale(0.5); opacity: 0; } 70% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes suc-glow        { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } 50% { box-shadow: 0 0 36px 10px rgba(16,185,129,0.15); } }
+      `}</style>
+      <div
+        className="relative w-24 h-24 mx-auto mb-8"
+        style={{ animation: 'suc-pop 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards' }}
+      >
+        <div className="absolute inset-[-2px] rounded-full" style={{ animation: 'suc-ring 2s ease-out 0.4s infinite', border: '2px solid rgba(16,185,129,0.3)' }} />
+        <div className="absolute inset-[-2px] rounded-full" style={{ animation: 'suc-ring 2s ease-out 1.0s infinite', border: '1.5px solid rgba(201,168,76,0.25)' }} />
+        <div
+          className="w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/40 flex items-center justify-center"
+          style={{ animation: 'suc-glow 2.5s ease-in-out 0.6s infinite' }}
+        >
+          <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12">
+            <circle
+              cx="24" cy="24" r="20"
+              stroke="#10b981" strokeWidth="2" strokeOpacity="0.55" fill="none"
+              style={{ strokeDasharray: 126, strokeDashoffset: 126, animation: 'suc-draw-circle 0.7s ease forwards 0.08s' }}
+            />
+            <path
+              d="M15.5 24.5L21 30.5L32.5 18"
+              stroke="#10b981" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"
+              style={{ strokeDasharray: 32, strokeDashoffset: 32, animation: 'suc-draw-check 0.45s ease forwards 0.65s' }}
+            />
+          </svg>
+        </div>
+      </div>
+    </>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function KalkulatorPage() {
@@ -733,12 +823,9 @@ export default function KalkulatorPage() {
   if (step === 'success') {
     return (
       <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center px-6">
-        <div className="max-w-lg w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/12 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-emerald-500">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+        <SuccessConfetti />
+        <div className="max-w-lg w-full text-center relative" style={{ zIndex: 10 }}>
+          <AnimatedCheckIcon />
           <h1 className="font-display text-[2.2rem] font-bold text-[var(--text)] mb-3">Narudžbina primljena!</h1>
           <p className="text-[var(--text-muted)] text-[15px] leading-relaxed mb-2">
             Hvala, <strong className="text-[var(--text)]">{customerName}</strong>!
