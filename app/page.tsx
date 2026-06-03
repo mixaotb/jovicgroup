@@ -17,13 +17,13 @@ import RevealUp from '@/components/RevealUp';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 
 export const metadata: Metadata = {
-  title: 'Jović Group | PVC i ALU Stolarija iz Starih Banovaca',
+  title: 'Jović Group | PVC & ALU Stolarija',
   description:
-    'Jović Group — PVC i ALU prozori i vrata iz Starih Banovaca. Evropski profili Schüco, Alphacan, Elvial. Ugradnja širom Srbije i za dijasporu. Besplatna kalkulacija online.',
+    'PVC i ALU prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije. Besplatna kalkulacija online.',
   alternates: { canonical: 'https://jovicgroup.com' },
   openGraph: {
-    title: 'Jović Group | PVC i ALU Stolarija iz Starih Banovaca',
-    description: 'PVC i ALU prozori i vrata iz Starih Banovaca. Evropski profili, garancija 5 godina, ugradnja širom Srbije.',
+    title: 'Jović Group | PVC & ALU Stolarija',
+    description: 'Prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije.',
     type: 'website',
     locale: 'sr_RS',
     url: 'https://jovicgroup.com',
