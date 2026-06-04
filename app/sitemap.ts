@@ -8,13 +8,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: base,
       lastModified: now,
-      changeFrequency: 'monthly',
+      changeFrequency: 'daily',
       priority: 1,
     },
     {
       url: `${base}/kalkulator`,
       lastModified: now,
-      changeFrequency: 'monthly',
+      changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
