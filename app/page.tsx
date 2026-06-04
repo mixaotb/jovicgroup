@@ -174,6 +174,7 @@ export default function HomePage() {
                     WebkitBackdropFilter: 'blur(20px)',
                     boxShadow: 'inset 0 1px 0 rgba(201,168,76,0.22)',
                     minHeight: '260px',
+                    transform: 'translateZ(0)',
                   }}
                 >
                   <div
@@ -279,12 +280,13 @@ export default function HomePage() {
                 <div className="mt-10 grid grid-cols-3 gap-3">
                   {/* Combined location card */}
                   <div
-                    className="col-span-3 p-4 rounded-2xl hover:scale-[1.005] transition-transform duration-300 flex items-center justify-between gap-4"
+                    className="col-span-3 p-4 rounded-2xl overflow-hidden hover:scale-[1.005] transition-transform duration-300 flex items-center justify-between gap-4"
                     style={{
                       background: 'var(--glass-bg)',
                       border: '1px solid var(--glass-border)',
                       backdropFilter: 'blur(12px)',
                       WebkitBackdropFilter: 'blur(12px)',
+                      transform: 'translateZ(0)',
                     }}
                   >
                     <div>
@@ -312,12 +314,13 @@ export default function HomePage() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="p-4 rounded-2xl hover:scale-[1.02] transition-transform duration-300"
+                      className="p-4 rounded-2xl overflow-hidden hover:scale-[1.02] transition-transform duration-300"
                       style={{
                         background: 'var(--glass-bg)',
                         border: '1px solid var(--glass-border)',
                         backdropFilter: 'blur(12px)',
                         WebkitBackdropFilter: 'blur(12px)',
+                        transform: 'translateZ(0)',
                       }}
                     >
                       <div className="font-display font-bold text-[var(--text)] text-[15px]">{item.label}</div>

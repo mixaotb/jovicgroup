@@ -91,15 +91,18 @@ export default function LiquidGlassCard({
         </defs>
       </svg>
 
-      {/* Layer 1 — backdrop blur + SVG distortion */}
+      {/* Layer 1 — backdrop blur + SVG distortion.
+          Both the displacement `filter` and the backdrop blur are applied via
+          CSS only on hover-capable (pointer: fine) devices. On touch screens the
+          mouse-tracking effect is inert, and the displacement + backdrop-filter
+          edges leave stray seam lines at the rounded clip, so Layer 1 stays
+          inert there (Layer 2's tint keeps the glass look). */}
       <div
-        className="absolute inset-0 rounded-[inherit] pointer-events-none"
+        className="lgc-distort absolute inset-0 rounded-[inherit] pointer-events-none"
         style={{
-          backdropFilter: 'blur(5px) saturate(150%)',
-          WebkitBackdropFilter: 'blur(5px) saturate(150%)',
-          filter: `url(#${filterId}) brightness(1.07)`,
+          ['--lgc-filter' as string]: `url(#${filterId})`,
           zIndex: 1,
-        }}
+        } as React.CSSProperties}
       />
 
       {/* Layer 2 — semi-transparent tint (light/dark adaptive) */}
