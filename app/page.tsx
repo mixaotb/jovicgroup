@@ -16,6 +16,9 @@ import HeroSection from '@/components/HeroSection';
 import RevealUp from '@/components/RevealUp';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
 import FloatingContact from '@/components/FloatingContact';
+import PortfolioGallery from '@/components/PortfolioGallery';
+import ScrollProgress from '@/components/ScrollProgress';
+import MagneticButton from '@/components/MagneticButton';
 
 export const metadata: Metadata = {
   title: 'Jović Group | PVC & ALU Stolarija',
@@ -51,61 +54,6 @@ const testimonials = [
     rating: 5,
   },
 ];
-
-const PORTFOLIO_ITEMS: { category: string; material: string; className?: string; minHeight: number }[] = [
-  { category: 'PVC prozori',      material: 'PVC', className: 'md:col-span-2', minHeight: 300 },
-  { category: 'ALU prozori',      material: 'ALU',                             minHeight: 300 },
-  { category: 'Balkonska vrata',  material: 'PVC',                             minHeight: 220 },
-  { category: 'Klizna vrata',     material: 'ALU',                             minHeight: 220 },
-  { category: 'Ulazna vrata',     material: 'PVC',                             minHeight: 220 },
-  { category: 'Komarnici',        material: 'PVC', className: 'md:col-span-3', minHeight: 180 },
-];
-
-function PortfolioCell({ className = '', minHeight }: Pick<(typeof PORTFOLIO_ITEMS)[number], 'className' | 'minHeight'>) {
-  return (
-    <div
-      className={`relative overflow-hidden rounded-[1.5rem] group cursor-default ${className}`}
-      style={{ minHeight }}
-    >
-      {/* Placeholder background — swap this div for <Image fill sizes="..." alt="..." src="/portfolio/..." /> when photos are ready */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'var(--glass-bg-strong)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-        }}
-      />
-      {/* Dot-grid texture */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(201,168,76,0.13) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }}
-      />
-      {/* Gold corner bloom */}
-      <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#C9A84C]/8 blur-[60px] pointer-events-none" />
-      {/* Border */}
-      <div
-        className="absolute inset-0 rounded-[1.5rem] pointer-events-none"
-        style={{ border: '1px solid var(--glass-border)' }}
-      />
-      {/* Camera placeholder icon */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div
-          className="w-12 h-12 rounded-2xl flex items-center justify-center opacity-20"
-          style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#C9A84C]" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Stars({ count }: { count: number }) {
   return (
@@ -144,6 +92,7 @@ export default function HomePage() {
         Preskoči na sadržaj
       </a>
 
+      <ScrollProgress />
       <GlassNav />
 
       <main id="main-content">
@@ -494,11 +443,7 @@ export default function HomePage() {
             </RevealUp>
 
             <RevealUp delay={0.05}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {PORTFOLIO_ITEMS.map((item) => (
-                  <PortfolioCell key={item.category} {...item} />
-                ))}
-              </div>
+              <PortfolioGallery />
             </RevealUp>
           </div>
         </section>
@@ -626,18 +571,20 @@ export default function HomePage() {
                     Unesite dimenzije, izaberite materijal i lokaciju.
                     Realan trošak odmah, bez čekanja na poziv.
                   </p>
-                  <Link
-                    href="/kalkulator"
-                    className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_14px_44px_rgba(201,168,76,0.5)] active:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
-                  >
-                    <span>Pokrenite kalkulator</span>
-                    <span
-                      className="ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-[2px] group-hover:-translate-y-[1px] group-hover:scale-105"
-                      style={{ background: 'rgba(6,8,15,0.15)' }}
+                  <MagneticButton strength={0.4}>
+                    <Link
+                      href="/kalkulator"
+                      className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_14px_44px_rgba(201,168,76,0.5)] active:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
                     >
-                      <ArrowRightIcon size={15} weight="bold" />
-                    </span>
-                  </Link>
+                      <span>Pokrenite kalkulator</span>
+                      <span
+                        className="ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-[2px] group-hover:-translate-y-[1px] group-hover:scale-105"
+                        style={{ background: 'rgba(6,8,15,0.15)' }}
+                      >
+                        <ArrowRightIcon size={15} weight="bold" />
+                      </span>
+                    </Link>
+                  </MagneticButton>
                   <p className="text-[var(--text-faint)] text-[11px] mt-5 tracking-wide">
                     Besplatno · Bez obaveza · Online ili telefonom
                   </p>

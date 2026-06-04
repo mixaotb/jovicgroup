@@ -1,0 +1,38 @@
+name: Cleanup old deployments
+
+on:
+  workflow_dispatch:
+
+permissions:
+  deployments: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all but latest deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployments = await github.paginate(
+              github.rest.repos.listDeployments,
+              { owner: context.repo.owner, repo: context.repo.repo, per_page: 100 }
+            );
+
+            const toDelete = deployments.slice(1);
+            console.log(`Keeping: ${deployments[0].id}, deleting: ${toDelete.length}`);
+
+            for (const d of toDelete) {
+              await github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: d.id,
+                state: 'inactive',
+              }).catch(() => {});
+              await github.rest.repos.deleteDeployment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: d.id,
+              });
+              console.log(`Deleted ${d.id}`);
+            }
