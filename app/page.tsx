@@ -61,7 +61,7 @@ const PORTFOLIO_ITEMS: { category: string; material: string; className?: string;
   { category: 'Komarnici',        material: 'PVC', className: 'md:col-span-3', minHeight: 180 },
 ];
 
-function PortfolioCell({ category, material, className = '', minHeight }: (typeof PORTFOLIO_ITEMS)[number]) {
+function PortfolioCell({ className = '', minHeight }: Pick<(typeof PORTFOLIO_ITEMS)[number], 'className' | 'minHeight'>) {
   return (
     <div
       className={`relative overflow-hidden rounded-[1.5rem] group cursor-default ${className}`}
@@ -102,20 +102,6 @@ function PortfolioCell({ category, material, className = '', minHeight }: (typeo
             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
           </svg>
         </div>
-      </div>
-      {/* Category label */}
-      <div className="absolute bottom-0 left-0 right-0 p-5 pointer-events-none">
-        <span
-          className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide mb-2"
-          style={{
-            background: material === 'ALU' ? 'rgba(201,168,76,0.12)' : 'var(--glass-bg)',
-            border: material === 'ALU' ? '1px solid rgba(201,168,76,0.28)' : '1px solid var(--glass-border)',
-            color: material === 'ALU' ? '#C9A84C' : 'var(--text-faint)',
-          }}
-        >
-          {material}
-        </span>
-        <div className="font-display font-bold text-[var(--text)] text-[15px]">{category}</div>
       </div>
     </div>
   );
