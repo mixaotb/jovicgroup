@@ -8,6 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 
 const NAV_LINKS = [
   { href: '#prednosti', label: 'Prednosti' },
+  { href: '#radovi',    label: 'Radovi'    },
   { href: '#o-nama',    label: 'O nama'    },
   { href: '#utisci',   label: 'Utisci'    },
 ];

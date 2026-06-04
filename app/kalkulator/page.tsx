@@ -978,10 +978,25 @@ export default function KalkulatorPage() {
                   <SectionTitle>3. Dimenzije i količina</SectionTitle>
                   <div className="space-y-7">
                     <div>
-                      <div className="flex justify-between items-baseline mb-3">
+                      <div className="flex justify-between items-center mb-3">
                         <label className="text-[var(--text-muted)] text-[13px] font-medium">Širina</label>
-                        <div className="flex items-baseline gap-1">
-                          <span className="font-mono font-bold text-[#C9A84C] text-[1.1rem]">{width}</span>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            min={limits.minW}
+                            max={limits.maxW}
+                            value={width}
+                            onChange={(e) => {
+                              const v = parseInt(e.target.value, 10);
+                              if (!isNaN(v)) setWidth(Math.max(limits.minW, Math.min(limits.maxW, v)));
+                            }}
+                            onBlur={(e) => {
+                              const v = parseInt(e.target.value, 10);
+                              if (isNaN(v) || v < limits.minW) setWidth(limits.minW);
+                              else if (v > limits.maxW) setWidth(limits.maxW);
+                            }}
+                            className="w-[72px] font-mono font-bold text-[#C9A84C] text-[1.1rem] text-right bg-transparent border-b border-[#C9A84C]/30 focus:border-[#C9A84C]/70 focus:outline-none pb-0.5 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                           <span className="text-[var(--text-faint)] text-[13px]">mm</span>
                         </div>
                       </div>
@@ -997,10 +1012,25 @@ export default function KalkulatorPage() {
                     </div>
 
                     <div>
-                      <div className="flex justify-between items-baseline mb-3">
+                      <div className="flex justify-between items-center mb-3">
                         <label className="text-[var(--text-muted)] text-[13px] font-medium">Visina</label>
-                        <div className="flex items-baseline gap-1">
-                          <span className="font-mono font-bold text-[#C9A84C] text-[1.1rem]">{height}</span>
+                        <div className="flex items-center gap-1.5">
+                          <input
+                            type="number"
+                            min={limits.minH}
+                            max={limits.maxH}
+                            value={height}
+                            onChange={(e) => {
+                              const v = parseInt(e.target.value, 10);
+                              if (!isNaN(v)) setHeight(Math.max(limits.minH, Math.min(limits.maxH, v)));
+                            }}
+                            onBlur={(e) => {
+                              const v = parseInt(e.target.value, 10);
+                              if (isNaN(v) || v < limits.minH) setHeight(limits.minH);
+                              else if (v > limits.maxH) setHeight(limits.maxH);
+                            }}
+                            className="w-[72px] font-mono font-bold text-[#C9A84C] text-[1.1rem] text-right bg-transparent border-b border-[#C9A84C]/30 focus:border-[#C9A84C]/70 focus:outline-none pb-0.5 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                           <span className="text-[var(--text-faint)] text-[13px]">mm</span>
                         </div>
                       </div>

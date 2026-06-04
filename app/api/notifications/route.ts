@@ -43,6 +43,11 @@ export async function DELETE() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Neautorizovan pristup' }, { status: 401 });
 
+  const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single();
+  if (!profile || (profile.role !== 'admin' && profile.role !== 'manager')) {
+    return NextResponse.json({ error: 'Zabranjen pristup' }, { status: 403 });
+  }
+
   const admin = createAdminClient();
   const { error } = await admin.from('notifications').delete().not('id', 'is', null);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

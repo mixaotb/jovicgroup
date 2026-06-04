@@ -18,6 +18,11 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Neautorizovan pristup' }, { status: 401 });
 
+    const { data: profile } = await supabase.from('users').select('role').eq('id', user.id).single();
+    if (!profile || (profile.role !== 'admin' && profile.role !== 'manager')) {
+      return NextResponse.json({ error: 'Zabranjen pristup' }, { status: 403 });
+    }
+
     const body = await request.json();
 
     if (!body.customer_name?.trim())

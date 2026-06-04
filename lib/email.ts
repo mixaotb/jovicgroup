@@ -295,6 +295,47 @@ export async function sendNewOrderEmail(data: NewOrderEmailData): Promise<void> 
   });
 }
 
+export async function sendContactEmail(email: string, message: string): Promise<void> {
+  if (!process.env.RESEND_API_KEY || !ADMIN_EMAIL) return;
+
+  const headerHtml = `<div class="hdr" style="padding:28px 36px;background:#0A1628;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;margin-bottom:18px;">
+  <tr>
+    <td width="32" valign="middle" style="padding-right:12px;">
+      <img src="${LOGO_URL}" width="26" height="50" alt="Jović Group" style="display:block;border:0;outline:0;text-decoration:none;">
+    </td>
+    <td valign="middle">
+      <div style="color:#C9A84C;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;font-family:${FONT};">CRM · JOVIĆ GROUP</div>
+      <div style="color:#4A5568;font-size:11px;margin-top:4px;font-family:${FONT};">Automatska obaveštenja sistema</div>
+    </td>
+  </tr>
+</table>
+<h1 style="margin:0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:-0.3px;font-family:${FONT};">Novo pitanje sa sajta</h1>
+</div>`;
+
+  const bodyHtml = `
+    <div class="sec" style="padding:24px 36px;border-bottom:1px solid #E8EDF3;">
+      ${secLabel('Pošiljalac')}
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+        ${infoRow('Email', `<a href="mailto:${esc(email)}" style="color:#C9A84C;text-decoration:none;">${esc(email)}</a>`)}
+      </table>
+    </div>
+    <div class="sec" style="padding:24px 36px;">
+      ${secLabel('Poruka')}
+      <div class="nb" style="color:#475569;font-size:13px;background:#F5F7FA;padding:14px 16px;border-radius:8px;border:1px solid #E8EDF3;line-height:1.6;white-space:pre-wrap;font-family:${FONT};">${esc(message)}</div>
+    </div>`;
+
+  const html = wrapEmail(buildHead(), headerHtml, bodyHtml);
+
+  await getResend().emails.send({
+    from: `Jović Group CRM <${FROM_EMAIL}>`,
+    to: [ADMIN_EMAIL],
+    replyTo: email,
+    subject: `Novo pitanje sa sajta — ${email}`,
+    html,
+  });
+}
+
 export async function sendOrderConfirmationEmail(data: NewOrderEmailData): Promise<void> {
   if (!process.env.RESEND_API_KEY || !data.email) return;
 

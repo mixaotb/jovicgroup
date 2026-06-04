@@ -141,7 +141,7 @@ export default function CrmLoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@jovicgroup.rs"
+                  placeholder="korisnik@jovicgroup.com"
                   autoComplete="email"
                   required
                   className={`w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-1 transition-colors ${t.input}`}

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase';
 import { createAdminClient } from '@/lib/supabase';
 import { sendNewOrderEmail, sendOrderConfirmationEmail } from '@/lib/email';
 import { formatRSD, calculatePrice, DIMENSION_LIMITS } from '@/lib/pricing';
-import { rateLimit } from '@/lib/ratelimit';
+import { rateLimit, getClientIp } from '@/lib/ratelimit';
 import type { OrderFormData, OrderItemData, ProductType, GlassType, OkovType, ColorType } from '@/types';
 
 const VALID_PRODUCT_TYPES: ProductType[] = [
@@ -51,8 +51,8 @@ function validateOrderItem(item: OrderItemData): string | null {
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
-    if (!rateLimit(`orders:${ip}`, 5, 60 * 60 * 1000)) {
+    const ip = getClientIp(request);
+    if (!await rateLimit(`orders:${ip}`, 5, 60 * 60 * 1000)) {
       return NextResponse.json(
         { error: 'Previše zahteva. Pokušajte ponovo za sat vremena.' },
         { status: 429 }
@@ -236,7 +236,7 @@ export async function GET(request: NextRequest) {
     const location  = searchParams.get('location');
     const status    = searchParams.get('status');
     const page      = parseInt(searchParams.get('page')     || '1',  10);
-    const pageSize  = parseInt(searchParams.get('pageSize') || '20', 10);
+    const pageSize  = Math.min(parseInt(searchParams.get('pageSize') || '20', 10), 100);
     const offset    = (page - 1) * pageSize;
 
     let query = supabase

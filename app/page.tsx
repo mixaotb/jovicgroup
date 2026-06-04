@@ -15,6 +15,7 @@ import GlassNav from '@/components/GlassNav';
 import HeroSection from '@/components/HeroSection';
 import RevealUp from '@/components/RevealUp';
 import LiquidGlassCard from '@/components/LiquidGlassCard';
+import FloatingContact from '@/components/FloatingContact';
 
 export const metadata: Metadata = {
   title: 'Jović Group | PVC & ALU Stolarija',
@@ -50,6 +51,75 @@ const testimonials = [
     rating: 5,
   },
 ];
+
+const PORTFOLIO_ITEMS: { category: string; material: string; className?: string; minHeight: number }[] = [
+  { category: 'PVC prozori',      material: 'PVC', className: 'md:col-span-2', minHeight: 300 },
+  { category: 'ALU prozori',      material: 'ALU',                             minHeight: 300 },
+  { category: 'Balkonska vrata',  material: 'PVC',                             minHeight: 220 },
+  { category: 'Klizna vrata',     material: 'ALU',                             minHeight: 220 },
+  { category: 'Ulazna vrata',     material: 'PVC',                             minHeight: 220 },
+  { category: 'Komarnici',        material: 'PVC', className: 'md:col-span-3', minHeight: 180 },
+];
+
+function PortfolioCell({ category, material, className = '', minHeight }: (typeof PORTFOLIO_ITEMS)[number]) {
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[1.5rem] group cursor-default ${className}`}
+      style={{ minHeight }}
+    >
+      {/* Placeholder background — swap this div for <Image fill sizes="..." alt="..." src="/portfolio/..." /> when photos are ready */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'var(--glass-bg-strong)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+        }}
+      />
+      {/* Dot-grid texture */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(201,168,76,0.13) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+      {/* Gold corner bloom */}
+      <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#C9A84C]/8 blur-[60px] pointer-events-none" />
+      {/* Border */}
+      <div
+        className="absolute inset-0 rounded-[1.5rem] pointer-events-none"
+        style={{ border: '1px solid var(--glass-border)' }}
+      />
+      {/* Camera placeholder icon */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div
+          className="w-12 h-12 rounded-2xl flex items-center justify-center opacity-20"
+          style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#C9A84C]" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+          </svg>
+        </div>
+      </div>
+      {/* Category label */}
+      <div className="absolute bottom-0 left-0 right-0 p-5 pointer-events-none">
+        <span
+          className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide mb-2"
+          style={{
+            background: material === 'ALU' ? 'rgba(201,168,76,0.12)' : 'var(--glass-bg)',
+            border: material === 'ALU' ? '1px solid rgba(201,168,76,0.28)' : '1px solid var(--glass-border)',
+            color: material === 'ALU' ? '#C9A84C' : 'var(--text-faint)',
+          }}
+        >
+          {material}
+        </span>
+        <div className="font-display font-bold text-[var(--text)] text-[15px]">{category}</div>
+      </div>
+    </div>
+  );
+}
 
 function Stars({ count }: { count: number }) {
   return (
@@ -140,7 +210,7 @@ export default function HomePage() {
                     <GlassIcon><GlobeIcon size={22} weight="light" /></GlassIcon>
                     <h3 className="font-display font-bold text-[1.35rem] text-white mt-4 mb-2">Evropski profili</h3>
                     <p className="text-white/70 text-[13.5px] leading-relaxed mb-5 max-w-sm">
-                      Alphacan & Schüco (PVC) · Elvial & Profilco (ALU), profili koji važe decenijama širom Evrope. Okov: AGB (Italija) i Schüco.
+                      Alphacan & Schüco (PVC) · Elvial & Profilco (ALU), profili koji važe decenijama širom Evrope. Okov: AGB i Schüco.
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {['Alphacan', 'Schüco', 'Elvial', 'Profilco', 'AGB'].map((tag) => (
@@ -303,7 +373,7 @@ export default function HomePage() {
                   {[
                     { label: 'PVC',  desc: 'Alphacan & Schüco profili' },
                     { label: 'ALU',  desc: 'Elvial & Profilco profili' },
-                    { label: 'Okov', desc: 'AGB (Italija) i Schüco' },
+                    { label: 'Okov', desc: 'AGB i Schüco' },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -416,6 +486,34 @@ export default function HomePage() {
                 </div>
               </RevealUp>
             </div>
+          </div>
+        </section>
+
+        {/* ─── Portfolio ────────────────────────────────── */}
+        <section id="radovi" className="relative py-32">
+          <div className="absolute top-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/6 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] rounded-full bg-[#1A2744]/40 blur-[100px] pointer-events-none" />
+
+          <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
+            <RevealUp className="mb-14">
+              <div className="gold-rule mb-5" />
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+                <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-tight text-[var(--text)]">
+                  Naši <span className="text-[#C9A84C]">radovi</span>
+                </h2>
+                <p className="text-[var(--text-muted)] text-[14px] max-w-xs sm:text-right leading-relaxed">
+                  Svaki projekat završen precizno i po dogovoru.
+                </p>
+              </div>
+            </RevealUp>
+
+            <RevealUp delay={0.05}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {PORTFOLIO_ITEMS.map((item) => (
+                  <PortfolioCell key={item.category} {...item} />
+                ))}
+              </div>
+            </RevealUp>
           </div>
         </section>
 
@@ -563,6 +661,8 @@ export default function HomePage() {
           </div>
         </section>
 
+        <FloatingContact />
+
         {/* ─── Footer ───────────────────────────────────── */}
         <footer
           className="py-12"
@@ -589,7 +689,7 @@ export default function HomePage() {
                 <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Kontakt</div>
                 <address className="not-italic space-y-2 text-[var(--text-faint)] text-[13px]">
                   <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
-                  <div><a href="tel:+381693999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 69 3 999 555</a></div>
+                  <div><a href="tel:+381653999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 65 3 999 555</a></div>
                   <div>Stevana Tišme 112, Stari Banovci</div>
                   <div>22305, Srbija</div>
                 </address>
@@ -601,7 +701,6 @@ export default function HomePage() {
                   <div><Link href="/kalkulator"            className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Kalkulator</Link></div>
                   <div><a href="#prednosti"                className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Prednosti</a></div>
                   <div><a href="#utisci"                   className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Utisci</a></div>
-                  <div><Link href="/crm/login"             className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">CRM Login</Link></div>
                 </div>
               </div>
             </div>

@@ -1,12 +1,12 @@
 // app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
-import { rateLimit } from '@/lib/ratelimit';
+import { rateLimit, getClientIp } from '@/lib/ratelimit';
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown';
-    if (!rateLimit(`login:${ip}`, 10, 15 * 60 * 1000)) {
+    const ip = getClientIp(request);
+    if (!await rateLimit(`login:${ip}`, 10, 15 * 60 * 1000)) {
       return NextResponse.json(
         { error: 'Previše pokušaja. Pokušajte ponovo za 15 minuta.' },
         { status: 429 }
