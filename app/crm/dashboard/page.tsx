@@ -1,7 +1,7 @@
 'use client';
 
 // app/crm/dashboard/page.tsx
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
@@ -1774,7 +1774,7 @@ function buildInvoiceHtml({
 }
 
 function RacunSection() {
-  const company = getCompanyInfo();
+  const company = useMemo(() => getCompanyInfo(), []);
   const [invoiceNumber, setInvoiceNumber] = useState(() => {
     const counter = parseInt(ls('crm-invoice-next', '1'), 10);
     return `${String(counter).padStart(3, '0')}/${String(new Date().getFullYear()).slice(-2)}`;
@@ -1795,6 +1795,28 @@ function RacunSection() {
   const [clientJmbg, setClientJmbg] = useState('');
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<InvoiceItem[]>([newInvoiceItem()]);
+
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(0.6);
+
+  useEffect(() => {
+    const el = previewContainerRef.current;
+    if (!el) return;
+    const update = () => setPreviewScale(Math.min(1, el.offsetWidth / 794));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const previewHtml = useMemo(() => buildInvoiceHtml({
+    invoiceNumber, invoiceDate, valuationDate, dueDate,
+    showClient, clientType, clientName, clientMb, clientPib,
+    clientAddress, clientCity, clientZip, clientPhone, clientContact, clientJmbg,
+    notes, items, company,
+  }), [invoiceNumber, invoiceDate, valuationDate, dueDate, showClient, clientType,
+      clientName, clientMb, clientPib, clientAddress, clientCity, clientZip,
+      clientPhone, clientContact, clientJmbg, notes, items, company]);
 
   function addItem() { setItems(prev => [...prev, newInvoiceItem()]); }
   function removeItem(id: string) { setItems(prev => prev.length > 1 ? prev.filter(i => i.id !== id) : prev); }
@@ -1834,7 +1856,8 @@ function RacunSection() {
   const II = `${INPUT} text-sm`;
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <div className="flex gap-6 items-start">
+      <div className="space-y-5 w-full max-w-[540px] flex-shrink-0 min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -2065,6 +2088,35 @@ function RacunSection() {
       <div className="p-5 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)]">
         <label className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest block mb-3">Napomena</label>
         <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Dodatne napomene koje će se pojaviti na računu..." className={`${II} resize-none`} />
+      </div>
+      </div>
+
+      {/* Live preview panel */}
+      <div className="hidden xl:block flex-1 sticky top-[72px] min-w-0">
+        <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-2 flex items-center justify-between">
+          <span>Pregled</span>
+          <span className="font-normal normal-case text-[var(--text-faint)] flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Ažurira se u realnom vremenu
+          </span>
+        </div>
+        <div className="rounded-2xl border border-[var(--border)] overflow-hidden shadow-xl">
+          <div ref={previewContainerRef} className="w-full relative overflow-hidden" style={{ height: `${Math.round(1123 * previewScale)}px` }}>
+            <iframe
+              srcDoc={previewHtml}
+              title="Pregled računa"
+              style={{
+                width: '794px',
+                height: '1123px',
+                transform: `scale(${previewScale})`,
+                transformOrigin: 'top left',
+                border: 'none',
+                pointerEvents: 'none',
+                display: 'block',
+              }}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
