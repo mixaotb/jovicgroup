@@ -1629,7 +1629,13 @@ function buildInvoiceHtml({
   const hasClient = showClient && !!clientName;
   const clientFullAddress = [clientAddress, [clientZip, clientCity].filter(Boolean).join(' ')].filter(Boolean).join(', ');
 
-  const tableRows = rows.map(r => `
+  const ITEMS_PER_PAGE = 18;
+  const chunks: (typeof rows)[] = [];
+  for (let i = 0; i < rows.length; i += ITEMS_PER_PAGE) chunks.push(rows.slice(i, i + ITEMS_PER_PAGE));
+  if (chunks.length === 0) chunks.push([]);
+  const totalPages = chunks.length;
+
+  const renderRows = (chunk: typeof rows) => chunk.map(r => `
     <tr>
       <td class="c">${r.n}.</td>
       <td>${r.description || '—'}</td>
@@ -1641,59 +1647,41 @@ function buildInvoiceHtml({
       <td class="r b">${fmtInv(r.total)}</td>
     </tr>`).join('');
 
-  return `<!DOCTYPE html>
-<html lang="sr">
-<head>
-<meta charset="utf-8">
-<title>Račun ${invoiceNumber ? '# ' + invoiceNumber : ''}</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,Helvetica,sans-serif;font-size:9.5pt;color:#1a1a1a;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .page{width:210mm;min-height:297mm;margin:0 auto;padding:14mm 15mm 24mm;background:#fff;position:relative}
-  .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:12px;border-bottom:2px solid #1a1a1a;margin-bottom:18px}
-  .header-left{display:flex;align-items:center;gap:12px}
-  .logo{width:48px;height:48px;object-fit:contain}
-  .co-name{font-size:20pt;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1}
-  .co-tag{font-size:6.5pt;color:#555;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
-  .co-det{text-align:right;font-size:8pt;color:#555;line-height:1.8}
-  .co-det b{color:#1a1a1a;font-weight:700}
-  .title-bar{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px}
-  .inv-h{font-size:28pt;font-weight:900;color:#111;letter-spacing:-1px;line-height:1}
-  .inv-num{font-size:7.5pt;color:#444;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
-  .inv-meta{text-align:right;font-size:8.5pt;color:#555;line-height:1.9}
-  .inv-meta b{color:#1a1a1a;font-weight:700;display:inline-block;min-width:130px}
-  ${hasClient ? `.client-box{background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:10px 14px;margin-bottom:18px;display:inline-block;min-width:220px;max-width:50%}
-  .client-box .ib-t{font-size:6.5pt;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
-  .client-box p{font-size:8.5pt;color:#1a1a1a;line-height:1.65}
-  .client-box p.m{color:#666;font-size:8pt}` : ''}
-  table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:9pt}
-  thead tr{background:#3a3a3a}
-  thead th{padding:7px 10px;font-weight:700;font-size:7pt;letter-spacing:0.4px;color:#fff;text-align:left;white-space:nowrap}
-  th.r{text-align:right}th.c{text-align:center}
-  tbody tr{border-bottom:1px solid #e8e8e8}
-  tbody tr:nth-child(even){background:#f7f7f7}
-  td{padding:7px 10px;color:#1a1a1a;vertical-align:middle}
-  td.r{text-align:right}td.c{text-align:center}td.b{font-weight:700}
-  .totals{display:flex;justify-content:flex-end;margin-bottom:20px}
-  .tot-box{width:272px;border:1px solid #d0d0d0;border-radius:7px;overflow:hidden}
-  .tr{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid #e8e8e8;font-size:9pt;color:#555}
-  .tr:last-child{border-bottom:none}
-  .tr span:last-child{color:#1a1a1a;font-weight:600;font-size:9.5pt}
-  .tg{background:#e8e8e8;padding:9px 14px}
-  .tg span{font-weight:900;font-size:11pt;color:#111}
-  .notes{border-top:1px solid #ddd;padding-top:10px;margin-top:4px}
-  .nt{font-size:6.5pt;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px}
-  .notes p{font-size:8.5pt;color:#555;line-height:1.6}
-  .footer{position:absolute;bottom:14mm;left:15mm;right:15mm;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid #ccc;padding-top:9px}
-  .ft{font-size:7pt;color:#888;line-height:1.75}
-  .sig{text-align:center;width:155px}
-  .sig-line{border-bottom:1px solid #bbb;height:40px;margin-bottom:5px}
-  .sig span{font-size:7pt;color:#888}
-  @media print{body{margin:0}@page{size:A4;margin:0}.page{padding:12mm 14mm 20mm}}
-</style>
-</head>
-<body>
-<div class="page">
+  const tableHead = `<thead><tr>
+        <th style="width:26px">#</th>
+        <th>Opis usluge / robe</th>
+        <th class="c" style="width:48px">J.m.</th>
+        <th class="r" style="width:54px">Kol.</th>
+        <th class="r" style="width:90px">Jed. cena</th>
+        <th class="c" style="width:44px">PDV%</th>
+        <th class="r" style="width:82px">PDV iznos</th>
+        <th class="r" style="width:90px">Ukupno</th>
+      </tr></thead>`;
+
+  const totalsAndFooter = `
+  <div class="totals">
+    <div class="tot-box">
+      <div class="tr"><span>Ukupno bez PDV</span><span>${fmtInv(subtotal)} RSD</span></div>
+      <div class="tr"><span>PDV</span><span>${fmtInv(totalPdv)} RSD</span></div>
+      <div class="tr tg"><span>UKUPNO ZA PLAĆANJE</span><span>${fmtInv(grandTotal)} RSD</span></div>
+    </div>
+  </div>
+  ${notes ? `<div class="notes"><div class="nt">Napomena</div><p>${notes}</p></div>` : ''}
+  <div class="footer">
+    <div class="ft">
+      <div>${company.name} &nbsp;·&nbsp; PIB: ${company.pib} &nbsp;·&nbsp; MB: ${company.mb}</div>
+      <div>${company.address}, ${company.city}, ${company.country}</div>
+    </div>
+    <div class="sig">
+      <div class="sig-line"></div>
+      <span>Potpis i pečat</span>
+    </div>
+  </div>`;
+
+  const pagesHtml = chunks.map((chunk, pageIdx) => {
+    const isFirst = pageIdx === 0;
+    const isLast = pageIdx === totalPages - 1;
+    const pageHeader = isFirst ? `
   <div class="header">
     <div class="header-left">
       <img src="${logoUrl}" alt="Logo" class="logo" onerror="this.style.display='none'"/>
@@ -1709,7 +1697,6 @@ function buildInvoiceHtml({
       <div>${company.city}, ${company.country}</div>
     </div>
   </div>
-
   <div class="title-bar">
     <div>
       <div class="inv-h">RAČUN</div>
@@ -1721,7 +1708,6 @@ function buildInvoiceHtml({
       ${dueDate ? `<div><b>Rok plaćanja:</b> ${fmtD(dueDate)}</div>` : ''}
     </div>
   </div>
-
   ${hasClient ? `<div class="client-box">
     <div class="ib-t">${clientType === 'firma' ? 'Kupac / Firma' : 'Kupac / Fizičko lice'}</div>
     <p><b>${clientName}</b></p>
@@ -1730,45 +1716,75 @@ function buildInvoiceHtml({
     ${clientType === 'fizicko' && clientJmbg ? `<p class="m">JMBG: ${clientJmbg}</p>` : ''}
     ${clientPhone ? `<p class="m">Tel: ${clientPhone}</p>` : ''}
     ${clientType === 'firma' && clientContact ? `<p class="m">Kontakt: ${clientContact}</p>` : ''}
-  </div>` : ''}
+  </div>` : ''}` : `
+  <div class="cont-header">
+    <span class="cont-title">RAČUN ${invoiceNumber ? '# ' + invoiceNumber : ''} — nastavak</span>
+    <span class="cont-page">Strana ${pageIdx + 1} / ${totalPages}</span>
+  </div>`;
+    return `<div class="page${isLast ? ' last' : ''}">
+  ${pageHeader}
+  <table>${tableHead}<tbody>${renderRows(chunk)}</tbody></table>
+  ${isLast ? totalsAndFooter : ''}
+</div>`;
+  }).join('\n');
 
-  <table>
-    <thead>
-      <tr>
-        <th style="width:26px">#</th>
-        <th>Opis usluge / robe</th>
-        <th class="c" style="width:48px">J.m.</th>
-        <th class="r" style="width:54px">Kol.</th>
-        <th class="r" style="width:90px">Jed. cena</th>
-        <th class="c" style="width:44px">PDV%</th>
-        <th class="r" style="width:82px">PDV iznos</th>
-        <th class="r" style="width:90px">Ukupno</th>
-      </tr>
-    </thead>
-    <tbody>${tableRows}</tbody>
-  </table>
-
-  <div class="totals">
-    <div class="tot-box">
-      <div class="tr"><span>Ukupno bez PDV</span><span>${fmtInv(subtotal)} RSD</span></div>
-      <div class="tr"><span>PDV</span><span>${fmtInv(totalPdv)} RSD</span></div>
-      <div class="tr tg"><span>UKUPNO ZA PLAĆANJE</span><span>${fmtInv(grandTotal)} RSD</span></div>
-    </div>
-  </div>
-
-  ${notes ? `<div class="notes"><div class="nt">Napomena</div><p>${notes}</p></div>` : ''}
-
-  <div class="footer">
-    <div class="ft">
-      <div>${company.name} &nbsp;·&nbsp; PIB: ${company.pib} &nbsp;·&nbsp; MB: ${company.mb}</div>
-      <div>${company.address}, ${company.city}, ${company.country}</div>
-    </div>
-    <div class="sig">
-      <div class="sig-line"></div>
-      <span>Potpis i pečat</span>
-    </div>
-  </div>
-</div>
+  return `<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<title>Račun ${invoiceNumber ? '# ' + invoiceNumber : ''}</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:9.5pt;color:#1a1a1a;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{width:210mm;min-height:297mm;margin:0 auto;padding:14mm 15mm 10mm;background:#fff;position:relative;page-break-after:always}
+  .page.last{padding-bottom:24mm;page-break-after:auto}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:12px;border-bottom:2px solid #1a1a1a;margin-bottom:18px}
+  .header-left{display:flex;align-items:center;gap:12px}
+  .logo{width:48px;height:48px;object-fit:contain}
+  .co-name{font-size:20pt;font-weight:900;color:#111;letter-spacing:-0.5px;line-height:1}
+  .co-tag{font-size:6.5pt;color:#555;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+  .co-det{text-align:right;font-size:8pt;color:#555;line-height:1.8}
+  .co-det b{color:#1a1a1a;font-weight:700}
+  .title-bar{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px}
+  .inv-h{font-size:28pt;font-weight:900;color:#111;letter-spacing:-1px;line-height:1}
+  .inv-num{font-size:7.5pt;color:#444;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+  .inv-meta{text-align:right;font-size:8.5pt;color:#555;line-height:1.9}
+  .inv-meta b{color:#1a1a1a;font-weight:700;display:inline-block;min-width:130px}
+  .cont-header{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:1px solid #ccc;margin-bottom:14px}
+  .cont-title{font-size:9pt;font-weight:700;color:#444;letter-spacing:0.3px}
+  .cont-page{font-size:8pt;color:#888}
+  ${hasClient ? `.client-box{background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:10px 14px;margin-bottom:18px;display:inline-block;min-width:220px;max-width:50%}
+  .client-box .ib-t{font-size:6.5pt;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+  .client-box p{font-size:8.5pt;color:#1a1a1a;line-height:1.65}
+  .client-box p.m{color:#666;font-size:8pt}` : ''}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:9pt;table-layout:fixed}
+  thead tr{background:#3a3a3a}
+  thead th{padding:7px 10px;font-weight:700;font-size:7pt;letter-spacing:0.4px;color:#fff;text-align:left;white-space:nowrap}
+  th.r{text-align:right}th.c{text-align:center}
+  tbody tr{border-bottom:1px solid #e8e8e8}
+  tbody tr:nth-child(even){background:#f7f7f7}
+  td{padding:7px 10px;color:#1a1a1a;vertical-align:top;word-break:break-word;overflow-wrap:break-word}
+  td.r{text-align:right}td.c{text-align:center}td.b{font-weight:700}
+  .totals{display:flex;justify-content:flex-end;margin-bottom:20px}
+  .tot-box{width:272px;border:1px solid #d0d0d0;border-radius:7px;overflow:hidden}
+  .tr{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid #e8e8e8;font-size:9pt;color:#555}
+  .tr:last-child{border-bottom:none}
+  .tr span:last-child{color:#1a1a1a;font-weight:600;font-size:9.5pt}
+  .tg{background:#e8e8e8;padding:9px 14px}
+  .tg span{font-weight:900;font-size:11pt;color:#111}
+  .notes{border-top:1px solid #ddd;padding-top:10px;margin-top:4px;margin-bottom:16px}
+  .nt{font-size:6.5pt;font-weight:700;color:#444;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px}
+  .notes p{font-size:8.5pt;color:#555;line-height:1.6}
+  .footer{position:absolute;bottom:14mm;left:15mm;right:15mm;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid #ccc;padding-top:9px}
+  .ft{font-size:7pt;color:#888;line-height:1.75}
+  .sig{text-align:center;width:155px}
+  .sig-line{border-bottom:1px solid #bbb;height:40px;margin-bottom:5px}
+  .sig span{font-size:7pt;color:#888}
+  @media print{body{margin:0}@page{size:A4;margin:0}.page{padding:12mm 14mm 8mm}.page.last{padding-bottom:18mm}}
+</style>
+</head>
+<body>
+${pagesHtml}
 </body>
 </html>`;
 }
@@ -1777,7 +1793,7 @@ function RacunSection() {
   const company = useMemo(() => getCompanyInfo(), []);
   const [invoiceNumber, setInvoiceNumber] = useState(() => {
     const counter = parseInt(ls('crm-invoice-next', '1'), 10);
-    return `${String(counter).padStart(3, '0')}/${String(new Date().getFullYear()).slice(-2)}`;
+    return `${String(counter).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`;
   });
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [valuationDate, setValuationDate] = useState('');
@@ -1849,7 +1865,7 @@ function RacunSection() {
     if (match) {
       const next = parseInt(match[1], 10) + 1;
       localStorage.setItem('crm-invoice-next', String(next));
-      setInvoiceNumber(`${String(next).padStart(3, '0')}/${String(new Date().getFullYear()).slice(-2)}`);
+      setInvoiceNumber(`${String(next).padStart(2, '0')}/${String(new Date().getFullYear()).slice(-2)}`);
     }
   }
 
@@ -2155,7 +2171,7 @@ function SettingsSection() {
   // ── Invoice ──────────────────────────────────────────────────────────────────
   const [nextNum, setNextNum] = useState(() => ls('crm-invoice-next', '1'));
   const [invSaved, setInvSaved] = useState(false);
-  const invoicePreview = `${String(parseInt(nextNum, 10) || 1).padStart(3, '0')}/${yr}`;
+  const invoicePreview = `${String(parseInt(nextNum, 10) || 1).padStart(2, '0')}/${yr}`;
 
   function saveInvoice() {
     const n = parseInt(nextNum, 10);
