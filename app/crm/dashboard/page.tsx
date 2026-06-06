@@ -694,8 +694,14 @@ function AddOrderModal({
   const [address, setAddress] = useState(initialData?.address ?? '');
   const [price, setPrice] = useState(initialData?.total_price ? String(initialData.total_price) : '');
   const [paymentMethod, setPaymentMethod] = useState<Order['payment_method']>(
-    initialData?.payment_method ?? (localStorage.getItem('crm-default-payment') as Order['payment_method'] | null) ?? 'cash_on_delivery'
+    initialData?.payment_method ?? 'cash_on_delivery'
   );
+  useEffect(() => {
+    if (!initialData?.payment_method) {
+      const saved = localStorage.getItem('crm-default-payment') as Order['payment_method'] | null;
+      if (saved) setPaymentMethod(saved);
+    }
+  }, []);
   const [status, setStatus] = useState<OrderStatus>(initialData?.status ?? 'na_cekanju');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
   const [items, setItems] = useState<NewOrderItem[]>(
