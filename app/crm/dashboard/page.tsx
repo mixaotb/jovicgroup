@@ -48,9 +48,14 @@ function canAccess(role: UserRole | null, min: UserRole): boolean {
   return role ? ROLE_RANKS[role] >= ROLE_RANKS[min] : false;
 }
 
+function ls(key: string, fallback: string): string {
+  if (typeof window === 'undefined') return fallback;
+  return localStorage.getItem(key) ?? fallback;
+}
+
 // ─── Shared CSS helpers ───────────────────────────────────────────────────────
 
-const INPUT = 'w-full px-3 py-2 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] text-[var(--text)] text-sm focus:outline-none focus:border-[#C9A84C]/50 transition-colors placeholder:text-[var(--text-muted)]';
+const INPUT ='w-full px-3 py-2 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] text-[var(--text)] text-sm focus:outline-none focus:border-[#C9A84C]/50 transition-colors placeholder:text-[var(--text-muted)]';
 const LABEL = 'text-[var(--text-muted)] text-xs font-medium block mb-1.5';
 
 // ─── StatusBadge ──────────────────────────────────────────────────────────────
@@ -694,14 +699,8 @@ function AddOrderModal({
   const [address, setAddress] = useState(initialData?.address ?? '');
   const [price, setPrice] = useState(initialData?.total_price ? String(initialData.total_price) : '');
   const [paymentMethod, setPaymentMethod] = useState<Order['payment_method']>(
-    initialData?.payment_method ?? 'cash_on_delivery'
+    initialData?.payment_method ?? (ls('crm-default-payment', 'cash_on_delivery') as Order['payment_method'])
   );
-  useEffect(() => {
-    if (!initialData?.payment_method) {
-      const saved = localStorage.getItem('crm-default-payment') as Order['payment_method'] | null;
-      if (saved) setPaymentMethod(saved);
-    }
-  }, []);
   const [status, setStatus] = useState<OrderStatus>(initialData?.status ?? 'na_cekanju');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
   const [items, setItems] = useState<NewOrderItem[]>(
@@ -1577,7 +1576,7 @@ type CompanyInfo = typeof DEFAULT_COMPANY_INFO;
 
 function getCompanyInfo(): CompanyInfo {
   try {
-    const saved = localStorage.getItem('crm-company-info');
+    const saved = ls('crm-company-info', '');
     if (saved) return { ...DEFAULT_COMPANY_INFO, ...JSON.parse(saved) };
   } catch {}
   return { ...DEFAULT_COMPANY_INFO };
@@ -1777,7 +1776,7 @@ function buildInvoiceHtml({
 function RacunSection() {
   const company = getCompanyInfo();
   const [invoiceNumber, setInvoiceNumber] = useState(() => {
-    const counter = parseInt(localStorage.getItem('crm-invoice-next') || '1', 10);
+    const counter = parseInt(ls('crm-invoice-next', '1'), 10);
     return `${String(counter).padStart(3, '0')}/${String(new Date().getFullYear()).slice(-2)}`;
   });
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
@@ -2079,8 +2078,8 @@ function orderAgingDays(order: Order): number {
 }
 
 function AgingBadge({ order }: { order: Order }) {
-  const warn = parseInt(localStorage.getItem('crm-aging-warn') || '7', 10);
-  const danger = parseInt(localStorage.getItem('crm-aging-danger') || '14', 10);
+  const warn = parseInt(ls('crm-aging-warn', '7'), 10);
+  const danger = parseInt(ls('crm-aging-danger', '14'), 10);
   const days = orderAgingDays(order);
   if (days < warn) return null;
   const isDanger = days >= danger;
@@ -2106,7 +2105,7 @@ function SettingsSection() {
   const yr = String(new Date().getFullYear()).slice(-2);
 
   // ── Invoice ──────────────────────────────────────────────────────────────────
-  const [nextNum, setNextNum] = useState(() => localStorage.getItem('crm-invoice-next') || '1');
+  const [nextNum, setNextNum] = useState(() => ls('crm-invoice-next', '1'));
   const [invSaved, setInvSaved] = useState(false);
   const invoicePreview = `${String(parseInt(nextNum, 10) || 1).padStart(3, '0')}/${yr}`;
 
@@ -2134,8 +2133,8 @@ function SettingsSection() {
   }
 
   // ── Aging ─────────────────────────────────────────────────────────────────────
-  const [agingWarn, setAgingWarn] = useState(() => localStorage.getItem('crm-aging-warn') || '7');
-  const [agingDanger, setAgingDanger] = useState(() => localStorage.getItem('crm-aging-danger') || '14');
+  const [agingWarn, setAgingWarn] = useState(() => ls('crm-aging-warn', '7'));
+  const [agingDanger, setAgingDanger] = useState(() => ls('crm-aging-danger', '14'));
   const [agingSaved, setAgingSaved] = useState(false);
 
   function saveAging() {
@@ -2148,10 +2147,10 @@ function SettingsSection() {
   }
 
   // ── Defaults ─────────────────────────────────────────────────────────────────
-  const [defSort, setDefSort] = useState(() => localStorage.getItem('crm-default-sort') || 'date');
-  const [defDir, setDefDir] = useState(() => localStorage.getItem('crm-default-sort-dir') || 'desc');
-  const [defDate, setDefDate] = useState(() => localStorage.getItem('crm-default-date-filter') || 'all');
-  const [defPayment, setDefPayment] = useState(() => localStorage.getItem('crm-default-payment') || 'cash_on_delivery');
+  const [defSort, setDefSort] = useState(() => ls('crm-default-sort', 'date'));
+  const [defDir, setDefDir] = useState(() => ls('crm-default-sort-dir', 'desc'));
+  const [defDate, setDefDate] = useState(() => ls('crm-default-date-filter', 'all'));
+  const [defPayment, setDefPayment] = useState(() => ls('crm-default-payment', 'cash_on_delivery'));
   const [defSaved, setDefSaved] = useState(false);
 
   function saveDefaults() {
@@ -2306,13 +2305,13 @@ export default function CrmDashboardPage() {
   const [duplicatingOrder, setDuplicatingOrder] = useState<Order | null>(null);
   const [successToast, setSuccessToast] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'value' | 'status' | 'name'>(
-    () => (localStorage.getItem('crm-default-sort') as 'date' | 'value' | 'status' | 'name') || 'date'
+    () => ls('crm-default-sort', 'date') as 'date' | 'value' | 'status' | 'name'
   );
   const [sortDir, setSortDir] = useState<'desc' | 'asc'>(
-    () => (localStorage.getItem('crm-default-sort-dir') as 'desc' | 'asc') || 'desc'
+    () => ls('crm-default-sort-dir', 'desc') as 'desc' | 'asc'
   );
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>(
-    () => (localStorage.getItem('crm-default-date-filter') as 'all' | 'today' | 'week' | 'month') || 'all'
+    () => ls('crm-default-date-filter', 'all') as 'all' | 'today' | 'week' | 'month'
   );
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -2723,7 +2722,7 @@ export default function CrmDashboardPage() {
                         <div
                           key={order.id}
                           onClick={() => setSelectedOrder(order)}
-                          className={`p-4 rounded-2xl backdrop-blur-md border hover:border-[#C9A84C]/40 active:scale-[0.99] transition-all cursor-pointer shadow-sm ${selectedIds.has(order.id) ? 'bg-[#C9A84C]/5 border-[#C9A84C]/30' : orderAgingDays(order) >= parseInt(localStorage.getItem('crm-aging-warn') || '7', 10) ? 'bg-amber-500/[0.04] border-amber-500/30 hover:border-amber-500/50' : 'bg-[var(--bg-surface)]/70 border-[var(--border)] hover:bg-[var(--bg-surface)]/90'}`}
+                          className={`p-4 rounded-2xl backdrop-blur-md border hover:border-[#C9A84C]/40 active:scale-[0.99] transition-all cursor-pointer shadow-sm ${selectedIds.has(order.id) ? 'bg-[#C9A84C]/5 border-[#C9A84C]/30' : orderAgingDays(order) >= parseInt(ls('crm-aging-warn', '7'), 10) ? 'bg-amber-500/[0.04] border-amber-500/30 hover:border-amber-500/50' : 'bg-[var(--bg-surface)]/70 border-[var(--border)] hover:bg-[var(--bg-surface)]/90'}`}
                         >
                           <div className="flex items-start gap-2.5 mb-2.5">
                             <div className="flex-shrink-0 pt-0.5" onClick={e => e.stopPropagation()}>
@@ -2788,7 +2787,7 @@ export default function CrmDashboardPage() {
                           <div
                             key={order.id}
                             onClick={() => setSelectedOrder(order)}
-                            className={`grid gap-4 px-5 py-3.5 items-start hover:bg-[var(--bg-raised)] transition-colors cursor-pointer border-l-2 ${selectedIds.has(order.id) ? 'bg-[#C9A84C]/5 border-l-[#C9A84C]/40' : orderAgingDays(order) >= parseInt(localStorage.getItem('crm-aging-warn') || '7', 10) ? 'border-l-amber-500/60 bg-amber-500/[0.03]' : 'border-l-transparent'} ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]'}`}
+                            className={`grid gap-4 px-5 py-3.5 items-start hover:bg-[var(--bg-raised)] transition-colors cursor-pointer border-l-2 ${selectedIds.has(order.id) ? 'bg-[#C9A84C]/5 border-l-[#C9A84C]/40' : orderAgingDays(order) >= parseInt(ls('crm-aging-warn', '7'), 10) ? 'border-l-amber-500/60 bg-amber-500/[0.03]' : 'border-l-transparent'} ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]'}`}
                           >
                             <div className="flex items-center pt-0.5" onClick={e => e.stopPropagation()}>
                               <input type="checkbox"
