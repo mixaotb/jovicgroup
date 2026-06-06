@@ -2092,7 +2092,7 @@ function RacunSection() {
       </div>
 
       {/* Live preview panel */}
-      <div className="hidden xl:block flex-1 sticky top-[72px] min-w-0">
+      <div className="hidden xl:block w-[320px] flex-shrink-0 sticky top-[72px]">
         <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-2 flex items-center justify-between">
           <span>Pregled</span>
           <span className="font-normal normal-case text-[var(--text-faint)] flex items-center gap-1.5">
