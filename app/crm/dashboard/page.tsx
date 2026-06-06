@@ -2013,45 +2013,45 @@ function RacunSection() {
             const c = calcItem(item);
             return (
               <div key={item.id} className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)] space-y-2.5">
-                {/* Row 1: description + unit + delete */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-[var(--text-muted)] w-5 flex-shrink-0 text-center">{idx + 1}.</span>
+                {/* Row 1: # · description · unit · delete — grid avoids w-full conflicts */}
+                <div className="grid grid-cols-[20px_1fr_72px_32px] gap-2 items-center">
+                  <span className="text-xs font-semibold text-[var(--text-muted)] text-center leading-none">{idx + 1}.</span>
                   <input
                     type="text"
                     value={item.description}
                     onChange={e => updateItem(item.id, 'description', e.target.value)}
                     placeholder="Opis usluge ili robe"
-                    className={`${II} flex-1`}
+                    className={II}
                   />
-                  <select value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} className={`${II} w-[72px] flex-shrink-0`}>
+                  <select value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} className={II}>
                     {ITEM_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
-                  <button onClick={() => removeItem(item.id)} disabled={items.length === 1} className="w-8 h-8 flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-25 flex-shrink-0">
+                  <button onClick={() => removeItem(item.id)} disabled={items.length === 1} className="w-8 h-8 flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-25">
                     <X size={13} />
                   </button>
                 </div>
-                {/* Row 2: qty × price + PDV + total */}
-                <div className="flex items-center gap-2 pl-7">
-                  <div className="flex-shrink-0">
+                {/* Row 2: qty × price · PDV · total */}
+                <div className="grid grid-cols-[80px_12px_1fr_72px_108px] gap-2 items-end pl-7">
+                  <div>
                     <label className={LABEL}>Količina</label>
-                    <input type="number" min="0" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', e.target.value)} className={`${II} w-20 [appearance:textfield]`} />
+                    <input type="number" min="0" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', e.target.value)} className={`${II} [appearance:textfield]`} />
                   </div>
-                  <span className="text-[var(--text-muted)] text-sm mt-4 flex-shrink-0">×</span>
-                  <div className="flex-1 min-w-0">
+                  <span className="text-[var(--text-muted)] text-sm pb-2.5 text-center">×</span>
+                  <div>
                     <label className={LABEL}>Cena bez PDV</label>
                     <input type="number" min="0" step="0.01" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', e.target.value)} placeholder="0.00" className={`${II} [appearance:textfield]`} />
                   </div>
-                  <div className="flex-shrink-0">
+                  <div>
                     <label className={LABEL}>PDV</label>
-                    <select value={item.pdvRate} onChange={e => updateItem(item.id, 'pdvRate', Number(e.target.value))} className={`${II} w-[72px]`}>
+                    <select value={item.pdvRate} onChange={e => updateItem(item.id, 'pdvRate', Number(e.target.value))} className={II}>
                       <option value={0}>0%</option>
                       <option value={10}>10%</option>
                       <option value={20}>20%</option>
                     </select>
                   </div>
-                  <div className="flex-shrink-0 text-right">
+                  <div>
                     <label className={LABEL}>Ukupno</label>
-                    <div className="px-3 py-2 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-sm text-[#C9A84C] font-mono font-semibold w-[108px]">
+                    <div className="px-3 py-2 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-sm text-[#C9A84C] font-mono font-semibold text-right">
                       {fmtInv(c.total)}
                     </div>
                   </div>
