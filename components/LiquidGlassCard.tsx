@@ -37,7 +37,7 @@ export default function LiquidGlassCard({
     const y = e.clientY - rect.top;
 
     if (mapRef.current) {
-      const s = Math.max(15, Math.min((x / rect.width) * 100, (y / rect.height) * 100));
+      const s = Math.max(2, Math.min((x / rect.width) * 12, (y / rect.height) * 12));
       mapRef.current.setAttribute('scale', String(s));
     }
 
@@ -47,7 +47,7 @@ export default function LiquidGlassCard({
   }, []);
 
   const onLeave = useCallback(() => {
-    if (mapRef.current) mapRef.current.setAttribute('scale', '77');
+    if (mapRef.current) mapRef.current.setAttribute('scale', '4');
     if (specularRef.current) specularRef.current.style.backgroundImage = '';
   }, []);
 
@@ -67,10 +67,10 @@ export default function LiquidGlassCard({
         <defs>
           <filter
             id={filterId}
-            x="-10%"
-            y="-10%"
-            width="120%"
-            height="120%"
+            x="0%"
+            y="0%"
+            width="100%"
+            height="100%"
             colorInterpolationFilters="sRGB"
           >
             <feTurbulence
@@ -83,7 +83,7 @@ export default function LiquidGlassCard({
             <feDisplacementMap
               in="SourceGraphic"
               in2="noise"
-              scale="77"
+              scale="4"
               xChannelSelector="R"
               yChannelSelector="G"
             />

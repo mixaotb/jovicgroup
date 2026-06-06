@@ -222,8 +222,8 @@ export default function FloatingContact() {
         <a
           href={`viber://chat?number=%2B${phone}`}
           aria-label="Pošaljite poruku na Viber"
-          className="group relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95"
-          style={{ background: '#7360F2', boxShadow: '0 6px 24px rgba(115,96,242,0.45)' }}
+          className="md:hidden group relative w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-110 hover:-translate-y-0.5 active:scale-95"
+          style={{ background: '#7360F2', boxShadow: '0 6px 24px rgba(115,96,242,0.45)', transition: 'transform 300ms ease', willChange: 'transform' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-[22px] h-[22px]" fill="white" aria-hidden>
             <path d="M11.985.015C5.4.015.017 5.4.017 11.985c0 2.08.543 4.036 1.495 5.73L0 24l6.51-1.706A11.936 11.936 0 0011.985 24c6.585 0 11.968-5.383 11.968-11.968C23.953 5.447 18.57.015 11.985.015zm5.85 16.696c-.268.748-1.548 1.43-2.14 1.52-.54.082-1.225.116-1.977-.124-.455-.149-1.039-.349-1.782-.681-3.122-1.345-5.16-4.484-5.316-4.692-.155-.208-1.264-1.679-1.264-3.202 0-1.523.8-2.27 1.084-2.58.28-.307.612-.384.815-.384h.574c.26 0 .548.01.794.604.287.694.975 2.388 1.06 2.562.085.174.142.378.03.607-.114.229-.171.372-.343.572-.171.2-.361.446-.514.6-.171.17-.35.356-.15.697.2.342.89 1.469 1.907 2.38 1.31 1.168 2.415 1.53 2.758 1.703.343.172.543.144.743-.085.2-.228.855-.998 1.083-1.342.228-.343.456-.285.77-.17.314.113 1.997.942 2.338 1.114.342.17.57.257.655.4.085.141.085.82-.183 1.68z" />
@@ -243,8 +243,8 @@ export default function FloatingContact() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Pošaljite poruku na WhatsApp"
-          className="group relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95"
-          style={{ background: '#25D366', boxShadow: '0 6px 24px rgba(37,211,102,0.45)' }}
+          className="md:hidden group relative w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-110 hover:-translate-y-0.5 active:scale-95"
+          style={{ background: '#25D366', boxShadow: '0 6px 24px rgba(37,211,102,0.45)', transition: 'transform 300ms ease', willChange: 'transform' }}
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-[22px] h-[22px]" fill="white" aria-hidden>
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
@@ -263,13 +263,15 @@ export default function FloatingContact() {
         <button
           onClick={() => setChatOpen((o) => !o)}
           aria-label={chatOpen ? 'Zatvori kontakt formu' : 'Pošaljite pitanje emailom'}
-          className="w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-0.5 active:scale-95"
+          className="w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-110 hover:-translate-y-0.5 active:scale-95"
           style={{
             background: chatOpen ? '#374151' : 'var(--glass-bg-strong)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             border: chatOpen ? '1px solid #4b5563' : '1px solid var(--glass-border)',
             boxShadow: '0 6px 24px rgba(0,0,0,0.25)',
+            transition: 'transform 300ms ease, border-color 300ms ease, background-color 300ms ease',
+            willChange: 'transform',
           }}
         >
           {chatOpen ? (

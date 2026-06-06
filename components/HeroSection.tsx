@@ -35,7 +35,7 @@ export default function HeroSection() {
       <div className="absolute top-1/3 right-1/4 w-[480px] h-[480px] rounded-full bg-[#C9A84C]/8 blur-[130px] pointer-events-none" />
       <div className="absolute bottom-1/4 left-1/2 w-[320px] h-[320px] rounded-full bg-[#1A2744]/50 blur-[90px] pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto px-5 sm:px-8 pt-32 pb-20 w-full">
+<div className="relative max-w-7xl mx-auto px-5 sm:px-8 pt-32 pb-20 w-full">
         <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-8 lg:gap-6 items-center">
 
           {/* ── Left: copy ─────────────────────────────── */}

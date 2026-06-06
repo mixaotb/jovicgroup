@@ -8,7 +8,6 @@ import {
   LightningIcon,
   SwatchesIcon,
   ShieldCheckIcon,
-  StarIcon,
   ArrowRightIcon,
 } from '@phosphor-icons/react/dist/ssr';
 import GlassNav from '@/components/GlassNav';
@@ -19,6 +18,8 @@ import FloatingContact from '@/components/FloatingContact';
 import PortfolioGallery from '@/components/PortfolioGallery';
 import ScrollProgress from '@/components/ScrollProgress';
 import MagneticButton from '@/components/MagneticButton';
+import AnimatedBar from '@/components/AnimatedBar';
+import TestimonialsSection from '@/components/TestimonialsSection';
 
 export const metadata: Metadata = {
   title: 'Jović Group | PVC & ALU Stolarija',
@@ -33,37 +34,6 @@ export const metadata: Metadata = {
     url: 'https://jovicgroup.com',
   },
 };
-
-const testimonials = [
-  {
-    text: 'Zamenili smo sve prozore u kući za jedan dan. Ekipa tačna i uredna, bez nereda. Kuća je od tada potpuno drugačija.',
-    author: 'Dajana Nikolić',
-    location: 'Stara Pazova',
-    rating: 5,
-  },
-  {
-    text: 'Koristio sam kalkulator i finalna cena bila skoro ista. Bez skrivenih troškova, sve ugrađeno besprekorno. Preporučujem svima.',
-    author: 'Aleksa Batoćanin',
-    location: 'Bele Vode, Beograd',
-    rating: 5,
-  },
-  {
-    text: 'Balkonska vrata i prozori ugrađeni za jedan dan, sve čisto i uredno. Odavno ih poznajem kao komšije, ali posao su odradili potpuno profesionalno.',
-    author: 'Dragana Preradović',
-    location: 'Stari Banovci',
-    rating: 5,
-  },
-];
-
-function Stars({ count }: { count: number }) {
-  return (
-    <div className="flex gap-1">
-      {Array.from({ length: count }).map((_, i) => (
-        <StarIcon key={i} size={13} weight="fill" className="text-[#C9A84C]" />
-      ))}
-    </div>
-  );
-}
 
 // Reusable glass icon wrapper
 function GlassIcon({ children }: { children: React.ReactNode }) {
@@ -367,26 +337,15 @@ export default function HomePage() {
 
                     <div className="space-y-5">
                       {[
-                        { label: 'Zvučna izolacija',   value: 'do 45 dB',     pct: 78 },
-                        { label: 'Klasa zaptivenosti', value: 'Klasa 4 (max)', pct: 95 },
+                        { label: 'Zvučna izolacija',   value: 'do 45 dB',     pct: 78,  delay: 0 },
+                        { label: 'Klasa zaptivenosti', value: 'Klasa 4 (max)', pct: 95,  delay: 0.15 },
                       ].map((spec) => (
                         <div key={spec.label}>
                           <div className="flex justify-between text-[12px] mb-2">
                             <span className="text-[var(--text-muted)] font-medium">{spec.label}</span>
                             <span className="text-[#C9A84C] font-mono font-bold tabular-nums">{spec.value}</span>
                           </div>
-                          <div
-                            className="h-[3px] rounded-full overflow-hidden"
-                            style={{ background: 'var(--glass-border)' }}
-                          >
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${spec.pct}%`,
-                                background: 'linear-gradient(90deg, #C9A84C, #E8C97A)',
-                              }}
-                            />
-                          </div>
+                          <AnimatedBar pct={spec.pct} delay={spec.delay} />
                         </div>
                       ))}
                     </div>
@@ -454,7 +413,6 @@ export default function HomePage() {
         {/* ─── Testimonials ─────────────────────────────── */}
         <section id="utisci" className="relative py-32">
           <div className="absolute top-1/4 left-1/6 w-[400px] h-[400px] rounded-full bg-[#C9A84C]/8 dark:bg-[#C9A84C]/5 blur-[100px] pointer-events-none" />
-          {/* Colorful accent orbs */}
           <div className="absolute top-[10%] right-[8%] w-[380px] h-[380px] rounded-full bg-blue-400/20 dark:bg-blue-500/18 blur-[120px] pointer-events-none" />
           <div className="absolute bottom-[5%] right-[30%] w-[320px] h-[320px] rounded-full bg-purple-400/18 dark:bg-purple-500/15 blur-[100px] pointer-events-none" />
           <div className="absolute top-[50%] left-[10%] w-[260px] h-[260px] rounded-full bg-teal-400/15 dark:bg-teal-400/12 blur-[90px] pointer-events-none" />
@@ -472,64 +430,8 @@ export default function HomePage() {
               </div>
             </RevealUp>
 
-            {/* Asymmetric: featured large left + two stacked right */}
             <RevealUp delay={0.05}>
-              <div className="grid md:grid-cols-3 gap-4">
-
-                <LiquidGlassCard
-                  className="md:col-span-2 p-8 rounded-[1.5rem]"
-                  style={{ border: '1px solid var(--glass-border)' }}
-                >
-                  <div className="relative">
-                    <div
-                      className="absolute top-0 right-0 font-display font-black text-[#C9A84C]/10 leading-none select-none pointer-events-none"
-                      style={{ fontSize: '6rem' }}
-                      aria-hidden
-                    >&ldquo;</div>
-                    <Stars count={testimonials[0].rating} />
-                    <p className="text-[var(--text)] text-[1.08rem] leading-relaxed mt-5 mb-7 max-w-lg relative z-10 font-medium">
-                      {testimonials[0].text}
-                    </p>
-                    <div
-                      className="flex items-center gap-3 pt-6"
-                      style={{ borderTop: '1px solid var(--glass-border)' }}
-                    >
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center font-display font-bold text-[14px] text-[#C9A84C]"
-                        style={{
-                          background: 'rgba(201,168,76,0.12)',
-                          border: '1px solid rgba(201,168,76,0.2)',
-                        }}
-                      >
-                        {testimonials[0].author[0]}
-                      </div>
-                      <div>
-                        <div className="font-display font-bold text-[var(--text)] text-[13px]">{testimonials[0].author}</div>
-                        <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{testimonials[0].location}</div>
-                      </div>
-                    </div>
-                  </div>
-                </LiquidGlassCard>
-
-                <div className="flex flex-col gap-4">
-                  {testimonials.slice(1).map((t) => (
-                    <LiquidGlassCard
-                      key={t.author}
-                      className="flex-1 p-6 rounded-[1.5rem]"
-                      style={{ border: '1px solid var(--glass-border)' }}
-                    >
-                      <Stars count={t.rating} />
-                      <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed mt-4 mb-5">
-                        {t.text}
-                      </p>
-                      <div style={{ borderTop: '1px solid var(--glass-border)' }} className="pt-4">
-                        <div className="font-display font-bold text-[var(--text)] text-[12px]">{t.author}</div>
-                        <div className="text-[var(--text-faint)] text-[11px] mt-0.5">{t.location}</div>
-                      </div>
-                    </LiquidGlassCard>
-                  ))}
-                </div>
-              </div>
+              <TestimonialsSection />
             </RevealUp>
           </div>
         </section>

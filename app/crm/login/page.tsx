@@ -38,7 +38,8 @@ export default function CrmLoginPage() {
         return;
       }
 
-      router.push('/dashboard');
+      const isSubdomain = typeof window !== 'undefined' && window.location.hostname === 'crm.jovicgroup.com';
+      router.push(isSubdomain ? '/dashboard' : '/crm/dashboard');
       router.refresh();
     } catch {
       setError('Greška. Proverite internet konekciju.');

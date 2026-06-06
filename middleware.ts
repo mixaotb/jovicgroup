@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get('host') ?? '';
+  const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1');
   const isCrmSubdomain = host === 'crm.jovicgroup.com' || host.startsWith('crm.jovicgroup.com:');
 
   if (isCrmSubdomain) {
@@ -60,12 +61,38 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // Main domain: redirect /crm/* → crm.jovicgroup.com
+  // Dev: /crm/* works directly on localhost with auth guard
+  if (isLocalhost && pathname.startsWith('/crm')) {
+    const isLoginPage = pathname === '/crm/login' || pathname === '/crm/login/';
+    const isApiPath = pathname.startsWith('/api/');
+
+    if (!isLoginPage && !isApiPath) {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { cookies: { getAll: () => request.cookies.getAll(), setAll: (cs: { name: string; value: string }[]) => { cs.forEach(({ name, value }) => request.cookies.set(name, value)); } } }
+      );
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          const url = request.nextUrl.clone();
+          url.pathname = '/crm/login';
+          return NextResponse.redirect(url);
+        }
+      } catch {
+        const url = request.nextUrl.clone();
+        url.pathname = '/crm/login';
+        return NextResponse.redirect(url);
+      }
+    }
+
+    return NextResponse.next();
+  }
+
+  // Production: redirect /crm/* → crm.jovicgroup.com
   if (pathname.startsWith('/crm')) {
-    const url = request.nextUrl.clone();
-    url.host = 'crm.jovicgroup.com';
-    url.pathname = pathname.replace(/^\/crm/, '') || '/';
-    return NextResponse.redirect(url, { status: 301 });
+    const target = `https://crm.jovicgroup.com${pathname.replace(/^\/crm/, '') || '/'}`;
+    return NextResponse.redirect(target, { status: 302 });
   }
 
   return NextResponse.next();

@@ -114,7 +114,7 @@ export default function NotificationBell({ onOrderClick }: Props) {
       {/* Toast */}
       {toast && (
         <div
-          className="fixed top-4 right-4 z-[100] max-w-sm w-full bg-[#0E1625] border border-[#C9A84C]/40 rounded-2xl shadow-2xl p-4 flex gap-3 items-start"
+          className="fixed top-4 right-4 z-[100] max-w-sm w-full bg-[var(--bg-surface)] border border-[#C9A84C]/40 rounded-2xl shadow-2xl p-4 flex gap-3 items-start"
           style={{ animation: 'slideInRight 0.3s ease' }}
         >
           <div className="w-8 h-8 rounded-lg bg-[#C9A84C]/15 border border-[#C9A84C]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -123,10 +123,10 @@ export default function NotificationBell({ onOrderClick }: Props) {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-semibold leading-tight">{toast.title}</p>
-            {toast.body && <p className="text-slate-400 text-xs mt-0.5">{toast.body}</p>}
+            <p className="text-[var(--text)] text-sm font-semibold leading-tight">{toast.title}</p>
+            {toast.body && <p className="text-[var(--text-muted)] text-xs mt-0.5">{toast.body}</p>}
           </div>
-          <button onClick={() => setToast(null)} className="text-slate-600 hover:text-slate-400 transition-colors flex-shrink-0">
+          <button onClick={() => setToast(null)} className="text-[var(--text-faint)] hover:text-[var(--text-muted)] transition-colors flex-shrink-0">
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
               <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z" />
             </svg>
@@ -138,7 +138,7 @@ export default function NotificationBell({ onOrderClick }: Props) {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={handleBellClick}
-          className="relative w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          className="relative w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--bg-raised)] transition-colors"
           aria-label="Notifikacije"
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -153,14 +153,14 @@ export default function NotificationBell({ onOrderClick }: Props) {
         </button>
 
         {open && (
-          <div className="absolute right-0 top-11 w-80 bg-[#0E1625] border border-slate-700 rounded-2xl shadow-2xl overflow-hidden z-50">
-            <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-              <span className="text-white text-sm font-semibold">Notifikacije</span>
+          <div className="absolute right-0 top-11 w-80 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden z-50">
+            <div className="px-4 py-3 border-b border-[var(--border)] flex items-center justify-between">
+              <span className="text-[var(--text)] text-sm font-semibold">Notifikacije</span>
               {notifications.length > 0 && (
                 <button
                   onClick={handleClearAll}
                   disabled={clearing}
-                  className="text-slate-500 hover:text-red-400 text-xs transition-colors disabled:opacity-40"
+                  className="text-[var(--text-muted)] hover:text-red-400 text-xs transition-colors disabled:opacity-40"
                 >
                   {clearing ? 'Brisanje...' : 'Obriši sve'}
                 </button>
@@ -169,7 +169,7 @@ export default function NotificationBell({ onOrderClick }: Props) {
 
             <div className="max-h-80 overflow-y-auto">
               {notifications.length === 0 ? (
-                <div className="py-10 text-center text-slate-600 text-sm">Nema notifikacija</div>
+                <div className="py-10 text-center text-[var(--text-muted)] text-sm">Nema notifikacija</div>
               ) : (
                 notifications.map(n => (
                   <button
@@ -180,17 +180,17 @@ export default function NotificationBell({ onOrderClick }: Props) {
                         setOpen(false);
                       }
                     }}
-                    className={`w-full text-left px-4 py-3 border-b border-slate-800/60 hover:bg-slate-800/40 transition-colors flex gap-3 items-start ${n.order_id && onOrderClick ? 'cursor-pointer' : 'cursor-default'}`}
+                    className={`w-full text-left px-4 py-3 border-b border-[var(--border)] hover:bg-[var(--bg-raised)] transition-colors flex gap-3 items-start ${n.order_id && onOrderClick ? 'cursor-pointer' : 'cursor-default'}`}
                   >
-                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${n.read ? 'bg-slate-700' : 'bg-[#C9A84C]'}`} />
+                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${n.read ? 'bg-[var(--border-strong)]' : 'bg-[#C9A84C]'}`} />
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm leading-snug ${n.read ? 'text-slate-400' : 'text-white font-medium'}`}>
+                      <p className={`text-sm leading-snug ${n.read ? 'text-[var(--text-muted)]' : 'text-[var(--text)] font-medium'}`}>
                         {n.title}
                       </p>
                       {n.body && (
-                        <p className="text-slate-500 text-xs mt-0.5 truncate">{n.body}</p>
+                        <p className="text-[var(--text-muted)] text-xs mt-0.5 truncate">{n.body}</p>
                       )}
-                      <p className="text-slate-600 text-xs mt-1">{timeAgo(n.created_at)}</p>
+                      <p className="text-[var(--text-faint)] text-xs mt-1">{timeAgo(n.created_at)}</p>
                     </div>
                   </button>
                 ))

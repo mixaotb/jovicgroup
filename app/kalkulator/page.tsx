@@ -252,7 +252,7 @@ function FieldLabel({ children, required, optional }: { children: React.ReactNod
     <label className="block text-[var(--text)] text-[13px] font-medium mb-2">
       {children}
       {required && <span className="text-[#C9A84C] ml-0.5">*</span>}
-      {optional && <span className="text-[var(--text-faint)] font-normal ml-1.5">(opciono)</span>}
+      {optional && <span className="text-[var(--text-faint)] font-normal ml-1.5">(opcionalno)</span>}
     </label>
   );
 }
