@@ -1857,7 +1857,7 @@ function RacunSection() {
 
   return (
     <div className="flex gap-6 items-start">
-      <div className="space-y-5 w-full max-w-[540px] flex-shrink-0 min-w-0">
+      <div className="space-y-5 flex-1 min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -2008,56 +2008,52 @@ function RacunSection() {
           </button>
         </div>
 
-        {/* Desktop header */}
-        <div className="hidden md:grid grid-cols-[24px_1fr_80px_68px_108px_72px_118px_32px] gap-2 mb-2 px-1">
-          {['#', 'Opis', 'J.m.', 'Kol.', 'Cena bez PDV', 'PDV %', 'Ukupno sa PDV', ''].map((h, i) => (
-            <div key={i} className="text-[9px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">{h}</div>
-          ))}
-        </div>
-
         <div className="space-y-2">
           {items.map((item, idx) => {
             const c = calcItem(item);
             return (
-              <div key={item.id}>
-                {/* Desktop row */}
-                <div className="hidden md:grid grid-cols-[24px_1fr_80px_68px_108px_72px_118px_32px] gap-2 items-center">
-                  <span className="text-[var(--text-muted)] text-xs text-center">{idx + 1}.</span>
-                  <input type="text" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} placeholder="Opis usluge ili robe" className={II} />
-                  <select value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} className={II}>
+              <div key={item.id} className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)] space-y-2.5">
+                {/* Row 1: description + unit + delete */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-[var(--text-muted)] w-5 flex-shrink-0 text-center">{idx + 1}.</span>
+                  <input
+                    type="text"
+                    value={item.description}
+                    onChange={e => updateItem(item.id, 'description', e.target.value)}
+                    placeholder="Opis usluge ili robe"
+                    className={`${II} flex-1`}
+                  />
+                  <select value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} className={`${II} w-[72px] flex-shrink-0`}>
                     {ITEM_UNITS.map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
-                  <input type="number" min="0" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', e.target.value)} className={`${II} [appearance:textfield]`} />
-                  <input type="number" min="0" step="0.01" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', e.target.value)} placeholder="0.00" className={`${II} [appearance:textfield]`} />
-                  <select value={item.pdvRate} onChange={e => updateItem(item.id, 'pdvRate', Number(e.target.value))} className={II}>
-                    <option value={0}>0%</option>
-                    <option value={10}>10%</option>
-                    <option value={20}>20%</option>
-                  </select>
-                  <div className="px-3 py-2 rounded-xl bg-[var(--bg-raised)] border border-[var(--border)] text-sm text-[#C9A84C] font-mono font-semibold text-right">
-                    {fmtInv(c.total)}
-                  </div>
-                  <button onClick={() => removeItem(item.id)} disabled={items.length === 1} className="w-8 h-8 flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-25">
+                  <button onClick={() => removeItem(item.id)} disabled={items.length === 1} className="w-8 h-8 flex items-center justify-center rounded-xl text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors disabled:opacity-25 flex-shrink-0">
                     <X size={13} />
                   </button>
                 </div>
-
-                {/* Mobile card */}
-                <div className="md:hidden p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[var(--text-muted)]">Stavka {idx + 1}</span>
-                    <button onClick={() => removeItem(item.id)} disabled={items.length === 1} className="text-[var(--text-muted)] hover:text-red-500 transition-colors disabled:opacity-25"><X size={13} /></button>
+                {/* Row 2: qty × price + PDV + total */}
+                <div className="flex items-center gap-2 pl-7">
+                  <div className="flex-shrink-0">
+                    <label className={LABEL}>Količina</label>
+                    <input type="number" min="0" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', e.target.value)} className={`${II} w-20 [appearance:textfield]`} />
                   </div>
-                  <input type="text" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} placeholder="Opis" className={II} />
-                  <div className="grid grid-cols-2 gap-2">
-                    <div><label className={LABEL}>J.m.</label><select value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} className={II}>{ITEM_UNITS.map(u => <option key={u} value={u}>{u}</option>)}</select></div>
-                    <div><label className={LABEL}>Količina</label><input type="number" min="0" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', e.target.value)} className={`${II} [appearance:textfield]`} /></div>
-                    <div><label className={LABEL}>Cena bez PDV</label><input type="number" min="0" step="0.01" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', e.target.value)} placeholder="0.00" className={`${II} [appearance:textfield]`} /></div>
-                    <div><label className={LABEL}>PDV stopa</label><select value={item.pdvRate} onChange={e => updateItem(item.id, 'pdvRate', Number(e.target.value))} className={II}><option value={0}>0%</option><option value={10}>10%</option><option value={20}>20%</option></select></div>
+                  <span className="text-[var(--text-muted)] text-sm mt-4 flex-shrink-0">×</span>
+                  <div className="flex-1 min-w-0">
+                    <label className={LABEL}>Cena bez PDV</label>
+                    <input type="number" min="0" step="0.01" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', e.target.value)} placeholder="0.00" className={`${II} [appearance:textfield]`} />
                   </div>
-                  <div className="flex justify-between items-center pt-1 border-t border-[var(--border)]">
-                    <span className="text-xs text-[var(--text-muted)]">Ukupno sa PDV</span>
-                    <span className="font-mono font-bold text-[#C9A84C] text-sm">{fmtInv(c.total)} RSD</span>
+                  <div className="flex-shrink-0">
+                    <label className={LABEL}>PDV</label>
+                    <select value={item.pdvRate} onChange={e => updateItem(item.id, 'pdvRate', Number(e.target.value))} className={`${II} w-[72px]`}>
+                      <option value={0}>0%</option>
+                      <option value={10}>10%</option>
+                      <option value={20}>20%</option>
+                    </select>
+                  </div>
+                  <div className="flex-shrink-0 text-right">
+                    <label className={LABEL}>Ukupno</label>
+                    <div className="px-3 py-2 rounded-xl bg-[var(--bg)] border border-[var(--border)] text-sm text-[#C9A84C] font-mono font-semibold w-[108px]">
+                      {fmtInv(c.total)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2092,7 +2088,7 @@ function RacunSection() {
       </div>
 
       {/* Live preview panel */}
-      <div className="hidden xl:block w-[320px] flex-shrink-0 sticky top-[72px]">
+      <div className="hidden xl:block w-[480px] flex-shrink-0 sticky top-[72px]">
         <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest mb-2 flex items-center justify-between">
           <span>Pregled</span>
           <span className="font-normal normal-case text-[var(--text-faint)] flex items-center gap-1.5">
