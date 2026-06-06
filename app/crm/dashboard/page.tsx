@@ -1648,7 +1648,7 @@ function buildInvoiceHtml({
     </tr>`).join('');
 
   const tableHead = `<thead><tr>
-        <th style="width:26px">#</th>
+        <th style="width:40px">#</th>
         <th>Opis usluge / robe</th>
         <th class="c" style="width:48px">J.m.</th>
         <th class="r" style="width:54px">Kol.</th>
@@ -1763,7 +1763,8 @@ function buildInvoiceHtml({
   th.r{text-align:right}th.c{text-align:center}
   tbody tr{border-bottom:1px solid #e8e8e8}
   tbody tr:nth-child(even){background:#f7f7f7}
-  td{padding:7px 10px;color:#1a1a1a;vertical-align:top;word-break:break-word;overflow-wrap:break-word}
+  td{padding:7px 10px;color:#1a1a1a;vertical-align:top;white-space:nowrap}
+  td:nth-child(2){white-space:normal;word-break:break-word;overflow-wrap:break-word}
   td.r{text-align:right}td.c{text-align:center}td.b{font-weight:700}
   .totals{display:flex;justify-content:flex-end;margin-bottom:20px}
   .tot-box{width:272px;border:1px solid #d0d0d0;border-radius:7px;overflow:hidden}
