@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jovicgroup",
+  "compatibility_date": "2026-06-15",
+  "observability": {
+    "enabled": true
+  },
+  "compatibility_flags": ["nodejs_compat"],
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "jovicgroup"
+    }
+  ]
+}
