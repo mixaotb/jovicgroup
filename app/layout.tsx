@@ -3,8 +3,6 @@ import type { Metadata } from 'next';
 import { Playfair_Display, DM_Sans } from 'next/font/google';
 import './globals.css';
 import SmoothScroll from '@/components/SmoothScroll';
-import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Analytics } from '@vercel/analytics/next';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -149,8 +147,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           aria-hidden
         />
         <SmoothScroll>{children}</SmoothScroll>
-        <SpeedInsights />
-        <Analytics />
       </body>
     </html>
   );
