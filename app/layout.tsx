@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: '%s | Jović Group',
   },
   description:
-    'PVC i ALU prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije. Besplatna kalkulacija online.',
+    'PVC i ALU prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije. Besplatna ponuda bez obaveza.',
   keywords: [
     'PVC stolarija Stari Banovci', 'ALU stolarija Beograd', 'prozori Zemun',
     'vrata Stari Banovci', 'PVC prozori Srbija', 'ALU prozori Srbija',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     'Jović Group', 'PVC stolarija', 'ALU stolarija',
     'PVC prozori Stara Pazova', 'stolarija Sremska Mitrovica', 'prozori Inđija',
     'PVC prozori Novi Beograd', 'stolarija Surčin', 'prozori i vrata po meri',
-    'kalkulator cene prozora', 'PVC prozori cena', 'ALU prozori cena',
+    'PVC prozori cena', 'ALU prozori cena',
     'stolarija dijaspora Srbija', 'ugradnja prozora Srbi u Austriji',
     'plisirani komarnici', 'roletne za prozore', 'trostruko staklo prozori',
   ],
@@ -72,7 +72,7 @@ const localBusinessSchema = {
     'Premium PVC i ALU stolarija — prozori, vrata i komarnici po evropskim standardima. Profesionalna izrada i ugradnja u Srbiji.',
   url: 'https://jovicgroup.com',
   telephone: '+381653999555',
-  email: 'info@jovicgroup.com',
+  email: 'jovicgroup@gmail.com',
   image: 'https://jovicgroup.com/logo.png',
   priceRange: '$$',
   currenciesAccepted: 'RSD',
@@ -95,9 +95,7 @@ const localBusinessSchema = {
     { '@type': 'City', name: 'Beograd' },
     { '@type': 'City', name: 'Zemun' },
     { '@type': 'City', name: 'Novi Sad' },
-    { '@type': 'Country', name: 'Germany' },
     { '@type': 'Country', name: 'Austria' },
-    { '@type': 'Country', name: 'Switzerland' },
   ],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',

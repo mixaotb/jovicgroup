@@ -5,10 +5,13 @@ import { useRef, useCallback, useId, useEffect } from 'react';
 export default function LiquidGlassCard({
   children,
   className = '',
+  contentClassName = '',
   style,
 }: {
   children: React.ReactNode;
   className?: string;
+  /** Classes for the inner content wrapper — put flex/grid layout here, not on className */
+  contentClassName?: string;
   style?: React.CSSProperties;
 }) {
   const uid = useId();
@@ -123,7 +126,7 @@ export default function LiquidGlassCard({
       />
 
       {/* Layer 4 — content */}
-      <div className="relative" style={{ zIndex: 4 }}>
+      <div className={`relative ${contentClassName}`} style={{ zIndex: 4 }}>
         {children}
       </div>
     </div>

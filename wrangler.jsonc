@@ -10,7 +10,7 @@
   "vars": {
     "NEXT_PUBLIC_SUPABASE_URL": "https://zorylsswdzsjxsyrevec.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_9QP8CpgZSau8yNM8vyVzpw_BOLCyqhO",
-    "ADMIN_EMAIL": "admin@jovicgroup.com",
+    "ADMIN_EMAIL": "jovicgroup@gmail.com",
     "RESEND_FROM_EMAIL": "noreply@jovicgroup.com",
     "NEXT_PUBLIC_SITE_URL": "https://jovicgroup.com"
   },

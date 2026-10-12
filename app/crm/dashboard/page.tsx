@@ -2834,7 +2834,7 @@ export default function CrmDashboardPage() {
 
                     {/* Desktop: table */}
                     <div className="hidden md:block rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--bg-surface)]/60 backdrop-blur-md">
-                      <div className={`grid gap-4 px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-raised)] text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest sticky top-14 z-10 ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]'}`}>
+                      <div className={`grid gap-4 px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-raised)] text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]'}`}>
                         <span>
                           <input type="checkbox"
                             checked={sortedOrders.length > 0 && sortedOrders.every(o => selectedIds.has(o.id))}

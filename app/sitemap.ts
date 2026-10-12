@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+import { CALCULATOR_ENABLED } from '@/lib/features';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = 'https://jovicgroup.com';
@@ -11,12 +12,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'daily',
       priority: 1,
     },
-    {
-      url: `${base}/kalkulator`,
-      lastModified: now,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
+    ...(CALCULATOR_ENABLED
+      ? [{
+          url: `${base}/kalkulator`,
+          lastModified: now,
+          changeFrequency: 'weekly' as const,
+          priority: 0.9,
+        }]
+      : []),
     {
       url: `${base}/politika-privatnosti`,
       lastModified: now,

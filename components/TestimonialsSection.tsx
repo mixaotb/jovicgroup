@@ -12,12 +12,6 @@ const testimonials = [
     rating: 5,
   },
   {
-    text: 'Koristio sam kalkulator i finalna cena bila skoro ista. Bez skrivenih troškova, sve ugrađeno besprekorno. Preporučujem svima.',
-    author: 'Aleksa Batoćanin',
-    location: 'Bele Vode, Beograd',
-    rating: 5,
-  },
-  {
     text: 'Balkonska vrata i prozori ugrađeni za jedan dan, sve čisto i uredno. Odavno ih poznajem kao komšije, ali posao su odradili potpuno profesionalno.',
     author: 'Dragana Preradović',
     location: 'Stari Banovci',

@@ -239,7 +239,7 @@ function buildFooter() {
 <div class="fn" style="color:#64748B;font-size:13px;font-weight:600;font-family:${FONT};">Jović Group</div>
 <div class="ft" style="color:#94A3B8;font-size:12px;margin-top:3px;font-family:${FONT};">PVC &amp; ALU stolarija</div>
 <div class="dv" style="margin:14px auto;width:36px;height:1px;background:#E2E8F0;"></div>
-<a href="mailto:info@jovicgroup.com" style="color:#C9A84C;text-decoration:none;font-size:12px;font-family:${FONT};">info@jovicgroup.com</a>
+<a href="mailto:jovicgroup@gmail.com" style="color:#C9A84C;text-decoration:none;font-size:12px;font-family:${FONT};">jovicgroup@gmail.com</a>
 <div class="fd" style="color:#CBD5E1;font-size:11px;margin-top:10px;font-family:${FONT};">Ovo je automatska poruka — molimo ne odgovarajte direktno na ovaj email</div>
 </div>`;
 }
@@ -295,7 +295,14 @@ export async function sendNewOrderEmail(data: NewOrderEmailData): Promise<void> 
   });
 }
 
-export async function sendContactEmail(email: string, message: string): Promise<void> {
+export interface ContactEmailData {
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+}
+
+export async function sendContactEmail({ name, phone, email, message }: ContactEmailData): Promise<void> {
   if (!process.env.RESEND_API_KEY || !ADMIN_EMAIL) return;
 
   const headerHtml = `<div class="hdr" style="padding:28px 36px;background:#0A1628;">
@@ -310,13 +317,15 @@ export async function sendContactEmail(email: string, message: string): Promise<
     </td>
   </tr>
 </table>
-<h1 style="margin:0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:-0.3px;font-family:${FONT};">Novo pitanje sa sajta</h1>
+<h1 style="margin:0;color:#FFFFFF;font-size:22px;font-weight:700;letter-spacing:-0.3px;font-family:${FONT};">Novi upit sa sajta</h1>
 </div>`;
 
   const bodyHtml = `
     <div class="sec" style="padding:24px 36px;border-bottom:1px solid #E8EDF3;">
       ${secLabel('Pošiljalac')}
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
+        ${infoRow('Ime', esc(name))}
+        ${infoRow('Telefon', `<a href="tel:${esc(phone.replace(/[^\d+]/g, ''))}" style="color:#C9A84C;text-decoration:none;">${esc(phone)}</a>`)}
         ${infoRow('Email', `<a href="mailto:${esc(email)}" style="color:#C9A84C;text-decoration:none;">${esc(email)}</a>`)}
       </table>
     </div>
@@ -331,7 +340,7 @@ export async function sendContactEmail(email: string, message: string): Promise<
     from: `Jović Group CRM <${FROM_EMAIL}>`,
     to: [ADMIN_EMAIL],
     replyTo: email,
-    subject: `Novo pitanje sa sajta — ${email}`,
+    subject: `Novi upit sa sajta — ${name}`,
     html,
   });
 }

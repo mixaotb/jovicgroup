@@ -22,14 +22,13 @@ Korišćenjem ovog sajta i slanjem narudžbine ili upita potvrđujete da ste pro
 
 Sajt jovicgroup.com pruža:
 — Informativne stranice o proizvodima i profil sistemima
-— Online kalkulator za okvirnu procenu cene
-— Formu za slanje upita / narudžbine
+— Formu za slanje upita i zahteva za ponudu
 
 Sajt nema funkciju e-commerce platforme u smislu Zakona o elektronskoj trgovini — svaka narudžbina podleže potvrdi od strane Jović Group pre zaključenja ugovora.`,
   },
   {
-    title: '3. Kalkulator i cene',
-    body: `Online kalkulator daje okvirnu procenu troškova na osnovu unetih dimenzija, materijala i opcija. Prikazana cena je informativna i ne predstavlja konačnu ponudu niti obavezujući ugovor.
+    title: '3. Ponude i cene',
+    body: `Ponudu pripremamo na osnovu dimenzija, materijala i opcija koje nam dostavite telefonom, e-mailom ili putem forme na sajtu. Okvirna cena data pre merenja je informativna i ne predstavlja konačnu ponudu niti obavezujući ugovor.
 
 Konačna cena utvrđuje se nakon:
 — Potvrde tehničkih detalja i dimenzija od strane našeg tima
@@ -40,7 +39,7 @@ Cene su izražene u srpskim dinarima (RSD) i uključuju PDV tamo gde je primenjl
   },
   {
     title: '4. Proces narudžbine',
-    body: `Slanjem forme na sajtu šaljete nam upit koji naš tim obrađuje u roku od jednog radnog dana. Narudžbina se smatra potvrđenom tek nakon što naš zaposleni kontaktira vas (telefonom ili e-mailom) i potvrdi tehničke detalje i cenu.
+    body: `Slanjem forme na sajtu šaljete nam upit koji naš tim obrađuje u roku od 48 sati. Narudžbina se smatra potvrđenom tek nakon što naš zaposleni kontaktira vas (telefonom ili e-mailom) i potvrdi tehničke detalje i cenu.
 
 Nakon potvrde, ugovor o izradi i ugradnji stolarije se zaključuje i Jović Group pristupa realizaciji. Otkaz potvrđene narudžbine moguć je bez naknade najkasnije 48 sati od pisane potvrde. Nakon tog roka, eventualni troškovi materijala koji je već nabavljen mogu biti naplaćeni.`,
   },
@@ -48,7 +47,7 @@ Nakon potvrde, ugovor o izradi i ugradnji stolarije se zaključuje i Jović Grou
     title: '5. Isporuka i ugradnja',
     body: `Rokovi izrade i ugradnje dogovaraju se individualno u zavisnosti od obima narudžbine, dostupnosti materijala i rasporeda ekipe. Okvirni rok se navodi u potvrdi narudžbine i tretira se kao procena, a ne kao garantovani datum.
 
-Isporuka na teritoriji Srbije se naplaćuje po važećem cenovniku (videti kalkulator). Za narudžbine iz inostranstva (dijaspora) cena isporuke se utvrđuje posebno. Ugradnja se vrši isključivo na teritoriji Srbije.`,
+Isporuka na teritoriji Srbije se naplaćuje po važećem cenovniku i navodi se u ponudi. Ugradnju vršimo u Srbiji i Austriji, a na drugim lokacijama po dogovoru. Za narudžbine i ugradnju u inostranstvu cena isporuke i putni troškovi utvrđuju se posebno i navode se u ponudi.`,
   },
   {
     title: '6. Garancija i reklamacije',
@@ -59,13 +58,13 @@ Garancija ne pokriva:
 — Normalno habanje tokom eksploatacije
 — Oštećenja nastala delovanjem više sile (grad, poplava, i sl.)
 
-Reklamaciju možete prijaviti na info@jovicgroup.com ili telefonom. Reklamacije rešavamo u skladu sa Zakonom o zaštiti potrošača Srbije, a odgovor dostavljamo najkasnije u roku od 8 dana.`,
+Reklamaciju možete prijaviti na jovicgroup@gmail.com ili telefonom. Reklamacije rešavamo u skladu sa Zakonom o zaštiti potrošača Srbije, a odgovor dostavljamo najkasnije u roku od 8 dana.`,
   },
   {
     title: '7. Ograničenje odgovornosti',
     body: `Jović Group ne snosi odgovornost za:
-— Štetu nastalu zbog privremene nedostupnosti sajta ili kalkulatora
-— Netačne procene nastale unosom pogrešnih dimenzija u kalkulator
+— Štetu nastalu zbog privremene nedostupnosti sajta
+— Netačne procene nastale na osnovu pogrešno dostavljenih dimenzija
 — Indirektnu ili posledičnu štetu
 
 Ukupna odgovornost Jović Group prema korisniku ograničena je na vrednost konkretne narudžbine u slučaju spora.
@@ -104,7 +103,7 @@ export default function UsloviKoriscenjaPage() {
           Uslovi korišćenja
         </h1>
         <p className="text-[13px]" style={{ color: 'var(--text-muted)' }}>
-          Poslednja izmena: 1. jun 2026. · Primenljivo pravo: Republika Srbija
+          Poslednja izmena: 12. oktobar 2026. · Primenljivo pravo: Republika Srbija
         </p>
       </div>
 

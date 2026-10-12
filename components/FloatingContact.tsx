@@ -1,8 +1,23 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useId } from 'react';
 
 type ChatState = 'idle' | 'loading' | 'success' | 'error';
+
+interface FormValues {
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+  website: string; // honeypot
+}
+
+const EMPTY_FORM: FormValues = { name: '', phone: '', email: '', message: '', website: '' };
+
+const inputClass =
+  'w-full px-3 py-3 rounded-xl text-[14px] text-[var(--text)] placeholder-[var(--text-faint)] focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/20 transition-colors';
+const inputStyle = { background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' };
+const labelClass = 'block text-[var(--text-muted)] text-[11px] font-semibold uppercase tracking-wide mb-1.5';
 
 function PanelHeader({ onClose }: { onClose: () => void }) {
   return (
@@ -11,8 +26,8 @@ function PanelHeader({ onClose }: { onClose: () => void }) {
       style={{ borderBottom: '1px solid var(--glass-border)' }}
     >
       <div>
-        <div className="font-display font-bold text-[var(--text)] text-[14px]">Pošaljite pitanje</div>
-        <div className="text-[var(--text-faint)] text-[11px] mt-0.5">Odgovaramo u roku od 24 sata</div>
+        <div className="font-display font-bold text-[var(--text)] text-[14px]">Zatražite ponudu</div>
+        <div className="text-[var(--text-faint)] text-[11px] mt-0.5">Javljamo se u roku od 48 sati</div>
       </div>
       <button
         onClick={onClose}
@@ -29,15 +44,19 @@ function PanelHeader({ onClose }: { onClose: () => void }) {
 }
 
 function PanelBody({
-  email, setEmail, message, setMessage,
+  values, setField,
   chatState, errorMsg, onSubmit, onClose,
 }: {
-  email: string; setEmail: (v: string) => void;
-  message: string; setMessage: (v: string) => void;
+  values: FormValues;
+  setField: (field: keyof FormValues, value: string) => void;
   chatState: ChatState; errorMsg: string;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
 }) {
+  // Panel renders twice (mobile sheet + desktop popover) — ids must be unique per instance
+  const uid = useId();
+  const id = (field: string) => `${uid}-${field}`;
+
   if (chatState === 'success') {
     return (
       <div className="px-5 py-10 text-center">
@@ -48,9 +67,9 @@ function PanelBody({
         </div>
         <div className="font-display font-bold text-[var(--text)] text-[16px] mb-2">Poruka poslata!</div>
         <div className="text-[var(--text-muted)] text-[14px] leading-relaxed mb-6">
-          Odgovorićemo na{' '}
-          <span className="text-[var(--text)] font-semibold">{email}</span>{' '}
-          u roku od 24 sata.
+          Javićemo vam se na{' '}
+          <span className="text-[var(--text)] font-semibold">{values.phone.trim()}</span>{' '}
+          u roku od 48 sati.
         </div>
         <button
           onClick={onClose}
@@ -63,45 +82,95 @@ function PanelBody({
     );
   }
 
+  const req = <span className="text-[#C9A84C]">*</span>;
+
   return (
     <form onSubmit={onSubmit} className="px-5 py-5 space-y-4">
       <div>
-        <label className="block text-[var(--text-muted)] text-[11px] font-semibold uppercase tracking-wide mb-1.5">
-          Email <span className="text-[#C9A84C]">*</span>
-        </label>
+        <label htmlFor={id('name')} className={labelClass}>Ime i prezime {req}</label>
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="vas@email.com"
+          id={id('name')}
+          type="text"
+          autoComplete="name"
+          value={values.name}
+          onChange={(e) => setField('name', e.target.value)}
+          placeholder="Petar Petrović"
           required
-          className="w-full px-3 py-3 rounded-xl text-[14px] text-[var(--text)] placeholder-[var(--text-faint)] focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/20 transition-colors"
-          style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
+          minLength={2}
+          maxLength={100}
+          className={inputClass}
+          style={inputStyle}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label htmlFor={id('phone')} className={labelClass}>Telefon {req}</label>
+          <input
+            id={id('phone')}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            value={values.phone}
+            onChange={(e) => setField('phone', e.target.value)}
+            placeholder="06x xxx xxxx"
+            required
+            className={inputClass}
+            style={inputStyle}
+          />
+        </div>
+        <div>
+          <label htmlFor={id('email')} className={labelClass}>Email {req}</label>
+          <input
+            id={id('email')}
+            type="email"
+            autoComplete="email"
+            value={values.email}
+            onChange={(e) => setField('email', e.target.value)}
+            placeholder="vas@email.com"
+            required
+            className={inputClass}
+            style={inputStyle}
+          />
+        </div>
+      </div>
+
+      {/* Honeypot — hidden from people and screen readers; bots fill it */}
+      <div aria-hidden className="absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none">
+        <label htmlFor={id('website')}>Website</label>
+        <input
+          id={id('website')}
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={values.website}
+          onChange={(e) => setField('website', e.target.value)}
         />
       </div>
 
       <div>
-        <label className="block text-[var(--text-muted)] text-[11px] font-semibold uppercase tracking-wide mb-1.5">
-          Poruka <span className="text-[#C9A84C]">*</span>
+        <label htmlFor={id('message')} className={labelClass}>
+          Poruka {req}
         </label>
         <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Vaše pitanje ili komentar..."
+          id={id('message')}
+          value={values.message}
+          onChange={(e) => setField('message', e.target.value)}
+          placeholder="Npr. 3 PVC prozora 120×140 cm i balkonska vrata, Stara Pazova"
           required
-          rows={5}
+          rows={4}
           minLength={10}
           maxLength={2000}
-          className="w-full px-3 py-3 rounded-xl text-[14px] text-[var(--text)] placeholder-[var(--text-faint)] focus:outline-none focus:ring-2 focus:ring-[#C9A84C]/20 transition-colors resize-none"
-          style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)' }}
+          className={`${inputClass} resize-none`}
+          style={inputStyle}
         />
         <div className="text-right text-[10px] text-[var(--text-faint)] mt-1 tabular-nums">
-          {message.length}/2000
+          {values.message.length}/2000
         </div>
       </div>
 
       {chatState === 'error' && errorMsg && (
-        <p className="text-red-400 text-[12px]">{errorMsg}</p>
+        <p className="text-red-400 text-[12px]" role="alert">{errorMsg}</p>
       )}
 
       <button
@@ -109,7 +178,7 @@ function PanelBody({
         disabled={chatState === 'loading'}
         className="w-full py-3 rounded-xl font-bold text-[14px] text-[#06080F] bg-[#C9A84C] hover:bg-[#E8C97A] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
       >
-        {chatState === 'loading' ? 'Slanje...' : 'Pošalji poruku →'}
+        {chatState === 'loading' ? 'Slanje...' : 'Pošalji upit →'}
       </button>
     </form>
   );
@@ -118,17 +187,19 @@ function PanelBody({
 export default function FloatingContact() {
   const phone = '381653999555';
   const [chatOpen, setChatOpen]   = useState(false);
-  const [email, setEmail]         = useState('');
-  const [message, setMessage]     = useState('');
+  const [values, setValues]       = useState<FormValues>(EMPTY_FORM);
   const [chatState, setChatState] = useState<ChatState>('idle');
   const [errorMsg, setErrorMsg]   = useState('');
+
+  const setField = useCallback((field: keyof FormValues, value: string) => {
+    setValues((v) => ({ ...v, [field]: value }));
+  }, []);
 
   const handleClose = useCallback(() => {
     setChatOpen(false);
     if (chatState === 'success') {
       setTimeout(() => {
-        setEmail('');
-        setMessage('');
+        setValues(EMPTY_FORM);
         setChatState('idle');
         setErrorMsg('');
       }, 300);
@@ -143,7 +214,13 @@ export default function FloatingContact() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), message: message.trim() }),
+        body: JSON.stringify({
+          name:    values.name.trim(),
+          phone:   values.phone.trim(),
+          email:   values.email.trim(),
+          message: values.message.trim(),
+          website: values.website,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Greška pri slanju.');
@@ -152,9 +229,9 @@ export default function FloatingContact() {
       setErrorMsg(err instanceof Error ? err.message : 'Greška pri slanju. Pokušajte ponovo.');
       setChatState('error');
     }
-  }, [email, message]);
+  }, [values]);
 
-  const panelProps = { email, setEmail, message, setMessage, chatState, errorMsg, onSubmit: handleSubmit, onClose: handleClose };
+  const panelProps = { values, setField, chatState, errorMsg, onSubmit: handleSubmit, onClose: handleClose };
 
   return (
     <>
@@ -169,7 +246,7 @@ export default function FloatingContact() {
           />
           {/* Sheet */}
           <div
-            className="fixed inset-x-0 bottom-0 z-[49] sm:hidden rounded-t-3xl overflow-hidden"
+            className="fixed inset-x-0 bottom-0 z-[49] sm:hidden rounded-t-3xl overflow-y-auto max-h-[92dvh]"
             style={{
               background: 'var(--glass-bg-strong)',
               backdropFilter: 'blur(28px) saturate(160%)',
@@ -204,7 +281,7 @@ export default function FloatingContact() {
           aria-hidden={!chatOpen}
         >
           <div
-            className="w-80 rounded-2xl overflow-hidden shadow-2xl shadow-black/40"
+            className="w-[22rem] rounded-2xl overflow-hidden shadow-2xl shadow-black/40"
             style={{
               background: 'var(--glass-bg-strong)',
               backdropFilter: 'blur(28px) saturate(160%)',
@@ -262,7 +339,7 @@ export default function FloatingContact() {
         {/* ── Chat toggle ───────────────────────────────────────────── */}
         <button
           onClick={() => setChatOpen((o) => !o)}
-          aria-label={chatOpen ? 'Zatvori kontakt formu' : 'Pošaljite pitanje emailom'}
+          aria-label={chatOpen ? 'Zatvori kontakt formu' : 'Zatražite ponudu'}
           className="w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-110 hover:-translate-y-0.5 active:scale-95"
           style={{
             background: chatOpen ? '#374151' : 'var(--glass-bg-strong)',

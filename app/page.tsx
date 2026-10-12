@@ -9,7 +9,11 @@ import {
   SwatchesIcon,
   ShieldCheckIcon,
   ArrowRightIcon,
+  PhoneIcon,
+  EnvelopeSimpleIcon,
 } from '@phosphor-icons/react/dist/ssr';
+import { CALCULATOR_ENABLED } from '@/lib/features';
+import { CONTACT_EMAIL, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/lib/contact';
 import GlassNav from '@/components/GlassNav';
 import HeroSection from '@/components/HeroSection';
 import RevealUp from '@/components/RevealUp';
@@ -24,7 +28,7 @@ import TestimonialsSection from '@/components/TestimonialsSection';
 export const metadata: Metadata = {
   title: 'Jović Group | PVC & ALU Stolarija',
   description:
-    'PVC i ALU prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije. Besplatna kalkulacija online.',
+    'PVC i ALU prozori i vrata po meri i evropskim standardima. Precizna izrada i profesionalna ugradnja širom Srbije. Besplatna ponuda bez obaveza.',
   alternates: { canonical: 'https://jovicgroup.com' },
   openGraph: {
     title: 'Jović Group | PVC & ALU Stolarija',
@@ -156,7 +160,7 @@ export default function HomePage() {
                   <div>
                     <h3 className="font-display font-bold text-[1.3rem] text-[var(--text)] mb-2">Garancija 5 godina</h3>
                     <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed">
-                      Servisni tim dostupan u roku od 48 sati za sve intervencije.
+                      Na izradu i ugradnju. Ako se bilo šta pojavi, dolazimo i rešavamo.
                     </p>
                   </div>
                 </div>
@@ -171,7 +175,7 @@ export default function HomePage() {
                   {
                     icon: <HouseIcon size={22} weight="light" />,
                     title: 'Profesionalna ugradnja',
-                    body: 'Iskusni tim koji svaki ugradnju završava precizno i uredno.',
+                    body: 'Iskusni tim koji svaku ugradnju završava precizno i uredno.',
                   },
                   {
                     icon: <SwatchesIcon size={22} weight="light" />,
@@ -194,22 +198,23 @@ export default function HomePage() {
 
                 {/* Cell 6: Energetska efikasnost — full width horizontal liquid glass */}
                 <LiquidGlassCard
-                  className="md:col-span-3 rounded-[1.5rem] p-7 flex flex-col md:flex-row items-start md:items-center gap-6 hover:scale-[1.005] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  className="md:col-span-3 rounded-[1.5rem] p-7 hover:scale-[1.005] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  contentClassName="flex flex-col md:flex-row items-start md:items-center gap-6"
                   style={{ border: '1px solid var(--glass-border)' }}
                 >
                   <GlassIcon><LightningIcon size={22} weight="light" /></GlassIcon>
                   <div className="flex-1">
                     <h3 className="font-display font-bold text-[1.05rem] text-[var(--text)] mb-1.5">Energetska efikasnost</h3>
                     <p className="text-[var(--text-muted)] text-[13.5px] leading-relaxed max-w-xl">
-                      Trojni staklopaketi smanjuju gubitke toplote za do 40%. Investicija koja se isplati već prve zime.
+                      Standardno ugrađujemo troslojno staklo. U poređenju sa klasičnim dvoslojnim, kroz njega izlazi 40–55% manje toplote, što znači topliju kuću i manje račune za grejanje. Dvoslojno je dostupno na zahtev.
                     </p>
                   </div>
                   <div
-                    className="flex-shrink-0 text-right md:pl-8 md:border-l"
+                    className="flex-shrink-0 text-left md:text-right md:pl-8 md:border-l"
                     style={{ borderColor: 'var(--glass-border)' }}
                   >
-                    <div className="font-display font-black text-[2.8rem] text-[#C9A84C] leading-none tabular-nums">-40%</div>
-                    <div className="text-[var(--text-faint)] text-[10px] mt-1 uppercase tracking-[0.12em] font-semibold">Gubici toplote</div>
+                    <div className="font-display font-black text-[2.8rem] text-[#C9A84C] leading-none tabular-nums whitespace-nowrap">40–55%</div>
+                    <div className="text-[var(--text-faint)] text-[10px] mt-1 uppercase tracking-[0.12em] font-semibold">Manje gubitka kroz staklo</div>
                   </div>
                 </LiquidGlassCard>
 
@@ -238,12 +243,12 @@ export default function HomePage() {
                     protokolima ugradnje.
                   </p>
                   <p>
-                    Skoro dve decenije kasnije, naš najveći marketing i dalje su preporuke, od komšije do komšije,
+                    Više od dvadeset godina kasnije, naš najveći marketing i dalje su preporuke, od komšije do komšije,
                     od porodice do porodice. Na tome smo gradili reputaciju i na tome ostajemo.
                   </p>
                   <p>
-                    Radimo i sa dijasporom, uglavnom srpskim porodicama iz Austrije koje žele da opreme
-                    stanove u Srbiji uz istu garanciju kvaliteta.
+                    Radimo i sa dijasporom, najviše sa našim porodicama u Austriji. Dolazimo i ugrađujemo
+                    na licu mesta, uz istu garanciju kao u Srbiji, a za druge zemlje se dogovaramo.
                   </p>
                 </div>
 
@@ -472,27 +477,68 @@ export default function HomePage() {
                     Vaš projekat zaslužuje<br />
                     <span className="text-[#C9A84C]">tačnu cenu.</span>
                   </h2>
-                  <p className="text-[var(--text-muted)] text-[15px] max-w-md mx-auto mb-10 leading-relaxed">
-                    Unesite dimenzije, izaberite materijal i lokaciju.
-                    Realan trošak odmah, bez čekanja na poziv.
-                  </p>
-                  <MagneticButton strength={0.4}>
-                    <Link
-                      href="/kalkulator"
-                      className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_14px_44px_rgba(201,168,76,0.5)] active:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
-                    >
-                      <span>Pokrenite kalkulator</span>
-                      <span
-                        className="ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-[2px] group-hover:-translate-y-[1px] group-hover:scale-105"
-                        style={{ background: 'rgba(6,8,15,0.15)' }}
-                      >
-                        <ArrowRightIcon size={15} weight="bold" />
-                      </span>
-                    </Link>
-                  </MagneticButton>
-                  <p className="text-[var(--text-faint)] text-[11px] mt-5 tracking-wide">
-                    Besplatno · Bez obaveza · Online ili telefonom
-                  </p>
+                  {CALCULATOR_ENABLED ? (
+                    <>
+                      <p className="text-[var(--text-muted)] text-[15px] max-w-md mx-auto mb-10 leading-relaxed">
+                        Unesite dimenzije, izaberite materijal i lokaciju.
+                        Realan trošak odmah, bez čekanja na poziv.
+                      </p>
+                      <MagneticButton strength={0.4}>
+                        <Link
+                          href="/kalkulator"
+                          className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_14px_44px_rgba(201,168,76,0.5)] active:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
+                        >
+                          <span>Pokrenite kalkulator</span>
+                          <span
+                            className="ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-[2px] group-hover:-translate-y-[1px] group-hover:scale-105"
+                            style={{ background: 'rgba(6,8,15,0.15)' }}
+                          >
+                            <ArrowRightIcon size={15} weight="bold" />
+                          </span>
+                        </Link>
+                      </MagneticButton>
+                      <p className="text-[var(--text-faint)] text-[11px] mt-5 tracking-wide">
+                        Besplatno · Bez obaveza · Online ili telefonom
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[var(--text-muted)] text-[15px] max-w-md mx-auto mb-10 leading-relaxed">
+                        Pozovite nas ili pošaljite dimenzije na email.
+                        Dobićete preciznu ponudu za vaš objekat.
+                      </p>
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <MagneticButton strength={0.4}>
+                          <a
+                            href={CONTACT_PHONE_HREF}
+                            className="group inline-flex items-center pl-7 pr-2 py-2 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[15px] hover:bg-[#E8C97A] hover:-translate-y-[3px] hover:shadow-[0_14px_44px_rgba(201,168,76,0.5)] active:translate-y-0 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.025] active:scale-[0.975] shadow-[0_8px_40px_rgba(201,168,76,0.35)]"
+                          >
+                            <span>{CONTACT_PHONE}</span>
+                            <span
+                              className="ml-4 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-[2px] group-hover:-translate-y-[1px] group-hover:scale-105"
+                              style={{ background: 'rgba(6,8,15,0.15)' }}
+                            >
+                              <PhoneIcon size={15} weight="bold" />
+                            </span>
+                          </a>
+                        </MagneticButton>
+                        <a
+                          href={`mailto:${CONTACT_EMAIL}`}
+                          className="inline-flex items-center gap-2 px-7 py-4 rounded-full font-semibold text-[14px] text-[var(--text-muted)] hover:text-[var(--text)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                          style={{
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
+                          }}
+                        >
+                          <EnvelopeSimpleIcon size={16} weight="bold" />
+                          {CONTACT_EMAIL}
+                        </a>
+                      </div>
+                      <p className="text-[var(--text-faint)] text-[11px] mt-5 tracking-wide">
+                        Besplatno · Bez obaveza · Telefonom ili emailom
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </RevealUp>
@@ -526,8 +572,8 @@ export default function HomePage() {
               <div>
                 <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Kontakt</div>
                 <address className="not-italic space-y-2 text-[var(--text-faint)] text-[13px]">
-                  <div><a href="mailto:info@jovicgroup.com" className="hover:text-[#C9A84C] transition-colors duration-300">info@jovicgroup.com</a></div>
-                  <div><a href="tel:+381653999555" className="hover:text-[#C9A84C] transition-colors duration-300">+381 65 3 999 555</a></div>
+                  <div><a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-[#C9A84C] transition-colors duration-300">{CONTACT_EMAIL}</a></div>
+                  <div><a href={CONTACT_PHONE_HREF} className="hover:text-[#C9A84C] transition-colors duration-300">{CONTACT_PHONE}</a></div>
                   <div>Stevana Tišme 112, Stari Banovci</div>
                   <div>22305, Srbija</div>
                 </address>
@@ -536,7 +582,9 @@ export default function HomePage() {
               <div>
                 <div className="text-[var(--text-muted)] font-semibold text-[12px] mb-4 tracking-wide uppercase">Linkovi</div>
                 <div className="space-y-2 text-[13px]">
-                  <div><Link href="/kalkulator"            className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Kalkulator</Link></div>
+                  {CALCULATOR_ENABLED && (
+                    <div><Link href="/kalkulator"          className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Kalkulator</Link></div>
+                  )}
                   <div><a href="#prednosti"                className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Prednosti</a></div>
                   <div><a href="#utisci"                   className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Utisci</a></div>
                 </div>

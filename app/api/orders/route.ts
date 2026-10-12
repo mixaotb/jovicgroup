@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase';
 import { sendNewOrderEmail, sendOrderConfirmationEmail } from '@/lib/email';
 import { formatRSD, calculatePrice, DIMENSION_LIMITS } from '@/lib/pricing';
 import { rateLimit, getClientIp } from '@/lib/ratelimit';
+import { CALCULATOR_ENABLED } from '@/lib/features';
 import type { OrderFormData, OrderItemData, ProductType, GlassType, OkovType, ColorType } from '@/types';
 
 const VALID_PRODUCT_TYPES: ProductType[] = [
@@ -50,6 +51,13 @@ function validateOrderItem(item: OrderItemData): string | null {
 }
 
 export async function POST(request: NextRequest) {
+  if (!CALCULATOR_ENABLED) {
+    return NextResponse.json(
+      { error: 'Online narudžbine trenutno nisu dostupne. Kontaktirajte nas telefonom ili emailom.' },
+      { status: 503 }
+    );
+  }
+
   try {
     const ip = getClientIp(request);
     if (!await rateLimit(`orders:${ip}`, 5, 60 * 60 * 1000)) {

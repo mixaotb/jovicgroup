@@ -16,20 +16,19 @@ const SECTIONS = [
 
 Jović Group
 Stevana Tišme 112, 22305 Stari Banovci, Republika Srbija
-E-pošta: info@jovicgroup.com
-Telefon: +381 69 3 999 555
+E-pošta: jovicgroup@gmail.com
+Telefon: +381 65 3 999 555
 
 Za sva pitanja u vezi sa obradom podataka možete nas kontaktirati na gorenavedenu e-adresu.`,
   },
   {
     title: '2. Koje podatke prikupljamo',
-    body: `Prikupljamo isključivo podatke koje nam vi direktno dostavite putem naše online forme za narudžbinu ili kalkulatora cena:
+    body: `Prikupljamo isključivo podatke koje nam vi direktno dostavite putem kontakt forme na sajtu, telefonom ili e-mailom:
 
 — Ime i prezime
-— Broj telefona
-— E-mail adresa (opciono)
-— Adresa isporuke (grad, ulica)
-— Detalji narudžbine (vrsta, dimenzije i materijal stolarije)
+— Broj telefona i e-mail adresa
+— Adresa objekta (grad, ulica), ako je navedete
+— Sadržaj upita (vrsta, dimenzije i materijal stolarije)
 
 Tehnički podaci (IP adresa, tip pregledača) mogu biti privremeno zabeleženi u serverskim logovima radi bezbednosti i otklanjanja grešaka, ali se ne koriste za profilisanje.`,
   },
@@ -56,6 +55,7 @@ Podaci koji nisu rezultirali narudžbinom (upiti bez konverzije) brišu se najka
 
 — Supabase Inc. — naša infrastruktura baze podataka (procesor podataka, ugovor o obradi potpisan)
 — Resend Inc. — servis za slanje transakcione e-pošte
+— Google LLC (Gmail) — prijem e-pošte i upita sa sajta
 — Nadležnim državnim organima, isključivo na osnovu zakonske obaveze
 
 Svi navedeni procesori podataka posluju u skladu sa GDPR / ekvivalentnim standardima zaštite.`,
@@ -71,7 +71,7 @@ Svi navedeni procesori podataka posluju u skladu sa GDPR / ekvivalentnim standar
 — Prigovorite obradi zasnovanoj na legitimnom interesu
 — Dobijete podatke u prenosivom formatu
 
-Zahteve možete uputiti na info@jovicgroup.com. Odgovorićemo najkasnije u roku od 30 dana.
+Zahteve možete uputiti na jovicgroup@gmail.com. Odgovorićemo najkasnije u roku od 30 dana.
 
 Imate i pravo na pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti (www.poverenik.rs).`,
   },
@@ -107,7 +107,7 @@ export default function PolitikaPrivatnostiPage() {
           Politika privatnosti
         </h1>
         <p className="text-[13px]" style={{ color: 'var(--text-muted)' }}>
-          Poslednja izmena: 1. jun 2026. · Primenljiv zakon: ZZPL (Republika Srbija)
+          Poslednja izmena: 12. oktobar 2026. · Primenljiv zakon: ZZPL (Republika Srbija)
         </p>
       </div>
 
@@ -121,7 +121,7 @@ export default function PolitikaPrivatnostiPage() {
             color: 'var(--text-muted)',
           }}
         >
-          Jović Group poštuje vašu privatnost. Ova politika objašnjava koje podatke prikupljamo putem našeg sajta i kalkulatora, kako ih koristimo i koja prava imate kao lice čiji se podaci obrađuju, u skladu sa Zakonom o zaštiti podataka o ličnosti Srbije (ZZPL) i GDPR standardima.
+          Jović Group poštuje vašu privatnost. Ova politika objašnjava koje podatke prikupljamo putem našeg sajta, kako ih koristimo i koja prava imate kao lice čiji se podaci obrađuju, u skladu sa Zakonom o zaštiti podataka o ličnosti Srbije (ZZPL) i GDPR standardima.
         </div>
       </div>
 

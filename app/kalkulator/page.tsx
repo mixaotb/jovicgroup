@@ -831,7 +831,7 @@ export default function KalkulatorPage() {
             Hvala, <strong className="text-[var(--text)]">{customerName}</strong>!
           </p>
           <p className="text-[var(--text-muted)] text-[14px] leading-relaxed mb-2">
-            Naš tim će vas kontaktirati na <strong className="text-[var(--text)]">{phone}</strong> u roku od 24 sata.
+            Naš tim će vas kontaktirati na <strong className="text-[var(--text)]">{phone}</strong> u roku od 48 sati.
           </p>
           <p className="text-[var(--text-faint)] text-[13px] mb-10">
             Ukupno: <span className="text-[#C9A84C] font-bold">{formatRSD(cartTotals.total)}</span>
@@ -1640,7 +1640,7 @@ export default function KalkulatorPage() {
                   ) : `Pošalji narudžbinu · ${formatRSD(cartTotals.total)}`}
                 </GlassButton>
                 <p className="text-center text-[var(--text-faint)] text-[11px] mt-3">
-                  Kontaktiraćemo vas u roku od 24h.
+                  Kontaktiraćemo vas u roku od 48h.
                 </p>
               </CardSection>
             )}

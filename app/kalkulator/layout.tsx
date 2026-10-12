@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { CALCULATOR_ENABLED } from '@/lib/features';
 
 export const metadata: Metadata = {
   title: 'Kalkulator Cene Stolarije — PVC i ALU Prozori i Vrata',
@@ -16,5 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default function KalkulatorLayout({ children }: { children: React.ReactNode }) {
+  // Calculator temporarily offline — old links and bookmarks land on the homepage.
+  if (!CALCULATOR_ENABLED) redirect('/');
   return children;
 }

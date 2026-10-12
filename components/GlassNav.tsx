@@ -3,8 +3,10 @@
 import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRightIcon, CalculatorIcon } from '@phosphor-icons/react';
+import { ArrowRightIcon, CalculatorIcon, PhoneIcon } from '@phosphor-icons/react';
 import ThemeToggle from '@/components/ThemeToggle';
+import { CALCULATOR_ENABLED } from '@/lib/features';
+import { CONTACT_PHONE_HREF } from '@/lib/contact';
 
 const NAV_LINKS = [
   { href: '#prednosti', label: 'Prednosti' },
@@ -137,25 +139,51 @@ export default function GlassNav() {
             <div className="flex items-center gap-2 pl-1 pr-1">
               <ThemeToggle />
 
-              {/* Desktop Kalkulator */}
-              <Link
-                href="/kalkulator"
-                className="group hidden md:inline-flex items-center pl-4 pr-1.5 py-1.5 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[12px] hover:bg-[#E8C97A] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.03] active:scale-[0.97]"
-              >
-                Kalkulator
-                <span className="ml-2.5 w-6 h-6 rounded-full bg-[#06080F]/12 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-[1px] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
-                  <ArrowRightIcon size={11} weight="bold" />
-                </span>
-              </Link>
+              {CALCULATOR_ENABLED ? (
+                <>
+                  {/* Desktop Kalkulator */}
+                  <Link
+                    href="/kalkulator"
+                    className="group hidden md:inline-flex items-center pl-4 pr-1.5 py-1.5 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[12px] hover:bg-[#E8C97A] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.03] active:scale-[0.97]"
+                  >
+                    Kalkulator
+                    <span className="ml-2.5 w-6 h-6 rounded-full bg-[#06080F]/12 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-[1px] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                      <ArrowRightIcon size={11} weight="bold" />
+                    </span>
+                  </Link>
 
-              {/* Mobile Kalkulator — icon only */}
-              <Link
-                href="/kalkulator"
-                aria-label="Kalkulator"
-                className="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-[#C9A84C] text-[#06080F] hover:bg-[#E8C97A] transition-all duration-300 active:scale-[0.95]"
-              >
-                <CalculatorIcon size={17} weight="bold" />
-              </Link>
+                  {/* Mobile Kalkulator — icon only */}
+                  <Link
+                    href="/kalkulator"
+                    aria-label="Kalkulator"
+                    className="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-[#C9A84C] text-[#06080F] hover:bg-[#E8C97A] transition-all duration-300 active:scale-[0.95]"
+                  >
+                    <CalculatorIcon size={17} weight="bold" />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {/* Desktop Pozovite */}
+                  <a
+                    href={CONTACT_PHONE_HREF}
+                    className="group hidden md:inline-flex items-center pl-4 pr-1.5 py-1.5 rounded-full bg-[#C9A84C] text-[#06080F] font-bold text-[12px] hover:bg-[#E8C97A] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[1.03] active:scale-[0.97]"
+                  >
+                    Pozovite
+                    <span className="ml-2.5 w-6 h-6 rounded-full bg-[#06080F]/12 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-[1px] transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                      <PhoneIcon size={11} weight="bold" />
+                    </span>
+                  </a>
+
+                  {/* Mobile Pozovite — icon only */}
+                  <a
+                    href={CONTACT_PHONE_HREF}
+                    aria-label="Pozovite nas"
+                    className="md:hidden w-9 h-9 flex items-center justify-center rounded-full bg-[#C9A84C] text-[#06080F] hover:bg-[#E8C97A] transition-all duration-300 active:scale-[0.95]"
+                  >
+                    <PhoneIcon size={17} weight="bold" />
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </nav>
