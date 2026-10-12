@@ -3,12 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase';
 import { sendNewOrderEmail } from '@/lib/email';
 import { formatRSD } from '@/lib/pricing';
-import type { ProductType, OrderStatus } from '@/types';
-
-const VALID_PRODUCT_TYPES: ProductType[] = [
-  'window_single', 'window_double', 'trokrilni_prozor', 'fiksni_prozor',
-  'door', 'balkonska_vrata', 'klizna_vrata', 'plisirani_komarnik',
-];
+import { validateOrderItems, toOrderItemRows, type OrderItemInput } from '@/lib/orderItems';
+import type { OrderStatus } from '@/types';
 
 const VALID_STATUSES: OrderStatus[] = ['na_cekanju', 'u_proizvodnji', 'isporuceno', 'otkazano'];
 
@@ -36,25 +32,9 @@ export async function POST(request: NextRequest) {
 
     const status: OrderStatus = VALID_STATUSES.includes(body.status) ? body.status : 'na_cekanju';
 
-    const items = body.items as Array<{
-      type: string; material: string; width: number; height: number; quantity: number;
-    }>;
-
-    if (!Array.isArray(items) || items.length === 0)
-      return NextResponse.json({ error: 'Narudžbina mora imati barem jednu stavku' }, { status: 400 });
-
-    for (const item of items) {
-      if (!VALID_PRODUCT_TYPES.includes(item.type as ProductType))
-        return NextResponse.json({ error: 'Neispravan tip proizvoda' }, { status: 400 });
-      if (item.material !== 'PVC' && item.material !== 'ALU')
-        return NextResponse.json({ error: 'Neispravan materijal' }, { status: 400 });
-      if (!item.width || item.width < 100 || item.width > 4000)
-        return NextResponse.json({ error: 'Neispravna širina (100–4000 mm)' }, { status: 400 });
-      if (!item.height || item.height < 100 || item.height > 4000)
-        return NextResponse.json({ error: 'Neispravna visina (100–4000 mm)' }, { status: 400 });
-      if (!item.quantity || item.quantity < 1 || item.quantity > 100)
-        return NextResponse.json({ error: 'Neispravna količina (1–100)' }, { status: 400 });
-    }
+    const items = body.items as OrderItemInput[];
+    const itemsError = validateOrderItems(items);
+    if (itemsError) return NextResponse.json({ error: itemsError }, { status: 400 });
 
     const totalPrice = typeof body.total_price === 'number' && body.total_price >= 0 ? body.total_price : 0;
 
@@ -82,21 +62,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Greška pri čuvanju narudžbine' }, { status: 500 });
     }
 
-    const orderItems = items.map(item => ({
-      order_id:        order.id,
-      type:            item.type,
-      material:        item.material,
-      width:           item.width,
-      height:          item.height,
-      quantity:        item.quantity,
-      dimensions_data: { type: item.type, material: item.material, width: item.width, height: item.height, quantity: item.quantity },
-    }));
+    const orderItems = toOrderItemRows(order.id, items);
 
-    const { error: itemsError } = await adminClient.from('order_items').insert(orderItems);
+    const { data: insertedItems, error: insertError } = await adminClient.from('order_items').insert(orderItems).select();
 
-    if (itemsError) {
+    if (insertError) {
       await adminClient.from('orders').delete().eq('id', order.id);
-      console.error('[Orders Admin API] Items insert error:', itemsError);
+      console.error('[Orders Admin API] Items insert error:', insertError);
       return NextResponse.json({ error: 'Greška pri čuvanju stavki narudžbine' }, { status: 500 });
     }
 
@@ -138,7 +110,7 @@ export async function POST(request: NextRequest) {
         notes:          body.notes?.trim() || null,
         created_at:     order.created_at,
         updated_at:     order.updated_at,
-        items:          orderItems.map((i, idx) => ({ id: idx, ...i })),
+        items:          insertedItems,
       },
     }, { status: 201 });
   } catch (err) {

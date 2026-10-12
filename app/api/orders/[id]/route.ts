@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase';
 import { createAdminClient } from '@/lib/supabase';
+import { validateOrderItems, toOrderItemRows, type OrderItemInput } from '@/lib/orderItems';
 import type { OrderStatus, OrderLocation, PaymentMethod } from '@/types';
 
 const VALID_STATUSES: OrderStatus[] = ['na_cekanju', 'u_proizvodnji', 'isporuceno', 'otkazano'];
@@ -101,6 +102,43 @@ export async function PATCH(
       updates.notes = body.notes?.trim() || null;
     }
 
+    // Items are replaced wholesale when provided
+    let items: OrderItemInput[] | undefined;
+    if (body.items !== undefined) {
+      const itemsError = validateOrderItems(body.items);
+      if (itemsError) return NextResponse.json({ error: itemsError }, { status: 400 });
+      items = body.items as OrderItemInput[];
+    }
+
+    let newItems: unknown[] | undefined;
+    if (items) {
+      // Insert the new rows before deleting the old ones, so a failure never leaves the order empty
+      const admin = createAdminClient();
+      const { data: inserted, error: insertError } = await admin
+        .from('order_items')
+        .insert(toOrderItemRows(id, items))
+        .select();
+      if (insertError) {
+        if (insertError.code === '23503') {
+          return NextResponse.json({ error: 'Narudžbina nije pronađena' }, { status: 404 });
+        }
+        console.error('[Order PATCH] Items insert error:', insertError);
+        return NextResponse.json({ error: 'Greška pri čuvanju stavki narudžbine' }, { status: 500 });
+      }
+      const newIds = inserted.map(i => i.id as string);
+      const { error: deleteError } = await admin
+        .from('order_items')
+        .delete()
+        .eq('order_id', id)
+        .not('id', 'in', `(${newIds.join(',')})`);
+      if (deleteError) {
+        await admin.from('order_items').delete().in('id', newIds);
+        console.error('[Order PATCH] Old items delete error:', deleteError);
+        return NextResponse.json({ error: 'Greška pri čuvanju stavki narudžbine' }, { status: 500 });
+      }
+      newItems = inserted;
+    }
+
     const { data, error } = await supabase
       .from('orders')
       .update(updates)
@@ -115,7 +153,7 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, order: data });
+    return NextResponse.json({ success: true, order: newItems ? { ...data, items: newItems } : data });
   } catch (err) {
     console.error('[Order PATCH] Error:', err);
     return NextResponse.json({ error: 'Interna greška servera' }, { status: 500 });

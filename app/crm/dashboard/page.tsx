@@ -14,7 +14,7 @@ import {
 } from '@phosphor-icons/react';
 import { formatRSD } from '@/lib/pricing';
 import NotificationBell from '@/components/NotificationBell';
-import type { Order, Task, OrderStatus, TaskStatus, User, UserRole, FinanceData, ProductType } from '@/types';
+import type { Order, Task, OrderStatus, TaskStatus, User, UserRole, FinanceData, ProductType, DimensionsData, OrderItem } from '@/types';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
@@ -33,6 +33,13 @@ const TASK_STATUS_CONFIG: Record<TaskStatus, { label: string; cls: string }> = {
 
 const ORDER_STATUSES: OrderStatus[] = ['na_cekanju', 'u_proizvodnji', 'isporuceno', 'otkazano'];
 
+// For values interpolated into the print/invoice HTML documents
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function getProductLabel(type: string): string {
   const map: Record<string, string> = {
     window_single: 'Jednokrilni prozor', window_double: 'Dvokrilni prozor',
@@ -42,6 +49,13 @@ function getProductLabel(type: string): string {
   };
   return map[type] ?? type;
 }
+
+const GLASS_LABELS: Record<string, string> = {
+  dvoslojno: 'Dvoslojno', dvoslojno_niskoemisiono: 'Dvoslojno niskoemisiono',
+  dvoslojno_peskirano: 'Dvoslojno peskirano', niskoemisiono: 'Niskoemisiono',
+  '4_godisnja_doba': '4 godišnja doba', peskirano: 'Peskirano',
+};
+const KOMARNIK_LABELS: Record<string, string> = { plisirani: 'Plisirani', rolo: 'Rolo', fiksni: 'Fiksni' };
 
 const ROLE_RANKS: Record<UserRole, number> = { worker: 1, manager: 2, admin: 3 };
 function canAccess(role: UserRole | null, min: UserRole): boolean {
@@ -208,6 +222,13 @@ function StatsSummary({ orders, tasks, userRole }: { orders: Order[]; tasks: Tas
 
 // ─── OrderItemsCell ───────────────────────────────────────────────────────────
 
+function stavkeLabel(n: number): string {
+  const mod10 = n % 10, mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return 'stavka';
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'stavke';
+  return 'stavki';
+}
+
 function OrderItemsCell({ items }: { items: Order['items'] }) {
   const [open, setOpen] = useState(false);
   if (!items || items.length === 0) return <span className="text-[var(--text-muted)] text-xs">—</span>;
@@ -224,16 +245,16 @@ function OrderItemsCell({ items }: { items: Order['items'] }) {
   return (
     <div className="text-xs">
       <button onClick={e => { e.stopPropagation(); setOpen(!open); }} className="text-[var(--text)] hover:text-[#C9A84C] transition-colors flex items-center gap-1">
-        <span className="font-medium">{items.length} stavki</span>
+        <span className="font-medium">{items.length} {stavkeLabel(items.length)}</span>
         <span className="text-[var(--text-muted)]">· {total} kom</span>
         <CaretDown size={11} className={`text-[var(--text-muted)] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className="mt-2 space-y-1.5 pl-2 border-l-2 border-[var(--border)]">
           {items.map((it, idx) => (
-            <div key={it.id || idx}>
-              <div className="text-[var(--text-muted)]">{getProductLabel(it.type)}</div>
-              <div className="text-[var(--text-muted)]/70">{it.material} · {it.width}×{it.height}mm · {it.quantity} kom</div>
+            <div key={it.id || idx} className="min-w-0">
+              <div className="text-[var(--text-muted)] truncate">{getProductLabel(it.type)}</div>
+              <div className="text-[var(--text-muted)]/70 whitespace-nowrap truncate">{it.material} · {it.width}×{it.height}mm · {it.quantity} kom</div>
             </div>
           ))}
         </div>
@@ -242,14 +263,35 @@ function OrderItemsCell({ items }: { items: Order['items'] }) {
   );
 }
 
+// ─── fetchAllOrders ───────────────────────────────────────────────────────────
+
+const ORDERS_PAGE_SIZE = 100; // API maximum
+
+// Walks every page so filters, stats and CSV export see all orders, not just the newest 100
+async function fetchAllOrders(): Promise<{ status: number; orders?: Order[] }> {
+  const byId = new Map<string, Order>();
+  for (let page = 1; ; page++) {
+    const res = await fetch(`/api/orders?pageSize=${ORDERS_PAGE_SIZE}&page=${page}`);
+    if (!res.ok) return { status: res.status };
+    const data = await res.json();
+    const batch: Order[] = data.orders || [];
+    // Keyed by id: an order created mid-walk shifts offsets and would otherwise appear twice
+    for (const o of batch) byId.set(o.id, o);
+    if (batch.length < ORDERS_PAGE_SIZE || page * ORDERS_PAGE_SIZE >= (data.total ?? 0)) {
+      return { status: res.status, orders: [...byId.values()] };
+    }
+  }
+}
+
 // ─── printOrder ───────────────────────────────────────────────────────────────
 
 function printOrder(order: Order) {
+  const e = escapeHtml;
   const rows = (order.items ?? []).map(it =>
-    `<tr><td>${getProductLabel(it.type)}</td><td>${it.material}</td><td>${it.width}×${it.height} mm</td><td>${it.quantity} kom</td></tr>`
+    `<tr><td>${e(getProductLabel(it.type))}</td><td>${e(it.material)}</td><td>${e(it.width)}×${e(it.height)} mm</td><td>${e(it.quantity)} kom</td></tr>`
   ).join('');
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-<title>Narudžbina — ${order.customer_name}</title>
+<title>Narudžbina — ${e(order.customer_name)}</title>
 <style>
 body{font-family:Arial,sans-serif;padding:32px;color:#111;font-size:14px}
 h1{font-size:20px;margin:0 0 4px}
@@ -263,19 +305,19 @@ th{text-align:left;padding:6px 8px;border-bottom:2px solid #ddd;font-size:11px;t
 td{padding:6px 8px;border-bottom:1px solid #eee}
 .total{font-size:18px;font-weight:bold;color:#B8860B;margin-top:16px}
 </style></head><body>
-<h1>${order.customer_name}</h1>
-<div class="sub">${new Date(order.created_at).toLocaleDateString('sr-RS',{day:'2-digit',month:'long',year:'numeric'})} · ${ORDER_STATUS_CONFIG[order.status].label}</div>
+<h1>${e(order.customer_name)}</h1>
+<div class="sub">${new Date(order.created_at).toLocaleDateString('sr-Latn-RS',{day:'2-digit',month:'long',year:'numeric'})} · ${ORDER_STATUS_CONFIG[order.status].label}</div>
 <section><h2>Kontakt</h2>
-<div class="row"><span class="lbl">Telefon:</span><span>${order.phone}</span></div>
-${order.email ? `<div class="row"><span class="lbl">Email:</span><span>${order.email}</span></div>` : ''}
-${order.town ? `<div class="row"><span class="lbl">Grad:</span><span>${order.town}${order.address ? ', ' + order.address : ''}</span></div>` : ''}
+<div class="row"><span class="lbl">Telefon:</span><span>${e(order.phone)}</span></div>
+${order.email ? `<div class="row"><span class="lbl">Email:</span><span>${e(order.email)}</span></div>` : ''}
+${order.town ? `<div class="row"><span class="lbl">Grad:</span><span>${e(order.town)}${order.address ? ', ' + e(order.address) : ''}</span></div>` : ''}
 </section>
 <section><h2>Proizvodi</h2>
 <table><tr><th>Tip</th><th>Mat.</th><th>Dim.</th><th>Kol.</th></tr>${rows}</table>
 </section>
 <section><h2>Detalji</h2>
 <div class="row"><span class="lbl">Plaćanje:</span><span>${order.payment_method === 'cash_on_delivery' ? 'Pouzećem' : 'Račun'}</span></div>
-${order.notes ? `<div class="row"><span class="lbl">Napomena:</span><span>${order.notes}</span></div>` : ''}
+${order.notes ? `<div class="row"><span class="lbl">Napomena:</span><span>${e(order.notes)}</span></div>` : ''}
 </section>
 <div class="total">${order.total_price.toLocaleString('sr-RS')} RSD</div>
 </body></html>`;
@@ -344,7 +386,7 @@ function OrderDetailDrawer({
           <div className="flex-1 min-w-0">
             <h2 className="font-semibold text-[var(--text)] text-sm leading-tight truncate">{order.customer_name}</h2>
             <div className="text-[var(--text-muted)] text-xs flex items-center gap-1.5">
-              {new Date(order.created_at).toLocaleDateString('sr-RS', { day: '2-digit', month: 'long', year: 'numeric' })}
+              {new Date(order.created_at).toLocaleDateString('sr-Latn-RS', { day: '2-digit', month: 'long', year: 'numeric' })}
               {ageDays > 0 && <span className="px-1.5 py-0.5 rounded-full bg-[var(--bg-raised)] border border-[var(--border)] text-[9px] font-semibold">{ageDays}d</span>}
             </div>
           </div>
@@ -424,7 +466,7 @@ function OrderDetailDrawer({
                     {item.dimensions_data && (
                       <div className="mt-2 pt-2 border-t border-[var(--border)] flex flex-wrap gap-x-4 gap-y-1">
                         {item.dimensions_data.glassType && (
-                          <span className="text-[10px] text-[var(--text-muted)]">Staklo: <span className="text-[var(--text)]">{item.dimensions_data.glassType}</span></span>
+                          <span className="text-[10px] text-[var(--text-muted)]">Staklo: <span className="text-[var(--text)]">{GLASS_LABELS[item.dimensions_data.glassType] ?? item.dimensions_data.glassType}</span></span>
                         )}
                         {item.dimensions_data.color && (
                           <span className="text-[10px] text-[var(--text-muted)]">Boja: <span className="text-[var(--text)]">{item.dimensions_data.color === 'white' ? 'Bela' : item.dimensions_data.color === 'anthracite' ? 'Antracit' : 'Drvo'}</span></span>
@@ -435,7 +477,7 @@ function OrderDetailDrawer({
                         {item.dimensions_data.hasRoletna && <span className="text-[10px] text-[var(--text-muted)]">Roletna: <span className="text-[var(--text)]">Da</span></span>}
                         {item.dimensions_data.hasInstallation && <span className="text-[10px] text-[var(--text-muted)]">Ugradnja: <span className="text-[var(--text)]">Da</span></span>}
                         {item.dimensions_data.komarnikType && item.dimensions_data.komarnikType !== 'none' && (
-                          <span className="text-[10px] text-[var(--text-muted)]">Komarnik: <span className="text-[var(--text)]">{item.dimensions_data.komarnikType}</span></span>
+                          <span className="text-[10px] text-[var(--text-muted)]">Komarnik: <span className="text-[var(--text)]">{KOMARNIK_LABELS[item.dimensions_data.komarnikType] ?? item.dimensions_data.komarnikType}</span></span>
                         )}
                       </div>
                     )}
@@ -505,7 +547,7 @@ function OrderDetailDrawer({
                 {customerHistory.map(o => (
                   <div key={o.id} className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)] text-xs">
                     <div className="min-w-0 flex-1">
-                      <div className="text-[var(--text-muted)]">{new Date(o.created_at).toLocaleDateString('sr-RS', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                      <div className="text-[var(--text-muted)]">{new Date(o.created_at).toLocaleDateString('sr-Latn-RS', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
                       {o.items && o.items.length > 0 && (
                         <div className="text-[var(--text)] mt-0.5 truncate">
                           {getProductLabel(o.items[0].type)}{o.items.length > 1 ? ` +${o.items.length - 1}` : ''}
@@ -556,7 +598,7 @@ function OrderDetailDrawer({
           >
             <Printer size={16} />
           </button>
-          {canAccess(userRole, 'manager') && (
+          {canAccess(userRole, 'admin') && (
             <button
               onClick={handleDelete}
               disabled={deleting}
@@ -569,6 +611,133 @@ function OrderDetailDrawer({
         </div>
       </motion.div>
     </>
+  );
+}
+
+// ─── Order item editor ────────────────────────────────────────────────────────
+
+type NewOrderItem = {
+  uid: string;
+  type: ProductType;
+  material: 'PVC' | 'ALU';
+  width: string;
+  height: string;
+  quantity: string;
+  // Glass/color/okov etc. carried over when duplicating or editing an existing order
+  dimensions_data?: DimensionsData;
+};
+
+function newOrderItem(): NewOrderItem {
+  return { uid: Math.random().toString(36).slice(2), type: 'window_single', material: 'PVC', width: '', height: '', quantity: '1' };
+}
+
+const PRODUCT_OPTIONS: { value: ProductType; label: string }[] = [
+  { value: 'window_single',     label: 'Jednokrilni prozor' },
+  { value: 'window_double',     label: 'Dvokrilni prozor' },
+  { value: 'trokrilni_prozor',  label: 'Trokrilni prozor' },
+  { value: 'fiksni_prozor',     label: 'Fiksni prozor' },
+  { value: 'door',              label: 'Vrata' },
+  { value: 'balkonska_vrata',   label: 'Balkonska vrata' },
+  { value: 'klizna_vrata',      label: 'Klizna vrata' },
+  { value: 'plisirani_komarnik', label: 'Plisirani komarnik' },
+];
+
+function itemsFromOrder(order?: Order): NewOrderItem[] {
+  if (!order?.items?.length) return [newOrderItem()];
+  return order.items.map(it => ({
+    ...newOrderItem(), type: it.type, material: it.material as 'PVC' | 'ALU',
+    width: String(it.width), height: String(it.height), quantity: String(it.quantity),
+    dimensions_data: it.dimensions_data,
+  }));
+}
+
+function validateNewOrderItems(items: NewOrderItem[]): string | null {
+  for (const [i, item] of items.entries()) {
+    if (!item.width || !item.height) return `Stavka ${i + 1}: unesite dimenzije`;
+    const w = Number(item.width), h = Number(item.height), q = Number(item.quantity) || 1;
+    if (w < 100 || h < 100) return `Stavka ${i + 1}: dimenzije moraju biti najmanje 100 mm`;
+    if (!Number.isInteger(q) || q < 1 || q > 100) return `Stavka ${i + 1}: količina mora biti između 1 i 100`;
+  }
+  return null;
+}
+
+function toItemPayload(items: NewOrderItem[]): OrderItem[] {
+  return items.map(item => ({
+    type:     item.type,
+    material: item.material,
+    width:    Number(item.width),
+    height:   Number(item.height),
+    quantity: Number(item.quantity) || 1,
+    dimensions_data: item.dimensions_data,
+  }));
+}
+
+function OrderItemsEditor({ items, setItems }: {
+  items: NewOrderItem[];
+  setItems: React.Dispatch<React.SetStateAction<NewOrderItem[]>>;
+}) {
+  function addItem() {
+    setItems(prev => [...prev, newOrderItem()]);
+  }
+
+  function removeItem(uid: string) {
+    setItems(prev => prev.filter(i => i.uid !== uid));
+  }
+
+  function updateItem(uid: string, field: 'type' | 'material' | 'width' | 'height' | 'quantity', value: string) {
+    setItems(prev => prev.map(item => item.uid === uid ? { ...item, [field]: value } : item));
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">Stavke</div>
+        <button type="button" onClick={addItem} className="flex items-center gap-1 text-[#C9A84C] text-xs font-semibold hover:text-[#E8C97A] transition-colors">
+          <Plus size={12} weight="bold" />Dodaj stavku
+        </button>
+      </div>
+      <div className="space-y-3">
+        {items.map((item, idx) => (
+          <div key={item.uid} className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)] space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-[var(--text-muted)]">Stavka {idx + 1}</span>
+              {items.length > 1 && (
+                <button type="button" onClick={() => removeItem(item.uid)} className="text-[var(--text-muted)] hover:text-red-500 transition-colors" title="Ukloni stavku">
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+            <div>
+              <label className={LABEL}>Tip proizvoda</label>
+              <select value={item.type} onChange={e => updateItem(item.uid, 'type', e.target.value)} className={INPUT}>
+                {PRODUCT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={LABEL}>Materijal</label>
+                <select value={item.material} onChange={e => updateItem(item.uid, 'material', e.target.value)} className={INPUT}>
+                  <option value="PVC">PVC</option>
+                  <option value="ALU">ALU</option>
+                </select>
+              </div>
+              <div>
+                <label className={LABEL}>Količina</label>
+                <input type="number" min="1" max="100" value={item.quantity} onChange={e => updateItem(item.uid, 'quantity', e.target.value)} className={`${INPUT} [appearance:textfield]`} />
+              </div>
+              <div>
+                <label className={LABEL}>Širina (mm)</label>
+                <input type="number" min="100" value={item.width} onChange={e => updateItem(item.uid, 'width', e.target.value)} placeholder="npr. 900" className={`${INPUT} [appearance:textfield]`} />
+              </div>
+              <div>
+                <label className={LABEL}>Visina (mm)</label>
+                <input type="number" min="100" value={item.height} onChange={e => updateItem(item.uid, 'height', e.target.value)} placeholder="npr. 1200" className={`${INPUT} [appearance:textfield]`} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -589,6 +758,7 @@ function EditOrderModal({
   const [paymentMethod, setPaymentMethod] = useState(order.payment_method);
   const [status, setStatus] = useState(order.status);
   const [notes, setNotes] = useState(order.notes || '');
+  const [items, setItems] = useState<NewOrderItem[]>(() => itemsFromOrder(order));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -596,12 +766,18 @@ function EditOrderModal({
     e.preventDefault();
     if (!name.trim()) { setError('Ime klijenta je obavezno'); return; }
     if (!phone.trim()) { setError('Telefon je obavezan'); return; }
+    const itemsError = validateNewOrderItems(items);
+    if (itemsError) { setError(itemsError); return; }
+    // Only send items when they changed — saving them replaces every item row
+    const itemPayload = toItemPayload(items);
+    const itemsChanged = JSON.stringify(itemPayload) !== JSON.stringify(toItemPayload(itemsFromOrder(order)));
     setSaving(true); setError('');
     await onSave(order.id, {
       customer_name: name.trim(), phone: phone.trim(),
       email: email.trim() || undefined, town: town.trim() || undefined,
       address: address.trim() || undefined, total_price: Number(price) || 0,
       payment_method: paymentMethod, status, notes: notes.trim() || undefined,
+      ...(itemsChanged ? { items: itemPayload } : {}),
     });
     setSaving(false);
   }
@@ -645,6 +821,7 @@ function EditOrderModal({
             </select>
           </div>
           <div><label className={LABEL}>Napomena</label><textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2} placeholder="Dodatne napomene..." className={`${INPUT} resize-none`} /></div>
+          <OrderItemsEditor items={items} setItems={setItems} />
           {error && (
             <div className="flex items-center gap-1.5 text-red-500 text-xs"><WarningCircle size={13} />{error}</div>
           )}
@@ -663,25 +840,6 @@ function EditOrderModal({
 }
 
 // ─── AddOrderModal ────────────────────────────────────────────────────────────
-
-type NewOrderItem = {
-  type: ProductType;
-  material: 'PVC' | 'ALU';
-  width: string;
-  height: string;
-  quantity: string;
-};
-
-const PRODUCT_OPTIONS: { value: ProductType; label: string }[] = [
-  { value: 'window_single',     label: 'Jednokrilni prozor' },
-  { value: 'window_double',     label: 'Dvokrilni prozor' },
-  { value: 'trokrilni_prozor',  label: 'Trokrilni prozor' },
-  { value: 'fiksni_prozor',     label: 'Fiksni prozor' },
-  { value: 'door',              label: 'Vrata' },
-  { value: 'balkonska_vrata',   label: 'Balkonska vrata' },
-  { value: 'klizna_vrata',      label: 'Klizna vrata' },
-  { value: 'plisirani_komarnik', label: 'Plisirani komarnik' },
-];
 
 function AddOrderModal({
   userRole, onClose, onSave, initialData,
@@ -703,33 +861,16 @@ function AddOrderModal({
   );
   const [status, setStatus] = useState<OrderStatus>(initialData?.status ?? 'na_cekanju');
   const [notes, setNotes] = useState(initialData?.notes ?? '');
-  const [items, setItems] = useState<NewOrderItem[]>(
-    initialData?.items?.length
-      ? initialData.items.map(it => ({ type: it.type, material: it.material as 'PVC' | 'ALU', width: String(it.width), height: String(it.height), quantity: String(it.quantity) }))
-      : [{ type: 'window_single', material: 'PVC', width: '', height: '', quantity: '1' }]
-  );
+  const [items, setItems] = useState<NewOrderItem[]>(() => itemsFromOrder(initialData));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  function addItem() {
-    setItems(prev => [...prev, { type: 'window_single', material: 'PVC', width: '', height: '', quantity: '1' }]);
-  }
-
-  function removeItem(idx: number) {
-    setItems(prev => prev.filter((_, i) => i !== idx));
-  }
-
-  function updateItem(idx: number, field: keyof NewOrderItem, value: string) {
-    setItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item));
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) { setError('Ime klijenta je obavezno'); return; }
     if (!phone.trim()) { setError('Telefon je obavezan'); return; }
-    for (const [i, item] of items.entries()) {
-      if (!item.width || !item.height) { setError(`Stavka ${i + 1}: unesite dimenzije`); return; }
-    }
+    const itemsError = validateNewOrderItems(items);
+    if (itemsError) { setError(itemsError); return; }
     setSaving(true); setError('');
     try {
       const res = await fetch('/api/orders/admin', {
@@ -746,13 +887,7 @@ function AddOrderModal({
           payment_method: paymentMethod,
           status,
           notes:          notes.trim() || undefined,
-          items: items.map(item => ({
-            type:     item.type,
-            material: item.material,
-            width:    Number(item.width),
-            height:   Number(item.height),
-            quantity: Number(item.quantity) || 1,
-          })),
+          items:          toItemPayload(items),
         }),
       });
       const data = await res.json();
@@ -798,56 +933,7 @@ function AddOrderModal({
             <div className="mt-3"><label className={LABEL}>Adresa</label><input type="text" value={address} onChange={e => setAddress(e.target.value)} placeholder="Ulica i broj" className={INPUT} /></div>
           </div>
 
-          {/* Items */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest">Stavke</div>
-              <button type="button" onClick={addItem} className="flex items-center gap-1 text-[#C9A84C] text-xs font-semibold hover:text-[#E8C97A] transition-colors">
-                <Plus size={12} weight="bold" />Dodaj stavku
-              </button>
-            </div>
-            <div className="space-y-3">
-              {items.map((item, idx) => (
-                <div key={idx} className="p-3 rounded-xl border border-[var(--border)] bg-[var(--bg-raised)] space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[var(--text-muted)]">Stavka {idx + 1}</span>
-                    {items.length > 1 && (
-                      <button type="button" onClick={() => removeItem(idx)} className="text-[var(--text-muted)] hover:text-red-500 transition-colors" title="Ukloni stavku">
-                        <X size={13} />
-                      </button>
-                    )}
-                  </div>
-                  <div>
-                    <label className={LABEL}>Tip proizvoda</label>
-                    <select value={item.type} onChange={e => updateItem(idx, 'type', e.target.value)} className={INPUT}>
-                      {PRODUCT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className={LABEL}>Materijal</label>
-                      <select value={item.material} onChange={e => updateItem(idx, 'material', e.target.value)} className={INPUT}>
-                        <option value="PVC">PVC</option>
-                        <option value="ALU">ALU</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className={LABEL}>Količina</label>
-                      <input type="number" min="1" max="100" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} className={`${INPUT} [appearance:textfield]`} />
-                    </div>
-                    <div>
-                      <label className={LABEL}>Širina (mm)</label>
-                      <input type="number" min="100" max="4000" value={item.width} onChange={e => updateItem(idx, 'width', e.target.value)} placeholder="npr. 900" className={`${INPUT} [appearance:textfield]`} />
-                    </div>
-                    <div>
-                      <label className={LABEL}>Visina (mm)</label>
-                      <input type="number" min="100" max="4000" value={item.height} onChange={e => updateItem(idx, 'height', e.target.value)} placeholder="npr. 1200" className={`${INPUT} [appearance:textfield]`} />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <OrderItemsEditor items={items} setItems={setItems} />
 
           {/* Order details */}
           <div>
@@ -1600,19 +1686,30 @@ function calcItem(item: InvoiceItem) {
   return { base, pdv, total: base + pdv };
 }
 
-function buildInvoiceHtml({
-  invoiceNumber, invoiceDate, valuationDate, dueDate,
-  showClient, clientType, clientName, clientMb, clientPib,
-  clientAddress, clientCity, clientZip, clientPhone, clientContact, clientJmbg,
-  notes, items, company,
-}: {
+type InvoiceHtmlInput = {
   invoiceNumber: string; invoiceDate: string; valuationDate: string; dueDate: string;
   showClient: boolean; clientType: 'firma' | 'fizicko';
   clientName: string; clientMb: string; clientPib: string;
   clientAddress: string; clientCity: string; clientZip: string;
   clientPhone: string; clientContact: string; clientJmbg: string;
   notes: string; items: InvoiceItem[]; company: CompanyInfo;
-}): string {
+};
+
+function buildInvoiceHtml(raw: InvoiceHtmlInput): string {
+  // Every string here is typed by the user and lands in raw HTML — escape once, up front
+  const escaped = Object.fromEntries(
+    Object.entries(raw).map(([k, v]) => [k, typeof v === 'string' ? escapeHtml(v) : v])
+  ) as InvoiceHtmlInput;
+  escaped.items = raw.items.map(it => ({ ...it, description: escapeHtml(it.description), unit: escapeHtml(it.unit) }));
+  escaped.company = Object.fromEntries(
+    Object.entries(raw.company).map(([k, v]) => [k, escapeHtml(v)])
+  ) as CompanyInfo;
+  const {
+    invoiceNumber, invoiceDate, valuationDate, dueDate,
+    showClient, clientType, clientName, clientMb, clientPib,
+    clientAddress, clientCity, clientZip, clientPhone, clientContact, clientJmbg,
+    notes, items, company,
+  } = escaped;
   const logoUrl = typeof window !== 'undefined' ? window.location.origin + '/logo.png' : '/logo.png';
   const fmtD = (d: string) => d ? new Date(d).toLocaleDateString('sr-RS', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
 
@@ -2387,18 +2484,14 @@ export default function CrmDashboardPage() {
     setOrdersLoading(true);
     setSelectedIds(new Set());
     try {
-      const p = new URLSearchParams();
-      if (statusFilter !== 'all') p.set('status', statusFilter);
-      p.set('pageSize', '100');
-      const res = await fetch(`/api/orders?${p}`);
-      if (res.status === 401) { router.push('/crm/login'); return; }
-      if (!res.ok) throw new Error('Greška pri učitavanju narudžbina');
-      const data = await res.json();
-      setOrders(data.orders || []);
+      const { status, orders: all } = await fetchAllOrders();
+      if (status === 401) { router.push('/crm/login'); return; }
+      if (!all) throw new Error('Greška pri učitavanju narudžbina');
+      setOrders(all);
     } catch (err: unknown) {
       setFetchError(err instanceof Error ? err.message : 'Nepoznata greška');
     } finally { setOrdersLoading(false); }
-  }, [statusFilter, router]);
+  }, [router]);
 
   const fetchTasks = useCallback(async () => {
     setTasksLoading(true);
@@ -2437,8 +2530,8 @@ export default function CrmDashboardPage() {
   const handleOrderEdit = useCallback(async (id: string, updates: Partial<Order>) => {
     try {
       const res = await fetch(`/api/orders/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(updates) });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { setErrorToast(data.error || 'Greška pri ažuriranju narudžbine'); return; }
       const updated = data.order as Order;
       setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updated } : o));
       setSelectedOrder(prev => prev?.id === id ? { ...prev, ...updated } : prev);
@@ -2450,7 +2543,11 @@ export default function CrmDashboardPage() {
   const handleOrderDelete = useCallback(async (id: string) => {
     try {
       const res = await fetch(`/api/orders/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setErrorToast(data.error || 'Greška pri brisanju narudžbine');
+        return;
+      }
       setOrders(prev => prev.filter(o => o.id !== id));
       setSelectedOrder(null);
     } catch { setErrorToast('Greška pri brisanju narudžbine'); }
@@ -2518,9 +2615,14 @@ export default function CrmDashboardPage() {
   }, []);
 
   const filteredOrders = useMemo(() => orders.filter(o => {
+    if (statusFilter !== 'all' && o.status !== statusFilter) return false;
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      if (!o.customer_name.toLowerCase().includes(q) && !o.phone.includes(q) && !(o.email || '').toLowerCase().includes(q)) return false;
+      const q = searchQuery.trim().toLowerCase();
+      const haystack = [
+        o.customer_name, o.phone, o.email, o.town, o.address,
+        ...(o.items ?? []).map(i => `${getProductLabel(i.type)} ${i.material} ${i.width}x${i.height} ${i.width}×${i.height}`),
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!haystack.includes(q)) return false;
     }
     if (dateFilter !== 'all') {
       const d = new Date(o.created_at);
@@ -2530,7 +2632,10 @@ export default function CrmDashboardPage() {
       if (dateFilter === 'month' && (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear())) return false;
     }
     return true;
-  }), [orders, searchQuery, dateFilter]);
+  }), [orders, statusFilter, searchQuery, dateFilter]);
+
+  // Drop selections that a filter change has hidden, so bulk actions only touch visible rows
+  useEffect(() => { setSelectedIds(new Set()); }, [statusFilter, searchQuery, dateFilter]);
 
   const toggleSort = useCallback((col: typeof sortBy) => {
     if (sortBy === col) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
@@ -2562,9 +2667,11 @@ export default function CrmDashboardPage() {
   }, [tasks]);
 
   const exportCSV = useCallback(() => {
-    const headers = ['Klijent', 'Telefon', 'Email', 'Grad', 'Adresa', 'Status', 'Vrednost (RSD)', 'Plaćanje', 'Datum'];
+    const headers = ['Klijent', 'Telefon', 'Email', 'Grad', 'Adresa', 'Proizvodi', 'Komada', 'Status', 'Vrednost (RSD)', 'Plaćanje', 'Datum'];
     const rows = sortedOrders.map(o => [
       o.customer_name, o.phone, o.email || '', o.town || '', o.address || '',
+      (o.items ?? []).map(i => `${getProductLabel(i.type)} ${i.material} ${i.width}×${i.height}mm ×${i.quantity}`).join('; '),
+      String((o.items ?? []).reduce((n, i) => n + i.quantity, 0)),
       ORDER_STATUS_CONFIG[o.status].label, String(o.total_price),
       o.payment_method === 'cash_on_delivery' ? 'Pouzećem' : 'Račun',
       new Date(o.created_at).toLocaleDateString('sr-RS'),
@@ -2581,13 +2688,16 @@ export default function CrmDashboardPage() {
     if (!selectedIds.size) return;
     setBulkApplying(true);
     const ids = [...selectedIds];
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       ids.map(id => fetch(`/api/orders/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: bulkStatus }) }))
     );
-    setOrders(prev => prev.map(o => ids.includes(o.id) ? { ...o, status: bulkStatus } : o));
-    setSelectedIds(new Set());
+    const okIds = new Set(ids.filter((_, i) => { const r = results[i]; return r.status === 'fulfilled' && r.value.ok; }));
+    const failed = ids.filter(id => !okIds.has(id));
+    setOrders(prev => prev.map(o => okIds.has(o.id) ? { ...o, status: bulkStatus } : o));
+    setSelectedIds(new Set(failed));
     setBulkApplying(false);
-    setSuccessToast(`${ids.length} narudžbina ažurirano`);
+    if (okIds.size) setSuccessToast(`${okIds.size} narudžbina ažurirano`);
+    if (failed.length) setErrorToast(`${failed.length} narudžbina nije ažurirano — pokušajte ponovo`);
   }, [selectedIds, bulkStatus]);
 
   // ── Nav items ────────────────────────────────────────────────────────────────
@@ -2682,8 +2792,8 @@ export default function CrmDashboardPage() {
                   if (o) { setSelectedOrder(o); return; }
                   setPendingOrderId(orderId);
                   try {
-                    const res = await fetch('/api/orders?pageSize=100');
-                    if (res.ok) { const d = await res.json(); setOrders(d.orders || []); }
+                    const { orders: all } = await fetchAllOrders();
+                    if (all) setOrders(all);
                   } catch { /* silent */ }
                 }}
               />
@@ -2710,13 +2820,13 @@ export default function CrmDashboardPage() {
                     <MagnifyingGlass size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
                     <input
                       type="text"
-                      placeholder="Pretraga po imenu, telefonu..."
+                      placeholder="Pretraga po imenu, telefonu, proizvodu..."
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       className={`${INPUT} pl-9`}
                     />
                   </div>
-                  <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as typeof statusFilter)} className={`${INPUT} w-auto`}>
+                  <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as typeof statusFilter)} className={`${INPUT} sm:!w-auto`}>
                     <option value="all">Svi statusi ({orders.length})</option>
                     <option value="na_cekanju">Na čekanju ({statusCounts.na_cekanju ?? 0})</option>
                     <option value="u_proizvodnji">U proizvodnji ({statusCounts.u_proizvodnji ?? 0})</option>
@@ -2727,8 +2837,7 @@ export default function CrmDashboardPage() {
                     <ArrowClockwise size={14} />Osveži
                   </button>
                   <button onClick={exportCSV} className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-muted)] text-sm hover:text-[var(--text)] hover:border-[var(--border-strong)] transition-colors flex-shrink-0" title="Izvezi CSV">
-                    <DownloadSimple size={14} />
-                    <span className="hidden sm:inline">CSV</span>
+                    <DownloadSimple size={14} />CSV
                   </button>
                   <button
                     onClick={() => setAddingOrder(true)}
@@ -2813,6 +2922,13 @@ export default function CrmDashboardPage() {
                               </div>
                             </div>
                           </div>
+                          {order.items && order.items.length > 0 && (
+                            <div className="text-xs text-[var(--text-muted)] mb-2.5 pl-6 truncate">
+                              {order.items.length === 1
+                                ? `${getProductLabel(order.items[0].type)} · ${order.items[0].width}×${order.items[0].height}mm`
+                                : `${order.items.length} ${stavkeLabel(order.items.length)} · ${order.items.reduce((n, i) => n + i.quantity, 0)} kom`}
+                            </div>
+                          )}
                           <div className="flex items-center justify-between text-xs gap-2">
                             {canAccess(currentUserRole, 'admin')
                               ? <span className="font-mono font-semibold text-[#C9A84C]">{formatRSD(order.total_price)}</span>
@@ -2834,7 +2950,7 @@ export default function CrmDashboardPage() {
 
                     {/* Desktop: table */}
                     <div className="hidden md:block rounded-2xl border border-[var(--border)] overflow-hidden bg-[var(--bg-surface)]/60 backdrop-blur-md">
-                      <div className={`grid gap-4 px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-raised)] text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]'}`}>
+                      <div className={`grid gap-4 px-5 py-3 border-b border-[var(--border)] bg-[var(--bg-raised)] text-[10px] font-semibold text-[var(--text-muted)] uppercase tracking-widest ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,2.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,2.25fr)_minmax(0,1fr)_auto]'}`}>
                         <span>
                           <input type="checkbox"
                             checked={sortedOrders.length > 0 && sortedOrders.every(o => selectedIds.has(o.id))}
@@ -2852,7 +2968,7 @@ export default function CrmDashboardPage() {
                           <div
                             key={order.id}
                             onClick={() => setSelectedOrder(order)}
-                            className={`grid gap-4 px-5 py-3.5 items-start hover:bg-[var(--bg-raised)] transition-colors cursor-pointer border-l-2 ${selectedIds.has(order.id) ? 'bg-[#C9A84C]/5 border-l-[#C9A84C]/40' : orderAgingDays(order) >= parseInt(ls('crm-aging-warn', '7'), 10) ? 'border-l-amber-500/60 bg-amber-500/[0.03]' : 'border-l-transparent'} ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)_auto]'}`}
+                            className={`grid gap-4 px-5 py-3.5 items-start hover:bg-[var(--bg-raised)] transition-colors cursor-pointer border-l-2 ${selectedIds.has(order.id) ? 'bg-[#C9A84C]/5 border-l-[#C9A84C]/40' : orderAgingDays(order) >= parseInt(ls('crm-aging-warn', '7'), 10) ? 'border-l-amber-500/60 bg-amber-500/[0.03]' : 'border-l-transparent'} ${canAccess(currentUserRole, 'admin') ? 'grid-cols-[auto_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,2.25fr)_minmax(0,1.25fr)_minmax(0,1fr)_auto]' : 'grid-cols-[auto_minmax(0,1.5fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,2.25fr)_minmax(0,1fr)_auto]'}`}
                           >
                             <div className="flex items-center pt-0.5" onClick={e => e.stopPropagation()}>
                               <input type="checkbox"
@@ -2925,7 +3041,7 @@ export default function CrmDashboardPage() {
                 >
                   <div className="pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border)] shadow-2xl backdrop-blur-xl">
                     <span className="text-[var(--text)] text-sm font-semibold whitespace-nowrap">{selectedIds.size} {selectedIds.size === 1 ? 'izabrana' : 'izabrano'}</span>
-                    <select value={bulkStatus} onChange={e => setBulkStatus(e.target.value as OrderStatus)} onClick={e => e.stopPropagation()} className={`${INPUT} w-auto py-1.5 text-xs`}>
+                    <select value={bulkStatus} onChange={e => setBulkStatus(e.target.value as OrderStatus)} onClick={e => e.stopPropagation()} className={`${INPUT} !w-auto py-1.5 text-xs`}>
                       {ORDER_STATUSES.map(s => <option key={s} value={s}>{ORDER_STATUS_CONFIG[s].label}</option>)}
                     </select>
                     <button onClick={handleBulkStatusChange} disabled={bulkApplying} className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#C9A84C] text-slate-950 font-bold text-xs hover:bg-[#E8C97A] transition-colors disabled:opacity-50 whitespace-nowrap">
