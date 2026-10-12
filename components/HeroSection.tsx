@@ -43,23 +43,6 @@ export default function HeroSection() {
           {/* ── Left: copy ─────────────────────────────── */}
           <div className="max-w-[680px]">
 
-            {/* Eyebrow badge — CSS animation, SSR-safe */}
-            <div
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full mb-10 animate-fade-up"
-              style={{
-                background: 'linear-gradient(135deg, rgba(201,168,76,0.16), rgba(201,168,76,0.06))',
-                border: '1px solid rgba(201,168,76,0.28)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                boxShadow: 'inset 0 1px 0 rgba(201,168,76,0.2)',
-              }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C9A84C] animate-pulse" />
-              <span className="text-[11px] font-bold text-[#C9A84C] tracking-[0.16em] uppercase">
-                Nemački profili · Domaći kvalitet
-              </span>
-            </div>
-
             {/* Headline */}
             <h1
               className="font-display text-[clamp(1.75rem,7.5vw,6.5rem)] font-bold leading-[0.96] tracking-[-0.02em] text-[var(--text)] mb-8 animate-fade-up delay-100"

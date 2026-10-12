@@ -74,14 +74,13 @@ export default function HomePage() {
         <HeroSection />
 
         {/* ─── Features ─────────────────────────────────── */}
-        <section id="prednosti" className="relative py-32">
-          {/* Background glow orbs — colorful so the liquid glass distortion is visible */}
+        <section id="prednosti" className="relative py-20 md:py-28">
+          {/* Background glow orbs, visible through the liquid glass */}
           <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/10 dark:bg-[#C9A84C]/8 blur-[120px] pointer-events-none" />
           <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#1A2744]/30 dark:bg-[#1A2744]/50 blur-[100px] pointer-events-none" />
-          {/* Colorful accent orbs */}
-          <div className="absolute top-[8%] right-[6%] w-[420px] h-[420px] rounded-full bg-blue-400/20 dark:bg-blue-500/20 blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-[8%] left-[4%] w-[360px] h-[360px] rounded-full bg-purple-400/18 dark:bg-purple-500/18 blur-[110px] pointer-events-none" />
-          <div className="absolute top-[45%] left-[55%] w-[280px] h-[280px] rounded-full bg-teal-400/18 dark:bg-teal-400/15 blur-[90px] pointer-events-none" />
+          <div className="absolute top-[8%] right-[6%] w-[420px] h-[420px] rounded-full bg-[#C9A84C]/12 dark:bg-[#C9A84C]/10 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[8%] left-[4%] w-[360px] h-[360px] rounded-full bg-[#1A2744]/20 dark:bg-[#2A3F6E]/30 blur-[110px] pointer-events-none" />
+          <div className="absolute top-[45%] left-[55%] w-[280px] h-[280px] rounded-full bg-[#E8C97A]/12 dark:bg-[#C9A84C]/8 blur-[90px] pointer-events-none" />
 
           <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
             <RevealUp className="mb-14">
@@ -111,30 +110,17 @@ export default function HomePage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-br from-[#06080F]/80 via-[#06080F]/50 to-transparent" />
                   {/* Double-bezel glass overlay */}
-                  <div className="absolute inset-0 flex flex-col justify-end p-7"
+                  <div className="relative h-full flex flex-col justify-end p-7"
                     style={{
                       background: 'linear-gradient(to top, rgba(6,8,15,0.85) 30%, transparent)',
+                      minHeight: '260px',
                     }}
                   >
                     <GlassIcon><GlobeIcon size={22} weight="light" /></GlassIcon>
                     <h3 className="font-display font-bold text-[1.35rem] text-white mt-4 mb-2">Evropski profili</h3>
-                    <p className="text-white/70 text-[13.5px] leading-relaxed mb-5 max-w-sm">
+                    <p className="text-white/70 text-[13.5px] leading-relaxed max-w-sm">
                       Alphacan & Schüco (PVC) · Elvial & Profilco (ALU), profili koji važe decenijama širom Evrope. Okov: AGB i Schüco.
                     </p>
-                    <div className="flex flex-wrap gap-2">
-                      {['Alphacan', 'Schüco', 'Elvial', 'Profilco', 'AGB'].map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide text-[#C9A84C]"
-                          style={{
-                            background: 'rgba(201,168,76,0.12)',
-                            border: '1px solid rgba(201,168,76,0.25)',
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 </div>
 
@@ -185,7 +171,8 @@ export default function HomePage() {
                 ].map((f) => (
                   <LiquidGlassCard
                     key={f.title}
-                    className="rounded-[1.5rem] p-6 flex flex-col gap-5 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                    className="rounded-[1.5rem] p-6 hover:scale-[1.01] transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                    contentClassName="flex flex-col gap-5"
                     style={{ border: '1px solid var(--glass-border)' }}
                   >
                     <GlassIcon>{f.icon}</GlassIcon>
@@ -224,7 +211,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── About ────────────────────────────────────── */}
-        <section id="o-nama" className="relative py-32">
+        <section id="o-nama" className="relative py-20 md:py-28">
           <div className="absolute top-1/2 right-0 w-[600px] h-[600px] rounded-full bg-[#1A2744]/40 blur-[120px] pointer-events-none -translate-y-1/2" />
 
           <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
@@ -253,34 +240,6 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-10 grid grid-cols-3 gap-3">
-                  {/* Combined location card */}
-                  <div
-                    className="col-span-3 p-4 rounded-2xl overflow-hidden hover:scale-[1.005] transition-transform duration-300 flex items-center justify-between gap-4"
-                    style={{
-                      background: 'var(--glass-bg)',
-                      border: '1px solid var(--glass-border)',
-                      backdropFilter: 'blur(12px)',
-                      WebkitBackdropFilter: 'blur(12px)',
-                      transform: 'translateZ(0)',
-                    }}
-                  >
-                    <div>
-                      <div className="font-display font-bold text-[var(--text)] text-[15px]">Gde radimo</div>
-                      <div className="text-[var(--text-faint)] text-xs mt-0.5">Srbija i dijaspora</div>
-                    </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      {['RS', 'AT'].map((code) => (
-                        <span
-                          key={code}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-widest text-[var(--text-faint)]"
-                          style={{ background: 'var(--glass-bg-strong)', border: '1px solid var(--glass-border)' }}
-                        >
-                          {code}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Material & hardware cards */}
                   {[
                     { label: 'PVC',  desc: 'Alphacan & Schüco profili' },
@@ -356,33 +315,26 @@ export default function HomePage() {
                     </div>
 
                     <div
-                      className="mt-7 pt-6 grid grid-cols-2 gap-2 text-center"
+                      className="mt-7 pt-6 grid grid-cols-3 gap-2"
                       style={{ borderTop: '1px solid var(--glass-border)' }}
                     >
-                      {['RS', 'AT'].map((code) => (
+                      {[
+                        { label: 'Staklo',    value: 'Troslojno' },
+                        { label: 'Boje',      value: '200+ RAL' },
+                        { label: 'Garancija', value: '5 godina' },
+                      ].map((fact) => (
                         <div
-                          key={code}
-                          className="py-2 rounded-xl text-[var(--text-faint)] text-[11px] font-bold tracking-widest"
+                          key={fact.label}
+                          className="px-3 py-3 rounded-xl"
                           style={{
                             background: 'var(--glass-bg)',
                             border: '1px solid var(--glass-border)',
                           }}
                         >
-                          {code}
+                          <div className="text-[var(--text-faint)] text-[10px] uppercase tracking-[0.12em] font-semibold">{fact.label}</div>
+                          <div className="font-display font-bold text-[var(--text)] text-[14px] mt-1">{fact.value}</div>
                         </div>
                       ))}
-                    </div>
-                    <p className="text-center text-[var(--text-faint)] text-[11px] mt-2">Srbija i dijaspora</p>
-
-                    <div
-                      className="mt-5 flex items-center gap-2.5 px-4 py-3 rounded-2xl"
-                      style={{
-                        background: 'rgba(52,211,153,0.08)',
-                        border: '1px solid rgba(52,211,153,0.2)',
-                      }}
-                    >
-                      <CheckCircleIcon size={16} weight="fill" className="text-emerald-400 flex-shrink-0" />
-                      <span className="text-[13px] font-semibold text-emerald-400">Garancija 5 godina na sve ugradnje</span>
                     </div>
                   </div>
                 </div>
@@ -392,7 +344,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── Portfolio ────────────────────────────────── */}
-        <section id="radovi" className="relative py-32">
+        <section id="radovi" className="relative py-20 md:py-28">
           <div className="absolute top-1/3 right-0 w-[500px] h-[500px] rounded-full bg-[#C9A84C]/6 blur-[120px] pointer-events-none" />
           <div className="absolute bottom-1/4 left-0 w-[400px] h-[400px] rounded-full bg-[#1A2744]/40 blur-[100px] pointer-events-none" />
 
@@ -416,23 +368,18 @@ export default function HomePage() {
         </section>
 
         {/* ─── Testimonials ─────────────────────────────── */}
-        <section id="utisci" className="relative py-32">
+        <section id="utisci" className="relative py-20 md:py-28">
           <div className="absolute top-1/4 left-1/6 w-[400px] h-[400px] rounded-full bg-[#C9A84C]/8 dark:bg-[#C9A84C]/5 blur-[100px] pointer-events-none" />
-          <div className="absolute top-[10%] right-[8%] w-[380px] h-[380px] rounded-full bg-blue-400/20 dark:bg-blue-500/18 blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-[5%] right-[30%] w-[320px] h-[320px] rounded-full bg-purple-400/18 dark:bg-purple-500/15 blur-[100px] pointer-events-none" />
-          <div className="absolute top-[50%] left-[10%] w-[260px] h-[260px] rounded-full bg-teal-400/15 dark:bg-teal-400/12 blur-[90px] pointer-events-none" />
+          <div className="absolute top-[10%] right-[8%] w-[380px] h-[380px] rounded-full bg-[#C9A84C]/10 dark:bg-[#C9A84C]/8 blur-[120px] pointer-events-none" />
+          <div className="absolute bottom-[5%] right-[30%] w-[320px] h-[320px] rounded-full bg-[#1A2744]/20 dark:bg-[#2A3F6E]/25 blur-[100px] pointer-events-none" />
+          <div className="absolute top-[50%] left-[10%] w-[260px] h-[260px] rounded-full bg-[#E8C97A]/10 dark:bg-[#C9A84C]/6 blur-[90px] pointer-events-none" />
 
           <div className="relative max-w-7xl mx-auto px-5 sm:px-8">
             <RevealUp className="mb-14">
               <div className="gold-rule mb-5" />
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold text-[var(--text)]">
-                  Šta kažu klijenti
-                </h2>
-                <p className="text-[var(--text-muted)] text-[14px] max-w-xs sm:text-right leading-relaxed">
-                  Reči naših klijenata govore same za sebe.
-                </p>
-              </div>
+              <h2 className="font-display text-[clamp(2rem,4vw,3rem)] font-bold leading-tight text-[var(--text)]">
+                Šta kažu <span className="text-[#C9A84C]">klijenti</span>
+              </h2>
             </RevealUp>
 
             <RevealUp delay={0.05}>
@@ -442,7 +389,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── CTA Banner ───────────────────────────────── */}
-        <section className="relative py-32 bg-theme">
+        <section className="relative py-20 md:py-28 bg-theme">
           {/* Central gold glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-[#C9A84C]/8 blur-[100px] pointer-events-none" />
           <div
@@ -585,8 +532,14 @@ export default function HomePage() {
                   {CALCULATOR_ENABLED && (
                     <div><Link href="/kalkulator"          className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Kalkulator</Link></div>
                   )}
-                  <div><a href="#prednosti"                className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Prednosti</a></div>
-                  <div><a href="#utisci"                   className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">Utisci</a></div>
+                  {[
+                    { href: '#prednosti', label: 'Prednosti' },
+                    { href: '#radovi',    label: 'Radovi' },
+                    { href: '#o-nama',    label: 'O nama' },
+                    { href: '#utisci',    label: 'Utisci' },
+                  ].map((l) => (
+                    <div key={l.href}><a href={l.href} className="text-[var(--text-faint)] hover:text-[#C9A84C] transition-colors duration-300">{l.label}</a></div>
+                  ))}
                 </div>
               </div>
             </div>

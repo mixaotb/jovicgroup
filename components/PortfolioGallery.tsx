@@ -252,7 +252,7 @@ export default function PortfolioGallery() {
             className={`relative overflow-hidden rounded-[1.5rem] group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] active:scale-[0.97] transition-transform duration-200 ${img.className}`}
             aria-label={`Otvori sliku ${i + 1}`}
           >
-            <Image src={img.src} alt="" fill sizes={img.sizes} className="object-cover transition-transform duration-700 group-hover:scale-105" />
+            <Image src={img.src} alt={`Jović Group, ugrađena stolarija, projekat ${i + 1}`} fill sizes={img.sizes} className="object-cover transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500" />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div

@@ -98,11 +98,6 @@ export default function PolitikaPrivatnostiPage() {
 
       {/* Page header */}
       <div className="pt-32 pb-14 px-6 text-center">
-        <div className="inline-flex items-center gap-2 mb-5">
-          <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>Jović Group</span>
-          <span style={{ color: 'var(--text-faint)', opacity: 0.4 }}>/</span>
-          <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#C9A84C' }}>Pravni dokumenti</span>
-        </div>
         <h1 className="font-display text-4xl sm:text-[52px] font-bold leading-tight mb-4" style={{ color: 'var(--text)' }}>
           Politika privatnosti
         </h1>

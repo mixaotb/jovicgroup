@@ -302,8 +302,12 @@ export default function FloatingContact() {
           className="md:hidden group relative w-12 h-12 rounded-2xl flex items-center justify-center hover:scale-110 hover:-translate-y-0.5 active:scale-95"
           style={{ background: '#7360F2', boxShadow: '0 6px 24px rgba(115,96,242,0.45)', transition: 'transform 300ms ease', willChange: 'transform' }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-[22px] h-[22px]" fill="white" aria-hidden>
-            <path d="M11.985.015C5.4.015.017 5.4.017 11.985c0 2.08.543 4.036 1.495 5.73L0 24l6.51-1.706A11.936 11.936 0 0011.985 24c6.585 0 11.968-5.383 11.968-11.968C23.953 5.447 18.57.015 11.985.015zm5.85 16.696c-.268.748-1.548 1.43-2.14 1.52-.54.082-1.225.116-1.977-.124-.455-.149-1.039-.349-1.782-.681-3.122-1.345-5.16-4.484-5.316-4.692-.155-.208-1.264-1.679-1.264-3.202 0-1.523.8-2.27 1.084-2.58.28-.307.612-.384.815-.384h.574c.26 0 .548.01.794.604.287.694.975 2.388 1.06 2.562.085.174.142.378.03.607-.114.229-.171.372-.343.572-.171.2-.361.446-.514.6-.171.17-.35.356-.15.697.2.342.89 1.469 1.907 2.38 1.31 1.168 2.415 1.53 2.758 1.703.343.172.543.144.743-.085.2-.228.855-.998 1.083-1.342.228-.343.456-.285.77-.17.314.113 1.997.942 2.338 1.114.342.17.57.257.655.4.085.141.085.82-.183 1.68z" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-[24px] h-[24px]" fill="none" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            {/* Viber: rounded speech bubble with a tail, handset and signal arcs */}
+            <path d="M12 2.6c-4.9 0-8.4 2-8.4 7.4v1.9c0 3.5 1.5 5.6 4.2 6.6v3.1l2.9-2.6H12c4.9 0 8.4-2 8.4-7.1V10c0-5.4-3.5-7.4-8.4-7.4z" />
+            <path d="M9.1 7.3c.4-.4 1-.4 1.3.1l.8 1.1c.3.4.2.9-.1 1.2l-.5.4c.5 1.1 1.4 2 2.5 2.5l.4-.5c.3-.3.8-.4 1.2-.1l1.1.8c.5.3.5.9.1 1.3l-.5.5c-.6.6-1.5.8-2.3.4-1.9-.9-3.4-2.4-4.3-4.3-.4-.8-.2-1.7.4-2.3z" fill="white" stroke="none" />
+            <path d="M13.2 6.4a3.6 3.6 0 0 1 3 3" />
+            <path d="M13.2 4.5a5.5 5.5 0 0 1 4.9 4.9" />
           </svg>
           <span
             className="absolute right-14 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg text-[12px] font-semibold text-white whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden sm:block"
